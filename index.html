@@ -90,7 +90,8 @@
   .identitybar .ib-name { font-weight: 700; font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .identity-badge { align-self: flex-start; display: inline-flex; align-items: center; gap: 5px; font-size: 9.5px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; padding: 2px 7px; border-radius: 999px; background: var(--surface-2); color: var(--accent-ink); }
 
-  .scroll { flex: 1; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; }
+  #app { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+  .scroll { flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; }
   .scroll.has-tabbar { padding-bottom: calc(82px + env(safe-area-inset-bottom, 0px)); }
   .page { padding: 18px 18px 28px; display: none; }
   .page.active { display: block; animation: fade .28s ease; }
