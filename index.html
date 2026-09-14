@@ -80,6 +80,7 @@
   .appbar { flex: none; display: flex; align-items: center; gap: 10px; padding: calc(16px + env(safe-area-inset-top, 0px)) calc(18px + env(safe-area-inset-right, 0px)) 12px calc(18px + env(safe-area-inset-left, 0px)); background: var(--paper); border-bottom: 1px solid var(--line); }
   .appbar__back { border: none; background: none; padding: 6px; margin: -6px 0 -6px -6px; color: var(--ink); cursor: pointer; border-radius: 8px; display: none; }
   .appbar[data-back="true"] .appbar__back { display: inline-flex; }
+  .appbar__logo { flex: none; height: 26px; width: 26px; object-fit: contain; border-radius: 7px; }
   .appbar__title { font-family: var(--font-display); font-weight: 500; font-size: 18px; letter-spacing: -.01em; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .rolepill { border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink-soft); font-family: var(--font-body); font-size: 10.5px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; padding: 6px 10px; border-radius: 999px; cursor: pointer; white-space: nowrap; }
 
@@ -163,7 +164,8 @@
 
   .login { max-width: 340px; margin: 0 auto; padding: 30px 22px; }
   .login .brandmark { text-align: center; margin-bottom: 22px; }
-  .login .brandmark .glyph { width: 52px; height: 52px; border-radius: 15px; background: var(--accent); color: #fff; display: grid; place-items: center; font-family: var(--font-display); font-weight: 600; font-size: 19px; margin: 0 auto 10px; }
+  .login .brandmark img { width: 56px; height: 56px; object-fit: contain; margin: 0 auto 10px; display: block; }
+  .login .brandmark .churchname { font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-faint); }
   .login h2 { font-family: var(--font-display); font-weight: 500; font-size: 22px; margin: 0 0 4px; text-align: center; }
   .login p.sub { text-align: center; margin: 0 0 18px; }
   .authlink { display: block; width: 100%; text-align: center; margin-top: 14px; background: none; border: none; color: var(--ink-soft); font-family: var(--font-body); font-size: 13px; cursor: pointer; padding: 8px; }
@@ -184,6 +186,7 @@
         <button class="appbar__back" id="backBtn" aria-label="Kembali">
           <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
         </button>
+        <img class="appbar__logo" src="./logo-mark.png" alt="JB3 Church">
         <div class="appbar__title" id="appbarTitle">Lead To Serve 1</div>
         <button class="rolepill" id="rolePill">Keluar</button>
       </header>
@@ -308,7 +311,7 @@
   RENDER.login = function () {
     el("loginBody").innerHTML = `
       <div class="login">
-        <div class="brandmark"><div class="glyph">LS</div></div>
+        <div class="brandmark"><img src="./logo-mark.png" alt="JB3 Church"><div class="churchname">JB3 Church</div></div>
         <h2>Lead To Serve 1</h2>
         <p class="sub muted">Masuk untuk mulai asesmen</p>
         <div class="field"><label>No. HP atau Nama</label><input id="liId" type="text" placeholder="08123456789 atau nama"></div>
@@ -321,7 +324,7 @@
   RENDER.register = function () {
     el("registerBody").innerHTML = `
       <div class="login">
-        <div class="brandmark"><div class="glyph">LS</div></div>
+        <div class="brandmark"><img src="./logo-mark.png" alt="JB3 Church"><div class="churchname">JB3 Church</div></div>
         <h2>Daftar</h2>
         <p class="sub muted">Buat akun untuk mulai asesmen</p>
         <div class="field"><label>Nama lengkap</label><input id="reName" type="text" placeholder="Nama lengkap"></div>
