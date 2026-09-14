@@ -1,0 +1,9 @@
+{
+  "name": "Lead To Serve 1",
+  "short_name": "Lead To Serve",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#1B1723",
+  "theme_color": "#241F30",
+  "icons": []
+}

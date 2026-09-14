@@ -1,0 +1,10 @@
+{
+  // Cloudflare Workers (static assets only) — dipakai oleh `npx wrangler deploy`
+  // di Cloudflare Workers Builds. Tanpa file ini, build gagal:
+  // "Missing entry-point to Worker script or to assets directory".
+  "name": "lead-to-serve-1",
+  "compatibility_date": "2026-09-14",
+  "assets": {
+    "directory": "."
+  }
+}
