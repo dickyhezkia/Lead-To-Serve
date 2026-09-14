@@ -455,6 +455,31 @@
     const pct = Math.max(0, Math.min(100, ((value - min) / (max - min)) * 100));
     return `<div class="barrow"><div class="bhead"><span>${esc(label)}</span><b>${value}</b></div><div class="barbg"><i style="width:${pct}%;background:${color};"></i></div></div>`;
   }
+  // Line chart sederhana: 4 titik (D-I-S-C) dihubungkan garis. min/max menentukan skala Y.
+  const DISC_LETTERS = ["D", "I", "S", "C"];
+  const DISC_COLORS = { D:"var(--disc-d)", I:"var(--disc-i)", S:"var(--disc-s)", C:"var(--disc-c)" };
+  function discLineChart(graph, min, max, lineColor) {
+    const w = 280, h = 130, padX = 26, padY = 20;
+    const stepX = (w - padX * 2) / (DISC_LETTERS.length - 1);
+    const scaleY = v => h - padY - ((v - min) / (max - min)) * (h - padY * 2);
+    const pts = DISC_LETTERS.map((L, i) => ({ L, x:padX + i * stepX, y:scaleY(graph[L]), v:graph[L] }));
+    const path = pts.map((p, i) => (i === 0 ? "M" : "L") + p.x.toFixed(1) + "," + p.y.toFixed(1)).join(" ");
+    const zeroY = (min < 0 && max > 0) ? scaleY(0) : null;
+    return `<svg viewBox="0 0 ${w} ${h}" width="100%" height="${h}" role="img" aria-label="Grafik DISC">
+      ${zeroY != null ? `<line x1="${padX}" y1="${zeroY.toFixed(1)}" x2="${w - padX}" y2="${zeroY.toFixed(1)}" stroke="var(--line-strong)" stroke-dasharray="3,3"/>` : ""}
+      <path d="${path}" fill="none" stroke="${lineColor}" stroke-width="2"/>
+      ${pts.map(p => `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="4.5" fill="${DISC_COLORS[p.L]}"/>
+        <text x="${p.x.toFixed(1)}" y="${(p.y - 10).toFixed(1)}" font-size="11" font-weight="700" text-anchor="middle" fill="var(--ink)">${p.v}</text>
+        <text x="${p.x.toFixed(1)}" y="${h - 4}" font-size="11" font-weight="800" text-anchor="middle" fill="var(--ink-faint)">${p.L}</text>`).join("")}
+    </svg>`;
+  }
+  function discChartCard(title, desc, graph, min, max, color) {
+    return `<div style="margin-bottom:16px;">
+      <b style="font-size:13px;">${esc(title)}</b>
+      <div class="sub" style="margin-top:2px;margin-bottom:4px;">${esc(desc)}</div>
+      ${discLineChart(graph, min, max, color)}
+    </div>`;
+  }
   RENDER.results = function () {
     const id = state.viewProfileId || state.meId;
     const prof = profileById(id) || state.myProfile;
@@ -464,11 +489,15 @@
     const giftsDone = giftsComplete((gifts || {}).answers);
 
     const discHTML = !discDone ? `<div class="sub">DISC belum diisi.</div>` : (() => {
-      const g3 = disc.graph3 || computeDiscGraphs(disc.picks).graph3;
-      const max = Math.max(1, ...["D", "I", "S", "C"].map(k => Math.abs(g3[k])));
-      const colors = { D:"var(--disc-d)", I:"var(--disc-i)", S:"var(--disc-s)", C:"var(--disc-c)" };
-      const names = { D:"Dominance", I:"Influence", S:"Steadiness", C:"Compliance" };
-      return ["D", "I", "S", "C"].map(k => bar(`${k} — ${names[k]}`, g3[k], -max, max, colors[k])).join("");
+      const computed = computeDiscGraphs(disc.picks);
+      const g1 = disc.graph1 || computed.graph1, g2 = disc.graph2 || computed.graph2, g3 = disc.graph3 || computed.graph3;
+      const max12 = Math.max(1, ...DISC_LETTERS.map(k => g1[k]), ...DISC_LETTERS.map(k => g2[k]));
+      const max3 = Math.max(1, ...DISC_LETTERS.map(k => Math.abs(g3[k])));
+      return `
+        ${discChartCard("Graph I — Masking (Topeng)", "Cara Anda tampil & beradaptasi di depan orang lain — dari pilihan \"Sangat\".", g1, 0, max12, "var(--accent)")}
+        ${discChartCard("Graph II — Stress", "Respons Anda saat tertekan / apa yang cenderung Anda tekan — dari pilihan \"Kurang\".", g2, 0, max12, "var(--bad)")}
+        ${discChartCard("Graph III — Real (Kepribadian Asli)", "Graph I dikurangi Graph II — gaya perilaku dasar Anda yang relatif stabil di segala situasi.", g3, -max3, max3, "var(--good)")}
+      `;
     })();
 
     const ssdHTML = !ssdDone ? `<div class="sub">SSD belum diisi.</div>` : SSD_CATEGORIES.map(c =>
@@ -491,7 +520,7 @@
 
     el("resultsBody").innerHTML = `
       ${state.persona === "ADMIN" && state.viewProfileId ? `<div class="divider-note">Melihat hasil: <b>${esc((prof || {}).name || "")}</b></div>` : ""}
-      <h2 class="section">DISC (Graph III — profil natural)</h2>
+      <h2 class="section">DISC</h2>
       <div class="card pad">${discHTML}</div>
       <h2 class="section">Skala Sikap Disfungsional</h2>
       <div class="card pad">${ssdHTML}</div>
