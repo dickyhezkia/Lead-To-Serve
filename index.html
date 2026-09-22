@@ -420,24 +420,29 @@
   // dipakai bawa token. Kalau ada, langsung pasang sesi (spy tak perlu ketik
   // ulang No. HP+kata sandi yg SAMA dgn akun JB3), lalu fragment dibersihkan
   // dari address bar (replaceState) spy token tak nyangkut di riwayat/URL.
+  // 2026-09-22 susulan (permintaan user, "tambahkan notifikasi di icon
+  // lonceng admin, pengajuan Lead To Serve"): fragment SEKARANG jg bisa bawa
+  // "&p=<halaman>" opsional (dipakai tombol "Buka & Kelola" di lonceng JB3,
+  // deep-link LANGSUNG ke halaman "requests" — bukan cuma beranda spt
+  // sebelumnya). Dikembalikan sbg { ok, page } spy boot() tahu ke mana.
   async function claimHandoffSession() {
-    const m = /^#at=([^&]+)&rt=([^&]+)/.exec(location.hash);
-    if (!m) return false;
+    const m = /^#at=([^&]+)&rt=([^&]+)(?:&p=([^&]+))?/.exec(location.hash);
+    if (!m) return { ok:false, page:null };
     try {
       await sb.auth.setSession({ access_token:decodeURIComponent(m[1]), refresh_token:decodeURIComponent(m[2]) });
       history.replaceState(null, "", location.pathname + location.search);
-      return true;
-    } catch (e) { console.error(e); return false; }
+      return { ok:true, page: m[3] ? decodeURIComponent(m[3]) : null };
+    } catch (e) { console.error(e); return { ok:false, page:null }; }
   }
 
   async function boot() {
-    await claimHandoffSession();
+    const handoff = await claimHandoffSession();
     const sess = await DB.session();
     if (!sess) { show("login", { replace:true }); return; }
     try {
       await loadAll();
       if (!state.myProfile) { show("login", { replace:true }); return; }
-      show("home", { replace:true });
+      show((handoff.page && META[handoff.page]) ? handoff.page : "home", { replace:true });
     } catch (e) { console.error(e); show("login", { replace:true }); }
   }
 
