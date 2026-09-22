@@ -28,7 +28,7 @@
  *    DB.logout()
  *    DB.changePassword(newPassword)
  *    DB.myAccessStatus() / DB.requestAccess()          (peserta)
- *    DB.listPendingAccessRequests() / DB.decideAccessRequest(id, approve)  (Admin saja)
+ *    DB.listAllAccessRequests() / DB.decideAccessRequest(id, approve)  (Admin saja)
  * ========================================================================== */
 window.makeDB = function makeDB(sb) {
   "use strict";
@@ -83,10 +83,14 @@ window.makeDB = function makeDB(sb) {
     },
 
     // ---------- Admin saja (RLS menolak diam2 utk peserta biasa) ----------
-    async listPendingAccessRequests() {
+    // 2026-09-22 susulan (permintaan user, "admin1... akan melihat dashboard
+    // secara keseluruhan"): SEMUA status (dulu cuma "pending") — dipakai utk
+    // kartu ringkasan (jumlah disetujui/menunggu/ditolak) di Dashboard, bukan
+    // cuma daftar yg perlu diputuskan.
+    async listAllAccessRequests() {
       const { data, error } = await sb.from("lts_access_requests")
-        .select("id,profile_id,requested_at,profile:profiles(name,phone)")
-        .eq("status", "pending").order("requested_at");
+        .select("id,profile_id,status,requested_at,decided_at,profile:profiles(name,phone)")
+        .order("requested_at", { ascending:false });
       if (error) throw error;
       return data || [];
     },

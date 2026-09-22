@@ -178,7 +178,7 @@
           <section class="page" data-page="vision"><div id="visionBody"></div></section>
           <section class="page" data-page="expansion"><div id="expansionBody"></div></section>
           <section class="page" data-page="hasil"><div id="hasilBody"></div></section>
-          <section class="page" data-page="requests"><div id="requestsBody"></div></section>
+          <section class="page" data-page="dashboard"><div id="dashboardBody"></div></section>
           <section class="page" data-page="profile"><div id="profileBody"></div></section>
         </div>
       </div>
@@ -211,7 +211,7 @@
   // ada data instrumen sama sekali (disc/ssd/gifts/roadmap results) — itu
   // tahap berikutnya, sengaja tak dipasang dulu spy tak ada jalur yg
   // "setengah jadi" & bisa error kalau diketuk.
-  const state = { page:"login", stack:[], persona:null, meId:null, myProfile:null, accessStatus:null, pendingRequests:[] };
+  const state = { page:"login", stack:[], persona:null, meId:null, myProfile:null, accessStatus:null, accessRequests:[] };
   const NOCHROME = ["login"];
 
   function initials(name) { return String(name || "?").trim().split(/\s+/).slice(0, 2).map(w => w[0] || "").join("").toUpperCase() || "?"; }
@@ -226,11 +226,13 @@
   }
 
   // 2026-09-22 (permintaan user, "tombol assesment yang terkunci dan hanya
-  // bisa dibuka dengan request ke admin"): Admin dapat tab tambahan
-  // "Permintaan" (daftar permintaan akses yg menunggu keputusan).
+  // bisa dibuka dengan request ke admin", lalu susulan "admin1... akan
+  // melihat dashboard secara keseluruhan"): Admin dapat tab tambahan
+  // "Dashboard" (dulu "Permintaan" — cuma daftar pending; SEKARANG ringkasan
+  // menyeluruh + daftar pending yg perlu diputuskan, lihat RENDER.dashboard).
   const TABS = {
     PESERTA: [{ p:"home", l:"Serve Road Map" }, { p:"profile", l:"Profil" }],
-    ADMIN: [{ p:"home", l:"Serve Road Map" }, { p:"requests", l:"Permintaan" }, { p:"profile", l:"Profil" }],
+    ADMIN: [{ p:"home", l:"Serve Road Map" }, { p:"dashboard", l:"Dashboard" }, { p:"profile", l:"Profil" }],
   };
   // 2026-09-22: S.E.R.V.E — akronim dari 5 bagian Serve Road Map (Strength/
   // Experience/Relationship/Vision/Expansion), lihat sumber/roadmap-fields.json
@@ -251,7 +253,7 @@
     vision: { h:"Vision", back:true },
     expansion: { h:"Expansion", back:true },
     hasil: { h:"Hasil Asesmen", back:true },
-    requests: { h:"Permintaan Akses", tab:"requests" },
+    dashboard: { h:"Dashboard", tab:"dashboard" },
     profile: { h:"Profil Saya", tab:"profile" },
   };
 
@@ -356,17 +358,45 @@
     `;
   };
 
-  // ---- Permintaan Akses (Admin) ----
-  RENDER.requests = function () {
-    const rows = state.pendingRequests;
-    el("requestsBody").innerHTML = `
-      <div class="divider-note">${rows.length} permintaan menunggu keputusan.</div>
-      ${rows.length ? rows.map(r => `<div class="card pad" style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+  // ---- Dashboard (Admin) ----
+  // 2026-09-22 (permintaan user, "pada admin1 di Lead To Serve akan melihat
+  // dashboard secara keseluruhan... buatkan dashboard untuk akun admin1"):
+  // dulu halaman ini ("Permintaan") cuma daftar pending — SEKARANG ringkasan
+  // menyeluruh (3 kartu angka: Disetujui/Menunggu/Ditolak, dari SEMUA status,
+  // bukan cuma pending) + antrean yg perlu diputuskan (Setujui/Tolak, pola
+  // SAMA persis spt sebelumnya) + 2 daftar bisa-dilipat (nama yg sudah
+  // disetujui / ditolak) supaya Admin py gambaran lengkap siapa sudah di
+  // tahap apa, bukan cuma yg masih menunggu. Data yg BISA ditampilkan
+  // sejujurnya baru sebatas status AKSES (blm ada data "sudah isi S-E-R-V-E
+  // berapa dari 5" krn tool isiannya sendiri belum dibangun — lihat memory
+  // lead-to-serve-1.md, "isian toolnya nanti saja").
+  RENDER.dashboard = function () {
+    const all = state.accessRequests || [];
+    const pending = all.filter(r => r.status === "pending");
+    const approved = all.filter(r => r.status === "approved");
+    const rejected = all.filter(r => r.status === "rejected");
+    const nameRow = r => `<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line);">
+      <span class="avatar" style="width:30px;height:30px;font-size:11px;">${esc(initials((r.profile || {}).name))}</span>
+      <span style="flex:1;min-width:0;"><b style="font-size:12.5px;">${esc((r.profile || {}).name || "?")}</b></span>
+    </div>`;
+    el("dashboardBody").innerHTML = `
+      <div class="divider-note">Ringkasan status akses asesmen Lead To Serve 1 — seluruh jemaat.</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px;">
+        <div class="card pad sm" style="text-align:center;"><b style="display:block;font-family:var(--font-display);font-size:22px;color:var(--good);">${approved.length}</b><span class="sub">Disetujui</span></div>
+        <div class="card pad sm" style="text-align:center;"><b style="display:block;font-family:var(--font-display);font-size:22px;color:var(--warn);">${pending.length}</b><span class="sub">Menunggu</span></div>
+        <div class="card pad sm" style="text-align:center;"><b style="display:block;font-family:var(--font-display);font-size:22px;color:var(--bad);">${rejected.length}</b><span class="sub">Ditolak</span></div>
+      </div>
+      <h2 class="section">Menunggu Keputusan</h2>
+      ${pending.length ? pending.map(r => `<div class="card pad" style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
         <span class="avatar">${esc(initials((r.profile || {}).name))}</span>
         <span style="flex:1;min-width:0;"><b style="font-size:13px;">${esc((r.profile || {}).name || "?")}</b><div class="sub">${esc((r.profile || {}).phone || "")}</div></span>
         <button type="button" class="btn btn--sm btn--ghost" style="color:var(--bad);border-color:var(--bad);" data-rejreq="${esc(r.id)}">Tolak</button>
         <button type="button" class="btn btn--sm btn--primary" data-appreq="${esc(r.id)}">Setujui</button>
       </div>`).join("") : `<div class="empty">Tidak ada permintaan yang menunggu.</div>`}
+      <h2 class="section">Sudah Disetujui (${approved.length})</h2>
+      <div class="card pad">${approved.length ? approved.map(nameRow).join("") : `<div class="empty" style="padding:10px;">Belum ada.</div>`}</div>
+      ${rejected.length ? `<h2 class="section">Ditolak (${rejected.length})</h2>
+      <div class="card pad">${rejected.map(nameRow).join("")}</div>` : ""}
     `;
   };
 
@@ -409,7 +439,7 @@
     if (!state.myProfile) return;
     state.meId = state.myProfile.id;
     state.persona = state.myProfile.role === "admin" ? "ADMIN" : "PESERTA";
-    if (state.persona === "ADMIN") state.pendingRequests = await DB.listPendingAccessRequests();
+    if (state.persona === "ADMIN") state.accessRequests = await DB.listAllAccessRequests();
     else state.accessStatus = await DB.myAccessStatus();
   }
 
@@ -423,7 +453,7 @@
   // 2026-09-22 susulan (permintaan user, "tambahkan notifikasi di icon
   // lonceng admin, pengajuan Lead To Serve"): fragment SEKARANG jg bisa bawa
   // "&p=<halaman>" opsional (dipakai tombol "Buka & Kelola" di lonceng JB3,
-  // deep-link LANGSUNG ke halaman "requests" — bukan cuma beranda spt
+  // deep-link LANGSUNG ke halaman "dashboard" — bukan cuma beranda spt
   // sebelumnya). Dikembalikan sbg { ok, page } spy boot() tahu ke mana.
   async function claimHandoffSession() {
     const m = /^#at=([^&]+)&rt=([^&]+)(?:&p=([^&]+))?/.exec(location.hash);
@@ -463,7 +493,7 @@
     }
     if (T.closest("#pfLogout") || T.closest("#rolePill")) {
       await DB.logout().catch(() => {});
-      Object.assign(state, { page:"login", stack:[], persona:null, meId:null, myProfile:null, accessStatus:null, pendingRequests:[] });
+      Object.assign(state, { page:"login", stack:[], persona:null, meId:null, myProfile:null, accessStatus:null, accessRequests:[] });
       show("login", { replace:true });
       return;
     }
@@ -485,8 +515,8 @@
       try {
         await DB.decideAccessRequest(id, !!appReq);
         toast(appReq ? "Permintaan disetujui." : "Permintaan ditolak.");
-        state.pendingRequests = await DB.listPendingAccessRequests();
-        RENDER.requests();
+        state.accessRequests = await DB.listAllAccessRequests();
+        RENDER.dashboard();
       } catch (err) { toast("Gagal: " + (err.message || err)); }
       return;
     }
