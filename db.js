@@ -87,12 +87,26 @@ window.makeDB = function makeDB(sb) {
     // secara keseluruhan"): SEMUA status (dulu cuma "pending") — dipakai utk
     // kartu ringkasan (jumlah disetujui/menunggu/ditolak) di Dashboard, bukan
     // cuma daftar yg perlu diputuskan.
+    // 2026-09-22 perbaikan bug nyata ("admin1 tidak bisa masuk" — root cause:
+    // login SEMPAT berhasil tapi fungsi ini melempar error saat dipanggil,
+    // lihat komentar besar di boot()): SENGAJA tak lagi pakai sintaks embed
+    // PostgREST "profile:profiles(name,phone)" (butuh cache skema PostgREST
+    // sudah mengenali relasi FK tabel BARU lts_access_requests — bisa
+    // terlambat tepat setelah migrasi baru dijalankan lewat SQL Editor) —
+    // diganti 2 query terpisah + digabung manual di sini, TAK bergantung ke
+    // cache skema PostgREST sama sekali, jadi lebih tahan gangguan.
     async listAllAccessRequests() {
-      const { data, error } = await sb.from("lts_access_requests")
-        .select("id,profile_id,status,requested_at,decided_at,profile:profiles(name,phone)")
+      const { data: reqs, error: e1 } = await sb.from("lts_access_requests")
+        .select("id,profile_id,status,requested_at,decided_at")
         .order("requested_at", { ascending:false });
-      if (error) throw error;
-      return data || [];
+      if (e1) throw e1;
+      const rows = reqs || [];
+      if (!rows.length) return [];
+      const ids = [...new Set(rows.map(r => r.profile_id))];
+      const { data: profs, error: e2 } = await sb.from("profiles").select("id,name,phone").in("id", ids);
+      if (e2) throw e2;
+      const profOf = id => (profs || []).find(p => p.id === id) || null;
+      return rows.map(r => ({ ...r, profile: profOf(r.profile_id) }));
     },
     async decideAccessRequest(id, approve) {
       const s = await this.session();

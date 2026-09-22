@@ -465,15 +465,33 @@
     } catch (e) { console.error(e); return { ok:false, page:null }; }
   }
 
+  // 2026-09-22 (perbaikan bug nyata, "di LTS1 admin1 tidak bisa masuk" —
+  // ketauan dari screenshot: appbar "Lead To Serve 1"+tombol Keluar tampil
+  // di ATAS form Masuk yg kosong): loadAll() utk Admin sempat berhasil set
+  // state.persona="ADMIN" (baris myProfile() jalan duluan) SEBELUM baris
+  // DB.listAllAccessRequests() di bawahnya gagal (query gabungan lts_access_
+  // requests+profiles — kemungkinan cache skema PostgREST blm sempat
+  // mengenali FK tabel baru itu tepat setelah migrasi dijalankan) — begitu
+  // gagal, catch di sini balik ke "login" TAPI state.persona TAK PERNAH
+  // direset, jadi renderChrome() masih anggap "sedang login" & menampilkan
+  // appbar, walau halaman yg tampil form Masuk kosong. Diperbaiki 2 sisi:
+  // (1) reset persona/myProfile eksplisit di sini spy tampilan selalu
+  // konsisten APAPUN sebabnya, (2) listAllAccessRequests() (lihat db.js)
+  // ditulis ulang tanpa join PostgREST spy tak bergantung ke cache skema.
   async function boot() {
     const handoff = await claimHandoffSession();
     const sess = await DB.session();
     if (!sess) { show("login", { replace:true }); return; }
     try {
       await loadAll();
-      if (!state.myProfile) { show("login", { replace:true }); return; }
+      if (!state.myProfile) { Object.assign(state, { persona:null, myProfile:null }); show("login", { replace:true }); return; }
       show((handoff.page && META[handoff.page]) ? handoff.page : "home", { replace:true });
-    } catch (e) { console.error(e); show("login", { replace:true }); }
+    } catch (e) {
+      console.error(e);
+      Object.assign(state, { persona:null, myProfile:null, meId:null });
+      toast("Gagal memuat data: " + (e.message || e));
+      show("login", { replace:true });
+    }
   }
 
   /* ---------------- events ---------------- */
