@@ -27,6 +27,7 @@
     --line:#E3DCEE; --line-strong:#D0C4E3;
     --accent:#4B3F72; --accent-ink:#372E54;
     --good:#4C7A54; --warn:#B4822F; --bad:#B2433A; --badge:#B2433A;
+    --disc-d:#C0504D; --disc-i:#C99A2E; --disc-s:#4F8F5B; --disc-c:#4472A8;
     --canvas:#241F30;
     --shadow: 0 1px 2px rgba(40,30,60,.06), 0 8px 24px rgba(40,30,60,.08);
     --r-sm:10px; --r-md:16px; --r-lg:24px;
@@ -131,6 +132,17 @@
 
   .avatar { width: 34px; height: 34px; border-radius: 10px; flex: none; display: grid; place-items: center; font-family: var(--font-display); font-weight: 500; font-size: 13px; background: var(--surface-2); color: var(--accent-ink); border: 1px solid var(--line); }
 
+  /* 2026-09-22 (asesmen DISC): 1 kelompok = 4 kata sifat (D/I/S/C), tiap
+     kata punya 2 tombol kecil (✓ paling / ✗ paling kurang). */
+  .discgroup { padding: 12px 0; border-bottom: 1px solid var(--line); }
+  .discgroup .gno { font-size: 10.5px; font-weight: 800; color: var(--ink-faint); margin-bottom: 6px; }
+  .discrow { display: flex; align-items: center; gap: 8px; padding: 5px 0; font-size: 13px; }
+  .discrow .word { flex: 1; }
+  .discpick { display: flex; gap: 4px; flex: none; }
+  .discpick button { width: 34px; height: 30px; border-radius: 8px; border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink-faint); font-size: 10px; font-weight: 800; cursor: pointer; }
+  .discpick button[aria-pressed="true"].sangat { background: var(--good); border-color: var(--good); color: #fff; }
+  .discpick button[aria-pressed="true"].kurang { background: var(--bad); border-color: var(--bad); color: #fff; }
+
   .login { max-width: 340px; margin: 0 auto; padding: 30px 22px; }
   .login .brandmark { text-align: center; margin-bottom: 22px; }
   .login .brandmark img { width: 56px; height: 56px; object-fit: contain; margin: 0 auto 10px; display: block; }
@@ -177,6 +189,7 @@
           <section class="page" data-page="relationship"><div id="relationshipBody"></div></section>
           <section class="page" data-page="vision"><div id="visionBody"></div></section>
           <section class="page" data-page="expansion"><div id="expansionBody"></div></section>
+          <section class="page" data-page="disc"><div id="discBody"></div></section>
           <section class="page" data-page="hasil"><div id="hasilBody"></div></section>
           <section class="page" data-page="dashboard"><div id="dashboardBody"></div></section>
           <section class="page" data-page="profile"><div id="profileBody"></div></section>
@@ -194,7 +207,8 @@
 <script>
 (function () {
   "use strict";
-  const { esc } = window.LTS;
+  const { esc, DISC_GROUPS, computeDiscGraphs, discComplete } = window.LTS;
+  const CURRENT_YEAR = new Date().getFullYear();
   const el = id => document.getElementById(id);
   const $ = s => document.querySelector(s);
 
@@ -206,12 +220,11 @@
   const DB = window.makeDB(sb);
 
   // 2026-09-22 (kerangka S-E-R-V-E, "isian toolnya nanti saja"): state
-  // disederhanakan besar2an — cuma yg dibutuhkan utk login + navigasi ke
-  // 5 pilihan (Strength/Experience/Relationship/Vision/Expansion). Belum
-  // ada data instrumen sama sekali (disc/ssd/gifts/roadmap results) — itu
-  // tahap berikutnya, sengaja tak dipasang dulu spy tak ada jalur yg
-  // "setengah jadi" & bisa error kalau diketuk.
-  const state = { page:"login", stack:[], persona:null, meId:null, myProfile:null, accessStatus:null, accessRequests:[] };
+  // disederhanakan besar2an — cuma yg dibutuhkan utk login + navigasi.
+  // 2026-09-22 susulan ("bangun assesment DISC dengan hasil masking, real,
+  // stress"): myDisc (baris tahun INI, null kalau belum diisi) + draft.discPicks
+  // (isian yg sedang dikerjakan, blm disimpan) ditambahkan.
+  const state = { page:"login", stack:[], persona:null, meId:null, myProfile:null, accessStatus:null, accessRequests:[], myDisc:null, draft:{ discPicks:[] } };
   const NOCHROME = ["login"];
 
   function initials(name) { return String(name || "?").trim().split(/\s+/).slice(0, 2).map(w => w[0] || "").join("").toUpperCase() || "?"; }
@@ -247,6 +260,7 @@
   ];
   const META = {
     home: { h:"Lead To Serve 1", tab:"home" },
+    disc: { h:"DISC", back:true },
     strength: { h:"Strength", back:true },
     experience: { h:"Experience", back:true },
     relationship: { h:"Relationship", back:true },
@@ -311,6 +325,22 @@
   // apa yang harus diperbaiki"): kartu terpisah (BUKAN salah satu ubin
   // S-E-R-V-E, krn ini MEMBACA gabungan semua isian, bukan MENGISI 1
   // bagian) → halaman "Hasil Asesmen", placeholder dulu spt ubin lainnya.
+  // 2026-09-22 (permintaan user, "bangun assesment DISC dengan hasil
+  // masking, real, stress"): kartu DISC terpisah, ditaruh SEBELUM S-E-R-V-E
+  // (urutan asli materi: kenali kepribadian dulu, baru refleksi Serve Road
+  // Map) — tag "Selesai"/"Belum" berdasarkan state.myDisc (baris tahun INI,
+  // null kalau belum pernah disimpan).
+  function discCardHTML() {
+    const done = !!state.myDisc;
+    return `<button type="button" class="card pad" style="width:100%;text-align:left;display:flex;align-items:center;gap:12px;margin-bottom:12px;cursor:pointer;" data-goto="disc">
+      <span style="flex:none;width:42px;height:42px;border-radius:12px;display:grid;place-items:center;font-size:20px;background:linear-gradient(150deg,#4472A8,color-mix(in srgb,#4472A8 70%,#000));">🧭</span>
+      <span style="flex:1;min-width:0;">
+        <b style="font-family:var(--font-display);font-size:14px;display:block;">DISC ${CURRENT_YEAR}</b>
+        <span class="sub" style="margin-top:2px;display:block;">28 kelompok kata — kenali gaya kepribadianmu</span>
+      </span>
+      <span class="tag ${done ? "tag--done" : "tag--todo"}">${done ? "Selesai" : "Belum"}</span>
+    </button>`;
+  }
   const SERVE_GRID_HTML = `
       <div class="serve-grid">
         ${SERVE_SECTIONS.map(s => `<button type="button" class="serve-tile" style="--dot:${s.dot};" data-goto="${s.key}">
@@ -352,9 +382,43 @@
     </div>`;
   }
   RENDER.home = function () {
+    const unlocked = state.persona === "ADMIN" || state.accessStatus === "approved";
     el("homeBody").innerHTML = `
+      ${unlocked ? discCardHTML() : ""}
       <div class="divider-note">Serve Road Map — 5 bagian refleksi yang menggabungkan kekuatan, pengalaman, relasi, visi, dan rencana pelayananmu jadi satu peta pribadi. Diperbarui setiap tahun.</div>
-      ${state.persona === "ADMIN" || state.accessStatus === "approved" ? SERVE_GRID_HTML : lockedHomeHTML()}
+      ${unlocked ? SERVE_GRID_HTML : lockedHomeHTML()}
+    `;
+  };
+
+  // ---- DISC (2026-09-22, permintaan user "bangun assesment DISC dengan
+  // hasil masking, real, stress") — 28 kelompok x 4 kata sifat (D/I/S/C),
+  // pilih 1 "paling" (✓/sangat) & 1 "paling kurang" (✗/kurang) tiap
+  // kelompok. Diambil dari DISC_GROUPS di common.js (sudah lengkap, tak
+  // disentuh sejak awal proyek — lihat catatan penting soal pemetaan huruf
+  // D/I/S/C di lead-to-serve-1.md/common.js). ----
+  RENDER.disc = function () {
+    const picks = state.draft.discPicks;
+    const seg = (attr, groupNo, current, val, cls) =>
+      `<button type="button" class="${cls}" aria-pressed="${current === val}" data-${attr}="${groupNo}:${val}">${cls === "sangat" ? "✓" : "✗"}</button>`;
+    const rows = DISC_GROUPS.map(g => {
+      const p = picks[g.no - 1] || {};
+      const letters = ["D", "I", "S", "C"];
+      return `<div class="discgroup">
+        <div class="gno">Kelompok ${g.no} <span class="muted">— pilih 1 paling (✓) & 1 kurang (✗) menggambarkan Anda</span></div>
+        ${letters.map(L => `<div class="discrow">
+          <span class="word">${esc(g[L])}</span>
+          <span class="discpick">
+            ${seg("discsangat", g.no, p.sangat, L, "sangat")}
+            ${seg("disckurang", g.no, p.kurang, L, "kurang")}
+          </span>
+        </div>`).join("")}
+      </div>`;
+    }).join("");
+    const done = discComplete(picks);
+    el("discBody").innerHTML = `
+      <div class="divider-note">Untuk tiap kelompok (1-28), pilih satu kata yang <b>paling</b> (✓) dan satu yang <b>paling kurang</b> (✗) menggambarkan diri Anda dari 4 pilihan.</div>
+      ${rows}
+      <button class="btn btn--primary" style="margin-top:14px;" id="discSave" ${done ? "" : "disabled"}>${done ? "Simpan Hasil DISC" : `Isi semua kelompok (${picks.filter(p => p && p.sangat && p.kurang).length}/28)`}</button>
     `;
   };
 
@@ -411,11 +475,57 @@
   RENDER.relationship = () => placeholderPage("relationshipBody", "Relationship");
   RENDER.vision = () => placeholderPage("visionBody", "Vision");
   RENDER.expansion = () => placeholderPage("expansionBody", "Expansion");
-  // 2026-09-22: nanti diisi pembacaan gabungan semua instrumen (DISC/SSD/
-  // Karunia Rohani/Serve Road Map) jadi narasi: kepribadian, keahlian,
-  // rekomendasi pekerjaan/pelayanan yang cocok, & area yang perlu
-  // diperbaiki — bukan cuma angka mentah spt versi lama (RENDER.results).
-  RENDER.hasil = () => placeholderPage("hasilBody", "Hasil Asesmen");
+  // 2026-09-22 (permintaan user, "bangun assesment DISC dengan hasil
+  // masking, real, stress"): sebagian halaman ini SEKARANG nyata (DISC),
+  // sisanya (SSD/Karunia Rohani/Serve Road Map -> narasi kepribadian penuh)
+  // MASIH placeholder — akan menyusul satu-satu, "isian toolnya nanti saja"
+  // masih berlaku utk instrumen yg belum dibangun.
+  const DISC_LETTERS = ["D", "I", "S", "C"];
+  const DISC_COLORS = { D:"var(--disc-d)", I:"var(--disc-i)", S:"var(--disc-s)", C:"var(--disc-c)" };
+  function discLineChart(graph, min, max, lineColor) {
+    const w = 280, h = 130, padX = 26, padY = 20;
+    const stepX = (w - padX * 2) / (DISC_LETTERS.length - 1);
+    const scaleY = v => h - padY - ((v - min) / (max - min)) * (h - padY * 2);
+    const pts = DISC_LETTERS.map((L, i) => ({ L, x:padX + i * stepX, y:scaleY(graph[L]), v:graph[L] }));
+    const path = pts.map((p, i) => (i === 0 ? "M" : "L") + p.x.toFixed(1) + "," + p.y.toFixed(1)).join(" ");
+    const zeroY = (min < 0 && max > 0) ? scaleY(0) : null;
+    return `<svg viewBox="0 0 ${w} ${h}" width="100%" height="${h}" role="img" aria-label="Grafik DISC">
+      ${zeroY != null ? `<line x1="${padX}" y1="${zeroY.toFixed(1)}" x2="${w - padX}" y2="${zeroY.toFixed(1)}" stroke="var(--line-strong)" stroke-dasharray="3,3"/>` : ""}
+      <path d="${path}" fill="none" stroke="${lineColor}" stroke-width="2"/>
+      ${pts.map(p => `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="4.5" fill="${DISC_COLORS[p.L]}"/>
+        <text x="${p.x.toFixed(1)}" y="${(p.y - 10).toFixed(1)}" font-size="11" font-weight="700" text-anchor="middle" fill="var(--ink)">${p.v}</text>
+        <text x="${p.x.toFixed(1)}" y="${h - 4}" font-size="11" font-weight="800" text-anchor="middle" fill="var(--ink-faint)">${p.L}</text>`).join("")}
+    </svg>`;
+  }
+  function discChartCard(title, desc, graph, min, max, color) {
+    return `<div style="margin-bottom:16px;">
+      <b style="font-size:13px;">${esc(title)}</b>
+      <div class="sub" style="margin-top:2px;margin-bottom:4px;">${esc(desc)}</div>
+      ${discLineChart(graph, min, max, color)}
+    </div>`;
+  }
+  RENDER.hasil = function () {
+    if (!state.myDisc) {
+      el("hasilBody").innerHTML = `<div class="card pad" style="text-align:center;padding:40px 20px;">
+        <b style="display:block;font-family:var(--font-display);font-size:16px;margin-bottom:6px;">Hasil Asesmen</b>
+        <p class="sub" style="margin:0 0 14px;">Isi DISC dulu untuk melihat hasil kepribadianmu di sini. Bagian keahlian & rekomendasi pekerjaan (dari SSD/Karunia Rohani/Serve Road Map) segera menyusul.</p>
+        <button type="button" class="btn btn--primary" data-goto="disc">Isi DISC</button>
+      </div>`;
+      return;
+    }
+    const g1 = state.myDisc.graph1, g2 = state.myDisc.graph2, g3 = state.myDisc.graph3;
+    const max12 = Math.max(1, ...DISC_LETTERS.map(k => g1[k]), ...DISC_LETTERS.map(k => g2[k]));
+    const max3 = Math.max(1, ...DISC_LETTERS.map(k => Math.abs(g3[k])));
+    el("hasilBody").innerHTML = `
+      <div class="divider-note">Hasil DISC ${state.myDisc.year} — kepribadianmu dari 3 sudut pandang berbeda.</div>
+      <div class="card pad">
+        ${discChartCard("Masking (Topeng)", "Cara Anda tampil & beradaptasi di depan orang lain.", g1, 0, max12, "var(--accent)")}
+        ${discChartCard("Stress", "Respons Anda saat tertekan / apa yang cenderung Anda tekan.", g2, 0, max12, "var(--bad)")}
+        ${discChartCard("Real (Kepribadian Asli)", "Gaya perilaku dasar Anda yang relatif stabil di segala situasi.", g3, -max3, max3, "var(--good)")}
+      </div>
+      <p class="sub" style="margin-top:10px;">Keahlian, rekomendasi pekerjaan/pelayanan yang cocok, & area yang perlu diperbaiki (dari SSD/Karunia Rohani/Serve Road Map) segera menyusul di sini.</p>
+    `;
+  };
 
   RENDER.profile = function () {
     el("profileBody").innerHTML = `
@@ -441,6 +551,14 @@
     state.persona = state.myProfile.role === "admin" ? "ADMIN" : "PESERTA";
     if (state.persona === "ADMIN") state.accessRequests = await DB.listAllAccessRequests();
     else state.accessStatus = await DB.myAccessStatus();
+    // 2026-09-22 ("bangun assesment DISC..."): baris tahun INI saja (skema
+    // "1 baris/tahun" — lihat supabase/v_lts_disc_results.sql). draft.discPicks
+    // diisi ulang dari data tersimpan spy form DISC lanjut dari isian
+    // terakhir kalau dibuka lagi sebelum disimpan final.
+    if (state.persona === "ADMIN" || state.accessStatus === "approved") {
+      state.myDisc = await DB.myDisc(CURRENT_YEAR);
+      state.draft.discPicks = (state.myDisc && state.myDisc.picks && state.myDisc.picks.length) ? state.myDisc.picks : [];
+    }
   }
 
   // 2026-09-22 (permintaan user, "tombol mulai" di kartu Lead To Serve 1 di
@@ -511,7 +629,7 @@
     }
     if (T.closest("#pfLogout") || T.closest("#rolePill")) {
       await DB.logout().catch(() => {});
-      Object.assign(state, { page:"login", stack:[], persona:null, meId:null, myProfile:null, accessStatus:null, accessRequests:[] });
+      Object.assign(state, { page:"login", stack:[], persona:null, meId:null, myProfile:null, accessStatus:null, accessRequests:[], myDisc:null, draft:{ discPicks:[] } });
       show("login", { replace:true });
       return;
     }
@@ -525,6 +643,29 @@
     if (T.closest("#reqAccessBtn")) {
       try { await DB.requestAccess(); state.accessStatus = "pending"; toast("Permintaan terkirim ke Admin."); RENDER.home(); }
       catch (err) { toast("Gagal mengajukan: " + (err.message || err)); }
+      return;
+    }
+
+    // ---- DISC picks (2026-09-22, "bangun assesment DISC...") ----
+    const ds2 = T.closest("[data-discsangat],[data-disckurang]");
+    if (ds2) {
+      const [key, val] = (ds2.dataset.discsangat || ds2.dataset.disckurang).split(":");
+      const which = ds2.dataset.discsangat ? "sangat" : "kurang";
+      const no = Number(key);
+      const arr = state.draft.discPicks;
+      arr[no - 1] = arr[no - 1] || { no };
+      arr[no - 1][which] = arr[no - 1][which] === val ? null : val;
+      RENDER.disc();
+      return;
+    }
+    if (T.closest("#discSave")) {
+      const { graph1, graph2, graph3 } = computeDiscGraphs(state.draft.discPicks);
+      try {
+        await DB.saveDisc(CURRENT_YEAR, { picks:state.draft.discPicks, graph1, graph2, graph3 });
+        toast("Hasil DISC disimpan.");
+        state.myDisc = await DB.myDisc(CURRENT_YEAR);
+        show("home");
+      } catch (err) { toast("Gagal simpan: " + (err.message || err)); }
       return;
     }
     const appReq = T.closest("[data-appreq]"), rejReq = T.closest("[data-rejreq]");

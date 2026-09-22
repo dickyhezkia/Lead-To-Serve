@@ -29,6 +29,7 @@
  *    DB.changePassword(newPassword)
  *    DB.myAccessStatus() / DB.requestAccess()          (peserta)
  *    DB.listAllAccessRequests() / DB.decideAccessRequest(id, approve)  (Admin saja)
+ *    DB.myDisc(year) / DB.saveDisc(year, {picks,graph1,graph2,graph3})  (peserta, 1 baris/tahun)
  * ========================================================================== */
 window.makeDB = function makeDB(sb) {
   "use strict";
@@ -115,6 +116,28 @@ window.makeDB = function makeDB(sb) {
         decided_at: new Date().toISOString(),
         decided_by: s.user.id,
       }).eq("id", id));
+    },
+
+    // ---------- DISC (2026-09-22, permintaan user "bangun assesment DISC
+    // dengan hasil masking, real, stress") — lihat supabase/v_lts_disc_results.sql.
+    // 1 baris per PROFIL per TAHUN (bukan seumur hidup) — sesuai keputusan
+    // "diperbaharui setiap tahunnya". graph1/2/3 (Masking/Stress/Real)
+    // dihitung di index.html (pakai computeDiscGraphs() dari common.js) lalu
+    // dikirim ke sini utk disimpan apa adanya — db.js sendiri tak menghitung
+    // apa2, murni lapisan simpan/baca. ----------
+    async myDisc(year) {
+      const s = await this.session();
+      if (!s) return null;
+      const { data, error } = await sb.from("lts_disc_results").select("*").eq("profile_id", s.user.id).eq("year", year).maybeSingle();
+      if (error) throw error;
+      return data || null;
+    },
+    async saveDisc(year, { picks, graph1, graph2, graph3 }) {
+      const s = await this.session();
+      if (!s) throw new Error("Belum login");
+      wrap(await sb.from("lts_disc_results").upsert({
+        profile_id: s.user.id, year, picks, graph1, graph2, graph3, updated_at: new Date().toISOString(),
+      }, { onConflict: "profile_id,year" }));
     },
   };
 };
