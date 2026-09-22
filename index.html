@@ -343,7 +343,25 @@
     state.persona = state.myProfile.role === "admin" ? "ADMIN" : "PESERTA";
   }
 
+  // 2026-09-22 (permintaan user, "tombol mulai" di kartu Lead To Serve 1 di
+  // JB3 HOME Tracker — carousel Discipleship Journey): terima sesi login yg
+  // diteruskan dari JB3 HOME Tracker lewat URL fragment (#at=...&rt=...) —
+  // fragment TAK PERNAH terkirim ke server (murni dibaca browser), jadi aman
+  // dipakai bawa token. Kalau ada, langsung pasang sesi (spy tak perlu ketik
+  // ulang No. HP+kata sandi yg SAMA dgn akun JB3), lalu fragment dibersihkan
+  // dari address bar (replaceState) spy token tak nyangkut di riwayat/URL.
+  async function claimHandoffSession() {
+    const m = /^#at=([^&]+)&rt=([^&]+)/.exec(location.hash);
+    if (!m) return false;
+    try {
+      await sb.auth.setSession({ access_token:decodeURIComponent(m[1]), refresh_token:decodeURIComponent(m[2]) });
+      history.replaceState(null, "", location.pathname + location.search);
+      return true;
+    } catch (e) { console.error(e); return false; }
+  }
+
   async function boot() {
+    await claimHandoffSession();
     const sess = await DB.session();
     if (!sess) { show("login", { replace:true }); return; }
     try {
