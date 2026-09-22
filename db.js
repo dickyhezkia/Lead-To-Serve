@@ -27,6 +27,8 @@
  *    DB.login({id,password})  id = No. HP atau nama — SAMA dgn akun JB3 HOME Tracker
  *    DB.logout()
  *    DB.changePassword(newPassword)
+ *    DB.myAccessStatus() / DB.requestAccess()          (peserta)
+ *    DB.listPendingAccessRequests() / DB.decideAccessRequest(id, approve)  (Admin saja)
  * ========================================================================== */
 window.makeDB = function makeDB(sb) {
   "use strict";
@@ -59,6 +61,42 @@ window.makeDB = function makeDB(sb) {
 
     async changePassword(newPassword) {
       wrap(await sb.auth.updateUser({ password:newPassword }));
+    },
+
+    // ---------- 2026-09-22 (permintaan user, "tombol assesment yang terkunci
+    // dan hanya bisa dibuka dengan request ke admin"): tabel lts_access_requests,
+    // lihat supabase/v_lts_access_requests.sql. Status terakhir SAJA yg relevan
+    // (kalau pernah ditolak lalu ajukan lagi, baris pending BARU dibuat — lihat
+    // unique index "1 pending aktif" di migrasi, jadi order+limit(1) di bawah
+    // selalu ambil yg TERBARU). ----------
+    async myAccessStatus() {
+      const s = await this.session();
+      if (!s) return null;
+      const { data, error } = await sb.from("lts_access_requests").select("status").eq("profile_id", s.user.id).order("requested_at", { ascending:false }).limit(1).maybeSingle();
+      if (error) throw error;
+      return data ? data.status : null;   // null = belum pernah mengajukan
+    },
+    async requestAccess() {
+      const s = await this.session();
+      if (!s) throw new Error("Belum login");
+      wrap(await sb.from("lts_access_requests").insert({ profile_id:s.user.id }));
+    },
+
+    // ---------- Admin saja (RLS menolak diam2 utk peserta biasa) ----------
+    async listPendingAccessRequests() {
+      const { data, error } = await sb.from("lts_access_requests")
+        .select("id,profile_id,requested_at,profile:profiles(name,phone)")
+        .eq("status", "pending").order("requested_at");
+      if (error) throw error;
+      return data || [];
+    },
+    async decideAccessRequest(id, approve) {
+      const s = await this.session();
+      wrap(await sb.from("lts_access_requests").update({
+        status: approve ? "approved" : "rejected",
+        decided_at: new Date().toISOString(),
+        decided_by: s.user.id,
+      }).eq("id", id));
     },
   };
 };

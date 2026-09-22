@@ -178,6 +178,7 @@
           <section class="page" data-page="vision"><div id="visionBody"></div></section>
           <section class="page" data-page="expansion"><div id="expansionBody"></div></section>
           <section class="page" data-page="hasil"><div id="hasilBody"></div></section>
+          <section class="page" data-page="requests"><div id="requestsBody"></div></section>
           <section class="page" data-page="profile"><div id="profileBody"></div></section>
         </div>
       </div>
@@ -210,7 +211,7 @@
   // ada data instrumen sama sekali (disc/ssd/gifts/roadmap results) — itu
   // tahap berikutnya, sengaja tak dipasang dulu spy tak ada jalur yg
   // "setengah jadi" & bisa error kalau diketuk.
-  const state = { page:"login", stack:[], persona:null, meId:null, myProfile:null };
+  const state = { page:"login", stack:[], persona:null, meId:null, myProfile:null, accessStatus:null, pendingRequests:[] };
   const NOCHROME = ["login"];
 
   function initials(name) { return String(name || "?").trim().split(/\s+/).slice(0, 2).map(w => w[0] || "").join("").toUpperCase() || "?"; }
@@ -224,7 +225,13 @@
     clearTimeout(t._h); t._h = setTimeout(() => { t.style.opacity = "0"; }, 2200);
   }
 
-  const TABS = { PESERTA: [{ p:"home", l:"Serve Road Map" }, { p:"profile", l:"Profil" }] };
+  // 2026-09-22 (permintaan user, "tombol assesment yang terkunci dan hanya
+  // bisa dibuka dengan request ke admin"): Admin dapat tab tambahan
+  // "Permintaan" (daftar permintaan akses yg menunggu keputusan).
+  const TABS = {
+    PESERTA: [{ p:"home", l:"Serve Road Map" }, { p:"profile", l:"Profil" }],
+    ADMIN: [{ p:"home", l:"Serve Road Map" }, { p:"requests", l:"Permintaan" }, { p:"profile", l:"Profil" }],
+  };
   // 2026-09-22: S.E.R.V.E — akronim dari 5 bagian Serve Road Map (Strength/
   // Experience/Relationship/Vision/Expansion), lihat sumber/roadmap-fields.json
   // & catatan di common.js (ROADMAP_SECTIONS) utk isi lengkap tiap bagian
@@ -244,6 +251,7 @@
     vision: { h:"Vision", back:true },
     expansion: { h:"Expansion", back:true },
     hasil: { h:"Hasil Asesmen", back:true },
+    requests: { h:"Permintaan Akses", tab:"requests" },
     profile: { h:"Profil Saya", tab:"profile" },
   };
 
@@ -271,7 +279,7 @@
     idb.innerHTML = `<span class="ib-ava">${esc(initials(state.myProfile && state.myProfile.name))}</span>
       <span class="ib-main"><span class="ib-name">${esc((state.myProfile || {}).name || "")}</span>
       <span class="identity-badge">${state.persona === "ADMIN" ? "Admin" : "Peserta"}</span></span>`;
-    const tabs = TABS.PESERTA;
+    const tabs = TABS[state.persona] || TABS.PESERTA;
     el("tabbar").innerHTML = tabs.map(t => `<button class="tab" data-goto="${t.p}" ${meta.tab === t.p ? 'aria-current="page"' : ""}>
       <span class="ico"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/></svg></span>
       <span class="lbl">${t.l}</span></button>`).join("");
@@ -301,9 +309,7 @@
   // apa yang harus diperbaiki"): kartu terpisah (BUKAN salah satu ubin
   // S-E-R-V-E, krn ini MEMBACA gabungan semua isian, bukan MENGISI 1
   // bagian) → halaman "Hasil Asesmen", placeholder dulu spt ubin lainnya.
-  RENDER.home = function () {
-    el("homeBody").innerHTML = `
-      <div class="divider-note">Serve Road Map — 5 bagian refleksi yang menggabungkan kekuatan, pengalaman, relasi, visi, dan rencana pelayananmu jadi satu peta pribadi. Diperbarui setiap tahun.</div>
+  const SERVE_GRID_HTML = `
       <div class="serve-grid">
         ${SERVE_SECTIONS.map(s => `<button type="button" class="serve-tile" style="--dot:${s.dot};" data-goto="${s.key}">
           <span class="ic">${esc(s.letter)}</span>
@@ -317,7 +323,50 @@
           <b style="font-family:var(--font-display);font-size:14px;display:block;">Hasil Asesmen</b>
           <span class="sub" style="margin-top:2px;display:block;">Kepribadian, keahlian, pekerjaan yang tepat & yang perlu diperbaiki</span>
         </span>
-      </button>
+      </button>`;
+  // 2026-09-22 (permintaan user, "tombol assesment yang terkunci dan hanya
+  // bisa dibuka dengan request ke admin"): utk PESERTA, S-E-R-V-E + Hasil
+  // Asesmen baru tampil setelah accessStatus==="approved" — sebelum itu,
+  // tampilan terkunci + tombol "Ajukan Akses" (atau pesan menunggu/ditolak).
+  // Admin TIDAK digerbang (langsung lihat semuanya + kelola Permintaan).
+  function lockedHomeHTML() {
+    const st = state.accessStatus;
+    if (st === "pending") return `<div class="card pad" style="text-align:center;padding:40px 20px;">
+      <div style="font-size:34px;margin-bottom:8px;">⏳</div>
+      <b style="display:block;font-family:var(--font-display);font-size:16px;margin-bottom:6px;">Menunggu Persetujuan</b>
+      <p class="sub" style="margin:0;">Permintaan aksesmu sudah terkirim ke Admin — akan terbuka begitu disetujui.</p>
+    </div>`;
+    if (st === "rejected") return `<div class="card pad" style="text-align:center;padding:40px 20px;">
+      <div style="font-size:34px;margin-bottom:8px;">🔒</div>
+      <b style="display:block;font-family:var(--font-display);font-size:16px;margin-bottom:6px;">Permintaan Belum Disetujui</b>
+      <p class="sub" style="margin:0 0 14px;">Hubungi Admin/gembala untuk info lebih lanjut, atau ajukan lagi.</p>
+      <button type="button" class="btn btn--primary" id="reqAccessBtn">Ajukan Lagi</button>
+    </div>`;
+    return `<div class="card pad" style="text-align:center;padding:40px 20px;">
+      <div style="font-size:34px;margin-bottom:8px;">🔒</div>
+      <b style="display:block;font-family:var(--font-display);font-size:16px;margin-bottom:6px;">Asesmen Terkunci</b>
+      <p class="sub" style="margin:0 0 14px;">Ajukan permintaan ke Admin untuk mulai mengisi Serve Road Map.</p>
+      <button type="button" class="btn btn--primary" id="reqAccessBtn">Ajukan Akses</button>
+    </div>`;
+  }
+  RENDER.home = function () {
+    el("homeBody").innerHTML = `
+      <div class="divider-note">Serve Road Map — 5 bagian refleksi yang menggabungkan kekuatan, pengalaman, relasi, visi, dan rencana pelayananmu jadi satu peta pribadi. Diperbarui setiap tahun.</div>
+      ${state.persona === "ADMIN" || state.accessStatus === "approved" ? SERVE_GRID_HTML : lockedHomeHTML()}
+    `;
+  };
+
+  // ---- Permintaan Akses (Admin) ----
+  RENDER.requests = function () {
+    const rows = state.pendingRequests;
+    el("requestsBody").innerHTML = `
+      <div class="divider-note">${rows.length} permintaan menunggu keputusan.</div>
+      ${rows.length ? rows.map(r => `<div class="card pad" style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+        <span class="avatar">${esc(initials((r.profile || {}).name))}</span>
+        <span style="flex:1;min-width:0;"><b style="font-size:13px;">${esc((r.profile || {}).name || "?")}</b><div class="sub">${esc((r.profile || {}).phone || "")}</div></span>
+        <button type="button" class="btn btn--sm btn--ghost" style="color:var(--bad);border-color:var(--bad);" data-rejreq="${esc(r.id)}">Tolak</button>
+        <button type="button" class="btn btn--sm btn--primary" data-appreq="${esc(r.id)}">Setujui</button>
+      </div>`).join("") : `<div class="empty">Tidak ada permintaan yang menunggu.</div>`}
     `;
   };
 
@@ -360,6 +409,8 @@
     if (!state.myProfile) return;
     state.meId = state.myProfile.id;
     state.persona = state.myProfile.role === "admin" ? "ADMIN" : "PESERTA";
+    if (state.persona === "ADMIN") state.pendingRequests = await DB.listPendingAccessRequests();
+    else state.accessStatus = await DB.myAccessStatus();
   }
 
   // 2026-09-22 (permintaan user, "tombol mulai" di kartu Lead To Serve 1 di
@@ -407,7 +458,7 @@
     }
     if (T.closest("#pfLogout") || T.closest("#rolePill")) {
       await DB.logout().catch(() => {});
-      Object.assign(state, { page:"login", stack:[], persona:null, meId:null, myProfile:null });
+      Object.assign(state, { page:"login", stack:[], persona:null, meId:null, myProfile:null, accessStatus:null, pendingRequests:[] });
       show("login", { replace:true });
       return;
     }
@@ -416,6 +467,22 @@
       if (np.length < 6) { toast("Minimal 6 karakter."); return; }
       try { await DB.changePassword(np); toast("Sandi diganti."); el("pfNewPw").value = ""; }
       catch (err) { toast("Gagal: " + (err.message || err)); }
+      return;
+    }
+    if (T.closest("#reqAccessBtn")) {
+      try { await DB.requestAccess(); state.accessStatus = "pending"; toast("Permintaan terkirim ke Admin."); RENDER.home(); }
+      catch (err) { toast("Gagal mengajukan: " + (err.message || err)); }
+      return;
+    }
+    const appReq = T.closest("[data-appreq]"), rejReq = T.closest("[data-rejreq]");
+    if (appReq || rejReq) {
+      const id = (appReq || rejReq).dataset.appreq || (appReq || rejReq).dataset.rejreq;
+      try {
+        await DB.decideAccessRequest(id, !!appReq);
+        toast(appReq ? "Permintaan disetujui." : "Permintaan ditolak.");
+        state.pendingRequests = await DB.listPendingAccessRequests();
+        RENDER.requests();
+      } catch (err) { toast("Gagal: " + (err.message || err)); }
       return;
     }
   });
