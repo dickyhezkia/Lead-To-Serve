@@ -178,6 +178,34 @@
   .serve-tile b { font-family: var(--font-display); font-size: 13.5px; font-weight: 500; color: var(--ink); }
   .serve-tile .sub { font-size: 10px; }
   .empty { text-align: center; padding: 30px 14px; color: var(--ink-faint); font-size: 13px; }
+
+  /* 2026-09-23 (permintaan user, "hasil yang dapat di print dalam bentuk
+     tabel seperti file ini" — screenshot lembar asli "JB3 SERVE ROADMAP"):
+     lembar cetak SENGAJA putih-hitam polos (bukan ikut tema gelap aplikasi)
+     krn ini tiruan dokumen kertas, bukan bagian tampilan app biasa. Trik
+     "visibility hidden/visible" (BUKAN display:none) dipakai spy tak perlu
+     mengubah ukuran .phone/.screen-frame utk cetak — jauh lebih aman drpd
+     coba melebarkan bingkai simulasi HP saat @media print. */
+  .printsheet { display: none; background: #fff; color: #000; padding: 14px; font-family: Georgia, "Times New Roman", serif; }
+  .printsheet, .printsheet * { color: #000; }
+  .printsheet h1 { font-size: 15px; margin: 0 0 6px; text-align: center; letter-spacing: .02em; }
+  .printsheet .psmeta { display: flex; justify-content: space-between; font-size: 10.5px; border-top: 2px solid #000; border-bottom: 2px solid #000; padding: 4px 0; margin-bottom: 8px; }
+  .printsheet .pscols { display: grid; grid-template-columns: repeat(5, 1fr); border: 1px solid #000; }
+  .printsheet .pscol { border-right: 1px solid #000; padding: 7px; font-size: 8.5px; }
+  .printsheet .pscol:last-child { border-right: none; }
+  .printsheet .pscol h2 { font-size: 9px; text-align: center; background: #eee; margin: -7px -7px 7px; padding: 4px; border-bottom: 1px solid #000; }
+  .printsheet .psblock { margin-bottom: 8px; }
+  .printsheet .psblock > b { display: block; font-size: 8.5px; margin-bottom: 2px; }
+  .printsheet .psline { border-bottom: 1px solid #999; min-height: 12px; padding: 1px 0 2px; white-space: pre-wrap; word-break: break-word; }
+  .printsheet .psexphead { border: 1px solid #000; border-top: none; padding: 4px 8px; font-size: 9.5px; font-weight: bold; text-align: center; background: #eee; }
+  .printsheet .psexp { display: grid; grid-template-columns: repeat(5, 1fr); border: 1px solid #000; border-top: none; }
+  .printsheet .psexp > div { border-right: 1px solid #000; padding: 7px; font-size: 8.5px; }
+  .printsheet .psexp > div:last-child { border-right: none; }
+  @media print {
+    body * { visibility: hidden; }
+    .printsheet, .printsheet * { visibility: visible; }
+    .printsheet { display: block; position: absolute; left: 0; top: 0; width: 100%; }
+  }
 </style>
 </head>
 <body>
@@ -218,6 +246,11 @@
     </div>
   </div>
 </div>
+<!-- 2026-09-23 ("hasil yang dapat di print"): SENGAJA di LUAR .phone/
+     .screen-frame (bingkai simulasi HP) — @media print (lihat CSS) memakai
+     visibility hidden/visible utk memunculkan HANYA wadah ini saat dicetak,
+     tak perlu bingkai HP-nya ikut ter-print. -->
+<div class="printsheet" id="printSheetBody"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="./config.js"></script>
@@ -563,7 +596,12 @@
   RENDER.strength = () => placeholderPage("strengthBody", "Strength");
   RENDER.experience = () => renderRoadmapSection("experience", "experienceBody");
   RENDER.relationship = () => placeholderPage("relationshipBody", "Relationship");
-  RENDER.vision = () => placeholderPage("visionBody", "Vision");
+  // 2026-09-23 (permintaan user, lengkap dgn screenshot lembar asli "JB3
+  // SERVE ROADMAP"): field missionStatement + coreValue1..5 ditambahkan ke
+  // ROADMAP_SECTIONS.vision di common.js — infrastruktur renderRoadmapSection/
+  // fieldHTML SUDAH generik (dibangun saat "Experience"), jadi bagian ini
+  // otomatis berfungsi tanpa kode tambahan sama sekali.
+  RENDER.vision = () => renderRoadmapSection("vision", "visionBody");
   RENDER.expansion = () => placeholderPage("expansionBody", "Expansion");
   // 2026-09-22 (permintaan user, "bangun assesment DISC dengan hasil
   // masking, real, stress"): sebagian halaman ini SEKARANG nyata (DISC),
@@ -600,14 +638,75 @@
     const pct = Math.max(0, Math.min(100, ((value - min) / (max - min)) * 100));
     return `<div class="barrow"><div class="bhead"><span>${esc(label)}</span><b>${value}</b></div><div class="barbg"><i style="width:${pct}%;background:${color};"></i></div></div>`;
   }
+  // 2026-09-23 (permintaan user, "selain ada tombol analisa, juga akan ada
+  // hasil yang dapat di print dalam bentuk tabel seperti file ini" —
+  // screenshot lembar asli "JB3 SERVE ROADMAP", nama+tanggal+5 kolom+tabel
+  // Expansion di bawah): "Analisa" DIBACA sbg tombol yg membawa ke halaman
+  // Hasil Asesmen ini (SUDAH ADA) — bagian BARU-nya adalah tombol "Cetak"
+  // yg mengisi #printSheetBody (di luar bingkai HP, lihat CSS .printsheet)
+  // lalu window.print(). Field yg belum py UI isian (Relationship/Expansion/
+  // Karunia Rohani) otomatis kosong di lembar cetak sampai dibangun nanti —
+  // BUKAN bug, cetak apa adanya dari data yg SUDAH terisi.
+  function fmtDateID(iso) {
+    try { return new Date(iso).toLocaleDateString("id-ID", { day:"numeric", month:"long", year:"numeric" }); } catch (e) { return "-"; }
+  }
+  const psLine = val => `<div class="psline">${esc(val || "")}</div>`;
+  function printSheetHTML() {
+    const rd = state.draft.roadmapData || {};
+    const disc = state.myDisc, ssd = state.mySsd;
+    const discGraphRow = (label, g) => `<div class="psline">${label} — D:${g.D} I:${g.I} S:${g.S} C:${g.C}</div>`;
+    return `
+      <h1>JB3 SERVE ROADMAP</h1>
+      <div class="psmeta"><span>Nama: <b>${esc((state.myProfile || {}).name || "")}</b></span><span>Tanggal Cetak: <b>${fmtDateID(new Date().toISOString())}</b></span></div>
+      <div class="pscols">
+        <div class="pscol"><h2>STRENGTH</h2>
+          <div class="psblock"><b>Bisa (Ability)</b>${psLine(rd.abilityText)}</div>
+          <div class="psblock"><b>Suka (Passion)</b>${psLine(rd.passionText)}</div>
+          <div class="psblock"><b>Bisa & Suka</b>${psLine(rd.abilityPassionText)}</div>
+          <div class="psblock"><b>Strength Statement</b>${psLine(rd.strengthStatement)}</div>
+        </div>
+        <div class="pscol"><h2>EXPERIENCE</h2>
+          <div class="psblock"><b>SSD (skor)</b>${ssd ? SSD_CATEGORIES.map(c => `<div class="psline">${esc(c.name)}: ${ssd.scores[c.code]}</div>`).join("") : psLine("")}</div>
+          <div class="psblock"><b>Titik Tertinggi</b>${psLine(rd.highPoint)}</div>
+          <div class="psblock"><b>Titik Terendah</b>${psLine(rd.lowPoint)}</div>
+          <div class="psblock"><b>Adaptasi 3A</b>${psLine(rd.adaptation3A)}</div>
+        </div>
+        <div class="pscol"><h2>RELATIONSHIP</h2>
+          <div class="psblock"><b>DISC (3 Graph)</b>${disc ? discGraphRow("Graph 1", disc.graph1) + discGraphRow("Graph 2", disc.graph2) + discGraphRow("Graph 3", disc.graph3) : psLine("")}</div>
+          <div class="psblock"><b>Berjalan (mentor)</b>${psLine(rd.mentorWalking)}</div>
+          <div class="psblock"><b>Berdiri (buddy)</b>${psLine(rd.buddyStanding)}</div>
+          <div class="psblock"><b>Duduk (mentee)</b>${psLine(rd.menteeSitting)}</div>
+        </div>
+        <div class="pscol"><h2>VISION</h2>
+          <div class="psblock"><b>Area Holy Discontent</b>${psLine((rd.holyDiscontentAreas || []).join(", "))}</div>
+          <div class="psblock"><b>Holy Discontent Statement</b>${psLine(rd.holyDiscontentStatement)}</div>
+        </div>
+        <div class="pscol"><h2>IDENTITY & DIRECTION</h2>
+          <div class="psblock"><b>Vision Statement</b>${psLine(rd.visionStatement)}</div>
+          <div class="psblock"><b>Mission Statement</b>${psLine(rd.missionStatement)}</div>
+          <div class="psblock"><b>Core Values</b>${[1, 2, 3, 4, 5].map(n => psLine(rd["coreValue" + n] ? n + ". " + rd["coreValue" + n] : "")).join("")}</div>
+        </div>
+      </div>
+      <div class="psexphead">EXPANSION — ACTION PLAN</div>
+      <div class="psexp">
+        <div><b>1. Goal</b>${psLine(rd.goal)}</div>
+        <div><b>2. Measurement</b>${psLine(rd.measurement)}</div>
+        <div><b>3. When</b>${psLine(rd.when)}</div>
+        <div><b>4. How</b>${psLine(rd.how)}</div>
+        <div><b>5. Who</b>${psLine(rd.who)}</div>
+      </div>
+    `;
+  }
   RENDER.hasil = function () {
+    const printBtn = `<button type="button" class="btn btn--ghost" style="margin-top:12px;" id="printSheetBtn">🖨️ Cetak Ringkasan Serve Road Map</button>`;
     if (!state.myDisc && !state.mySsd) {
       el("hasilBody").innerHTML = `<div class="card pad" style="text-align:center;padding:40px 20px;">
         <b style="display:block;font-family:var(--font-display);font-size:16px;margin-bottom:6px;">Hasil Asesmen</b>
         <p class="sub" style="margin:0 0 14px;">Isi DISC atau SSD dulu untuk melihat hasilnya di sini. Bagian keahlian & rekomendasi pekerjaan (dari Karunia Rohani/Serve Road Map) segera menyusul.</p>
         <button type="button" class="btn btn--primary" data-goto="disc" style="margin-bottom:8px;">Isi DISC</button>
         <button type="button" class="btn btn--ghost" data-goto="ssd">Isi SSD</button>
-      </div>`;
+      </div>
+      ${printBtn}`;
       return;
     }
     const discHTML = !state.myDisc ? `<div class="card pad" style="margin-bottom:12px;"><p class="sub" style="margin:0 0 8px;">DISC belum diisi.</p><button type="button" class="btn btn--ghost" data-goto="disc">Isi DISC</button></div>` : (() => {
@@ -630,6 +729,7 @@
       <h2 class="section">Skala Sikap Disfungsional</h2>
       ${ssdHTML}
       <p class="sub" style="margin-top:10px;">Keahlian, rekomendasi pekerjaan/pelayanan yang cocok (dari Karunia Rohani/Serve Road Map) segera menyusul di sini.</p>
+      ${printBtn}
     `;
   };
 
@@ -797,6 +897,11 @@
         state.mySsd = await DB.mySsd(CURRENT_YEAR);
         show("home");
       } catch (err) { toast("Gagal simpan: " + (err.message || err)); }
+      return;
+    }
+    if (T.closest("#printSheetBtn")) {
+      el("printSheetBody").innerHTML = printSheetHTML();
+      window.print();
       return;
     }
     const appReq = T.closest("[data-appreq]"), rejReq = T.closest("[data-rejreq]");
