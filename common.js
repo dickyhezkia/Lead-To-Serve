@@ -123,11 +123,93 @@ window.LTS = (function () {
   function giftName(code) { const g = GIFTS_LIST.find(x => x.code === code); return g ? g.name : code; }
   function ssdCatName(code) { const c = SSD_CATEGORIES.find(x => x.code === code); return c ? c.name : code; }
 
+  // 2026-09-23 (permintaan user, "saya punya file doc berisi pertanyaan post
+  // test utk Rock Solid 3 ... perlu ijin admin, baru bisa mengikuti test"):
+  // post-test Rock Solid 3 ("Firm Local Church") — 40 soal pilihan ganda,
+  // sumber: "Rock Solid 3 Questions .pdf" milik user. BUKAN bagian dari
+  // materi "Serve To Lead" (Bintoro/JPCC) spt instrumen lain di file ini —
+  // ini soal post-test kelas pemuridan JB3 sendiri. Skor akhir = persentase
+  // jawaban benar dari 40 soal ("BOBOT SEDANG" = tiap soal berbobot sama),
+  // dikategorikan ke 4 tingkat SAMA PERSIS spt di dokumen sumber: Excellent
+  // (90-100%) / Better (75-89%) / Good (50-74%) / Underperform (<50%).
+  // "Good" ke atas = LULUS (permintaan user: "setelah hasil testnya 'Good'
+  // berarti lulus akan ditandai sebagai telah mengikuti RS3").
+  // ⚠️ Sama spt DISC_GROUPS/GIFTS_LIST, kunci jawaban ("correct") ikut
+  // dikirim ke client di dalam common.js ini (dibaca siapa saja lewat
+  // View Source) — SENGAJA, demi konsisten dgn arsitektur skoring
+  // client-side yg sudah dipakai instrumen lain di app ini (DISC/SSD/Karunia
+  // Rohani semua begitu). Ini post-test internal pemuridan gereja, bukan
+  // ujian bersertifikat — risiko rendah. Kalau nanti perlu lebih ketat
+  // (kunci jawaban disembunyikan, skor dihitung server-side), pindahkan
+  // logic computeRs3Result() ke sebuah fungsi Postgres SECURITY DEFINER.
+  const RS3_QUESTIONS = [
+    { "no": 1, "text": "Apakah arti utama dari penamaan modul pemuridan dasar di Gereja JB3, yaitu \"Firm Local Church\"?", "options": { "A": "Gereja lokal adalah tempat orang percaya dibentuk, bertumbuh, dan berbuah.", "B": "Gereja lokal hanyalah sebuah organisasi sosial yang bersifat sementara.", "C": "Gedung gereja harus dibangun dengan fondasi fisik yang sangat kokoh.", "D": "Setiap jemaat wajib mendirikan bangunan gereja sendiri." }, "correct": "A" },
+    { "no": 2, "text": "Apa alasan utama mengapa mengetahui sejarah gereja lokal sangat penting bagi jemaat?", "options": { "A": "Untuk menghafal tahun-tahun berdirinya pelayanan.", "B": "Menunjukkan arah ke depan, memberi konteks, menjaga batas nilai, dan membangun identitas.", "C": "Agar jemaat dapat mendirikan cabang gereja tanpa izin pimpinan.", "D": "Membandingkan besar kecilnya pelayanan antar kota." }, "correct": "B" },
+    { "no": 3, "text": "Apakah dua dorongan utama yang melahirkan perintisan jemaat di Bandung?", "options": { "A": "Keinginan mendirikan sekolah umum dan pusat bisnis.", "B": "Amanat Agung dan visi kota berkampus.", "C": "Permintaan dari pemerintah daerah setempat.", "D": "Perpindahan massal anggota jemaat dari luar pulau." }, "correct": "B" },
+    { "no": 4, "text": "Bagaimanakah urutan perubahan nama organisasi gereja ini dari awal hingga sekarang?", "options": { "A": "JB3 -> GAP -> GPMI", "B": "GAP -> GPMI -> JB3", "C": "GPMI -> GAP -> JB3", "D": "GPMI -> JB3 -> GAP" }, "correct": "C" },
+    { "no": 5, "text": "Siapakah gembala sidang yang memimpin jemaat Bandung sejak 1 Agustus 2021 hingga saat ini?", "options": { "A": "Gerrit Hansen", "B": "Juliono Wijaya", "C": "Eric Dooley", "D": "Dicky Hizkia Sukmawidjaja" }, "correct": "D" },
+    { "no": 6, "text": "Bagaimanakah rumusan Visi Gereja JB3 yang diperbarui mulai tahun 2024?", "options": { "A": "Menjadi jemaat yang besar dan berdampak secara nasional.", "B": "Menjadi murid Kristus yang berakar di gereja lokal untuk menjadi berkat bagi bangsa.", "C": "Mengenal, Mengasihi dan Memuliakan Tuhan melalui pelayanan.", "D": "Memenangkan jiwa sebanyak-banyaknya di kota Bandung." }, "correct": "B" },
+    { "no": 7, "text": "Apa makna dari nilai inti \"Honor\" dalam kehidupan pelayanan di Gereja JB3?", "options": { "A": "Memberikan penghargaan materi kepada para pemimpin senior.", "B": "Memandang setiap orang sebagai pribadi berharga yang diciptakan serupa dan segambar dengan Allah.", "C": "Menjaga kesopanan hanya kepada sesama pelayan Tuhan di gereja.", "D": "Mengikuti setiap instruksi tanpa pernah memberikan masukan." }, "correct": "B" },
+    { "no": 8, "text": "Semboyan apakah yang menggambarkan keseimbangan ukuran pelayanan dalam nilai inti Caring?", "options": { "A": "\"Big in size, powerful in action.\"", "B": "\"Small group, big church.\"", "C": "\"Big enough to impact, small enough to care.\"", "D": "\"Care for all, impact the world.\"" }, "correct": "C" },
+    { "no": 9, "text": "Apa urutan tahapan dalam jalur pemuridan (Discipleship Journey) di Gereja JB3 sebelum seseorang masuk ke jenjang pelayanan?", "options": { "A": "Rock Solid 1 -> Rock Solid 2 -> Rock Solid 3 -> Lead to Serve 1 -> Lead to Serve 2", "B": "Lead to Serve 1 -> Rock Solid 1 -> Rock Solid 2 -> Lead to Serve 2", "C": "Rock Solid 3 -> Rock Solid 1 -> Rock Solid 2", "D": "Rock Solid 1 -> Lead to Serve 1 -> Rock Solid 2 -> Lead to Serve 2" }, "correct": "A" },
+    { "no": 10, "text": "Manakah pola kepemimpinan gereja yang dianut oleh struktur JB3 (Senior Pastor bersama para Elder)?", "options": { "A": "Episkopal / Hierarkis", "B": "Kongregasional", "C": "Sidang Penatua (Presbyterian)", "D": "Demokrasi Jemaat" }, "correct": "C" },
+    { "no": 11, "text": "Ayat manakah yang menjadi landasan alkitabiah dalam materi sejarah untuk menjaga batas nilai agar tidak dipindahkan?", "options": { "A": "Amsal 22:28", "B": "Matius 28:19", "C": "Efesus 4:11", "D": "Kolose 2:6-7" }, "correct": "A" },
+    { "no": 12, "text": "Manakah di bawah ini yang merupakan salah satu bentuk pelayanan misi JB3 yang dimulai sejak tahun 2003?", "options": { "A": "Rumah Ruth", "B": "CBCS", "C": "Setara", "D": "Metro" }, "correct": "B" },
+    { "no": 13, "text": "Bagian manakah dari Pengakuan Iman JB3 yang menjelaskan tentang keselamatan manusia?", "options": { "A": "Allah Tritunggal adalah pencipta alam semesta.", "B": "Keselamatan adalah anugerah cuma-cuma dari Allah, diterima melalui iman kepada Yesus Kristus, bukan oleh perbuatan baik.", "C": "Roh Kudus berdiam di dalam setiap orang percaya.", "D": "Baptisan air adalah ekspresi lahiriah dari perubahan batiniah." }, "correct": "B" },
+    { "no": 14, "text": "Apa arti dari frasa kata \"menjadi\" dalam bagian pertama Visi JB3 (\"Menjadi murid Kristus\")?", "options": { "A": "Status rohani yang sudah sempurna dan selesai.", "B": "Sebuah undangan untuk terus bertumbuh dan terus dibentuk.", "C": "Kewajiban mutlak untuk menjadi pengajar penuh waktu.", "D": "Syarat administrasi keanggotaan gereja." }, "correct": "B" },
+    { "no": 15, "text": "Apakah rumusan Misi Gereja JB3 yang tercantum dalam materi?", "options": { "A": "Membangun generasi yang memancarkan terang Kristus bagi bangsa melalui komunitas.", "B": "Memberitakan Injil kepada seluruh suku dan bahasa di dunia.", "C": "Membuka sekolah-sekolah Kristen di setiap kota besar.", "D": "Menjangkau jiwa-jiwa terhilang melalui media sosial." }, "correct": "A" },
+    { "no": 16, "text": "Manakah yang mencakup arti dari nilai inti ETHIC berupa \"Teachable\"?", "options": { "A": "Kemampuan mengajar orang lain dengan sangat fasih.", "B": "Memiliki sikap hati yang terbuka untuk terus-menerus belajar sepanjang hayat.", "C": "Keahlian memimpin kelompok besar.", "D": "Kepatuhan mutlak tanpa kritik terhadap organisasi." }, "correct": "B" },
+    { "no": 17, "text": "Kisah alkitabiah manakah yang digunakan untuk menjelaskan prinsip pendelegasian beban kepemimpinan dalam struktur organisasi gereja?", "options": { "A": "Kisah Para Rasul 2 tentang Pentakosta", "B": "Nasihat Yitro kepada Musa dalam Keluaran 18:17-22", "C": "Perjalanan Misionaris Paulus di Antiokhia", "D": "Surat Efesus tentang Tubuh Kristus" }, "correct": "B" },
+    { "no": 18, "text": "Syarat apa yang harus dipenuhi oleh seorang anggota Home agar dapat menjadi seorang Home Leader?", "options": { "A": "Menjadi anggota minimal selama 5 tahun berturut-turut.", "B": "Setia mengikuti HOME 6 bulan, menunjukkan hati Loving God & Loving People, serta mengikuti Kelas Rock Solid 1–3.", "C": "Menyumbangkan dana pembangunan gedung gereja.", "D": "Lulus dari Sekolah Tinggi Teologi formal." }, "correct": "B" },
+    { "no": 19, "text": "Apa perbedaan utama antara persyaratan penatua dan diaken berdasarkan 1 Timotius 3 dan Titus 1?", "options": { "A": "Diaken harus berumur lebih tua daripada penatua.", "B": "Calon diaken tidak harus sanggup mengajar, sementara penatua harus cakap mengajar.", "C": "Penatua dipilih oleh jemaat umum, diaken dipilih oleh pemerintah.", "D": "Diaken tidak perlu diuji kehidupannya terlebih dahulu." }, "correct": "B" },
+    { "no": 20, "text": "Apa nama keempat pilar atau tanggung jawab utama gereja lokal dalam bingkai pelayanan yang saling melengkapi?", "options": { "A": "Doa, Puasa, Memberi, Menginjili", "B": "Koinonia, Marturia, Didaskalia, Diakonia", "C": "Pengajaran, Pelayanan, Persembahan, Pengembalaan", "D": "Ibadah, Persekutuan, Kesaksian, Misi" }, "correct": "B" },
+    { "no": 21, "text": "Pilar apakah yang merujuk pada tanggung jawab gereja lokal dalam mengajarkan kebenaran Firman Allah guna membangun kedewasaan rohani?", "options": { "A": "Koinonia", "B": "Marturia", "C": "Didaskalia", "D": "Diakonia" }, "correct": "C" },
+    { "no": 22, "text": "Berapakah jumlah ciri jemaat yang berakar, bertumbuh, dan berbuah yang dijabarkan dalam modul Rock Solid 3?", "options": { "A": "5 ciri", "B": "7 ciri", "C": "10 ciri", "D": "12 ciri" }, "correct": "C" },
+    { "no": 23, "text": "Bagaimanakah pandangan Mazmur 119 mengenai Firman Tuhan bagi kehidupan seorang murid?", "options": { "A": "Firman bukan sekadar daftar aturan atau bacaan senggang, melainkan pedoman hidup, sumber hikmat, dan sukacita.", "B": "Firman adalah sejarah masa lalu yang tidak relevan dengan zaman modern.", "C": "Firman hanya dipahami oleh para pemimpin rohani profesional.", "D": "Firman adalah buku panduan moral yang kaku." }, "correct": "A" },
+    { "no": 24, "text": "Melatih tubuh dan jiwa untuk menyangkal diri dan tunduk pada Roh, bukan untuk menekan Tuhan, adalah tujuan sejati dari latihan rohani berupa apa?", "options": { "A": "Doa malam", "B": "Puasa", "C": "Memberi persepuluhan", "D": "Pelayanan diakonia" }, "correct": "B" },
+    { "no": 25, "text": "Apakah arti dari kata bahasa Yunani \"exousia\" yang berkaitan dengan konsep otoritas rohani?", "options": { "A": "Kekuatan militer atau paksaan fisik", "B": "Hak atau wewenang yang sah secara moral dan hukum", "C": "Status sosial yang tinggi di masyarakat", "D": "Jabatan formal dalam organisasi" }, "correct": "B" },
+    { "no": 26, "text": "Manakah jenis otoritas yang seharusnya hidup dan berfungsi di dalam gereja lokal menurut materi?", "options": { "A": "Otoritas Jabatan / Posisi semata", "B": "Otoritas Keahlian teknologi", "C": "Otoritas Karakter / Rohani", "D": "Otoritas Finansial" }, "correct": "C" },
+    { "no": 27, "text": "Bagaimanakah tahapan langkah disiplin yang benar sesuai dengan instruksi Matius 18:15-17?", "options": { "A": "Langsung mengumumkan di ibadah umum -> Tegur pribadi -> Lapor polisi", "B": "Tegur pribadi empat mata -> bawa satu atau dua saksi -> sampaikan kepada pimpinan gereja -> pandang sebagai orang yang tidak mengenal Allah", "C": "Bawa ke dewan penatua -> tegur pribadi -> abaikan", "D": "Berdoa tanpa menegur secara langsung" }, "correct": "B" },
+    { "no": 28, "text": "Berdasarkan 1 Timotius 5:19, ketentuan apa yang harus dipenuhi sebelum menerima tuduhan terhadap seorang penatua?", "options": { "A": "Harus disebarkan kepada seluruh jemaat terlebih dahulu.", "B": "Harus ada dua atau tiga orang saksi yang memberikan bukti sah.", "C": "Cukup berdasarkan laporan anonim yang valid.", "D": "Harus diadili di pengadilan umum." }, "correct": "B" },
+    { "no": 29, "text": "Manakah di bawah ini yang merupakan salah satu alasan penting untuk berkomitmen pada gereja lokal?", "options": { "A": "Karena gedung gereja sangat megah dan nyaman.", "B": "Gereja lokal adalah milik Kristus dan hubungan antara Kristus dan gereja adalah sebuah perjanjian (covenant).", "C": "Agar mendapatkan posisi pelayanan yang tinggi.", "D": "Karena teman-teman berkumpul di tempat yang sama." }, "correct": "B" },
+    { "no": 30, "text": "Bagaimanakah wujud konkret dari ciri kesepuluh jemaat (\"Memberi\") dalam kehidupan sehari-hari?", "options": { "A": "Memberikan waktu, tenaga, dan harta dengan kerelaan dan sukacita karena menyadari segala sesuatu berasal dari Tuhan.", "B": "Memberikan sumbangan hanya saat diminta oleh panitia pembangunan.", "C": "Menyisihkan sisa uang belanja untuk kotak persembahan.", "D": "Meminjamkan uang dengan mengharapkan pengembalian." }, "correct": "A" },
+    { "no": 31, "text": "Siapakah tokoh yang merintis jemaat Jakarta bersama Gerrit Hansen pada tahun 1986?", "options": { "A": "Juliono Wijaya", "B": "Dicky Hizkia Sukmawidjaja", "C": "Eric Dooley", "D": "Yitro" }, "correct": "C" },
+    { "no": 32, "text": "Tanggal berapakah Kebaktian Kebangunan Rohani (KKR) di Hotel Istana Bandung yang menjadi titik awal jemaat Bandung diadakan?", "options": { "A": "10 Juli 1987", "B": "4 Oktober 1987", "C": "1 Agustus 2021", "D": "17 Agustus 1996" }, "correct": "A" },
+    { "no": 33, "text": "Apa nama pelayanan misi JB3 yang berjalan dalam rentang waktu tahun 2011 hingga 2024?", "options": { "A": "Rumah Ruth", "B": "Setara", "C": "Metro", "D": "Puspa" }, "correct": "A" },
+    { "no": 34, "text": "Berapakah perkiraan persentase jemaat hasil pertobatan yang menjadi target dalam Impian-Impian JB3 1995 dari pelayanan Jemaat BBB Cilaki?", "options": { "A": "50%", "B": "60%", "C": "80%", "D": "95%" }, "correct": "C" },
+    { "no": 35, "text": "Manakah ayat Alkitab yang mendasari keyakinan bahwa Allah Tritunggal adalah Pencipta dan Penguasa alam semesta dalam Pengakuan Iman JB3?", "options": { "A": "Kejadian 1:1 (atau dasar Alkitab umum tentang Tritunggal/Penciptaan)", "B": "Wahyu 19:7", "C": "Amsal 22:28", "D": "Keluaran 18:17" }, "correct": "A" },
+    { "no": 36, "text": "Apa fokus utama dari nilai inti ETHIC yang dilambangkan dengan huruf \"E\" pertama?", "options": { "A": "Education — Belajar terus menerus", "B": "Excellent — Melakukan yang terbaik dalam semua bentuk pelayanan", "C": "Evangelism — Memberitakan Injil", "D": "Empathy — Merasakan penderitaan orang lain" }, "correct": "B" },
+    { "no": 37, "text": "Nilai inti ETHIC manakah yang menekankan pentingnya menjaga perkataan dan tindakan agar sesuai dengan kebenaran Firman Tuhan serta menepati janji?", "options": { "A": "Honor", "B": "Caring", "C": "Integrity", "D": "Teachable" }, "correct": "C" },
+    { "no": 38, "text": "Apakah nama kelas pemuridan dasar JB3 yang berada tepat sebelum peserta memasuki modul Rock Solid 3?", "options": { "A": "Rock Solid 1 — Firm Foundation", "B": "Rock Solid 2 — Firm Faith", "C": "Lead to Serve 1", "D": "Lead to Serve 2" }, "correct": "B" },
+    { "no": 39, "text": "Manakah pilar pelayanan gereja lokal yang berfokus pada persekutuan erat serta saling memperhatikan dan mendorong dalam kasih?", "options": { "A": "Koinonia", "B": "Marturia", "C": "Didaskalia", "D": "Diakonia" }, "correct": "A" },
+    { "no": 40, "text": "Mengapa jemaat yang hidup kudus perlu menjaga integritas dalam pikiran, perkataan, dan perbuatan menurut 1 Petrus 1:15-16?", "options": { "A": "Agar dipuji oleh sesama anggota gereja.", "B": "Sebab Allah sendiri adalah kudus, dan Ia memanggil umat-Nya untuk menjadi kudus di dalam seluruh hidup.", "C": "Agar terhindar dari hukuman hukum positif negara.", "D": "Supaya mendapatkan kedudukan terhormat di masyarakat." }, "correct": "B" },
+  ];
+  const RS3_BANDS = [
+    { "key": "excellent", "label": "Excellent", "min": 90 },
+    { "key": "better", "label": "Better", "min": 75 },
+    { "key": "good", "label": "Good", "min": 50 },
+    { "key": "underperform", "label": "Underperform", "min": 0 },
+  ];
+  function computeRs3Result(answers) {
+    answers = answers || {};
+    let correct = 0;
+    RS3_QUESTIONS.forEach(q => { if (answers[String(q.no)] === q.correct) correct++; });
+    const total = RS3_QUESTIONS.length;
+    const pct = Math.round((correct / total) * 100);
+    const band = RS3_BANDS.find(b => pct >= b.min) || RS3_BANDS[RS3_BANDS.length - 1];
+    return { correct, total, pct, bandKey: band.key, bandLabel: band.label, passed: pct >= 50 };
+  }
+  function rs3Complete(answers) {
+    answers = answers || {};
+    return RS3_QUESTIONS.every(q => !!answers[String(q.no)]);
+  }
+
   return {
     esc,
     DISC_GROUPS, computeDiscGraphs, discComplete,
     SSD_QUESTIONS, SSD_CATEGORIES, SSD_SCALE, computeSsdScores, ssdComplete, ssdCatName,
     GIFTS_QUESTIONS, GIFTS_LIST, GIFTS_SCALE, computeGiftsScores, giftsComplete, giftName,
     ROADMAP_SECTIONS, HOLY_DISCONTENT_AREAS, DISC_PROFILES, SSD_INSIGHT,
+    RS3_QUESTIONS, RS3_BANDS, computeRs3Result, rs3Complete,
   };
 })();

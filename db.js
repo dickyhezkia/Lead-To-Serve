@@ -34,6 +34,9 @@
  *    DB.mySsd(year) / DB.saveSsd(year, {answers,scores})  (peserta, 1 baris/tahun)
  *    DB.myGifts(year) / DB.saveGifts(year, {answers,scores})  (peserta, 1 baris/tahun)
  *    DB.deleteAccessRequest(id)  (Admin saja)
+ *    DB.myRs3Status() / DB.requestRs3Access()          (peserta, post-test Rock Solid 3)
+ *    DB.listAllRs3AccessRequests() / DB.decideRs3AccessRequest(id, approve) / DB.deleteRs3AccessRequest(id)  (Admin saja)
+ *    DB.myRs3Latest() / DB.saveRs3Result({answers,correct,total,pct,band,passed})  (peserta, riwayat percobaan; lulus = auto-tandai kelas RS3 di JB3)
  * ========================================================================== */
 window.makeDB = function makeDB(sb) {
   "use strict";
@@ -215,6 +218,87 @@ window.makeDB = function makeDB(sb) {
       wrap(await sb.from("lts_gifts_results").upsert({
         profile_id: s.user.id, year, answers, scores, updated_at: new Date().toISOString(),
       }, { onConflict: "profile_id,year" }));
+    },
+
+    // ---------- Rock Solid 3 post-test (2026-09-23, permintaan user:
+    // "buatkan link dari kartu carousel Rock solid 3 (seperti LTS1) perlu
+    // ijin admin, baru bisa mengikuti test") — pola access-gate SAMA PERSIS
+    // dgn lts_access_requests di atas, tabel TERPISAH ("rs3_" prefix) krn
+    // konsepnya beda (post-test kelas, bukan S-E-R-V-E). Lihat
+    // supabase/v_rs3_access_requests.sql / v_rs3_test_results.sql. ----------
+    async myRs3Status() {
+      const s = await this.session();
+      if (!s) return null;
+      const { data, error } = await sb.from("rs3_access_requests").select("status").eq("profile_id", s.user.id).order("requested_at", { ascending:false }).limit(1).maybeSingle();
+      if (error) throw error;
+      return data ? data.status : null;
+    },
+    async requestRs3Access() {
+      const s = await this.session();
+      if (!s) throw new Error("Belum login");
+      wrap(await sb.from("rs3_access_requests").insert({ profile_id:s.user.id }));
+    },
+    // Admin saja (RLS menolak diam2 utk peserta biasa) — sama pola dgn
+    // listAllAccessRequests(): 2 query terpisah + gabung manual, TAK
+    // bergantung ke embed PostgREST/cache skema (lihat komentar besar di
+    // listAllAccessRequests soal bug "admin1 tidak bisa masuk").
+    async listAllRs3AccessRequests() {
+      const { data: reqs, error: e1 } = await sb.from("rs3_access_requests")
+        .select("id,profile_id,status,requested_at,decided_at")
+        .order("requested_at", { ascending:false });
+      if (e1) throw e1;
+      const rows = reqs || [];
+      if (!rows.length) return [];
+      const ids = [...new Set(rows.map(r => r.profile_id))];
+      const { data: profs, error: e2 } = await sb.from("profiles").select("id,name,phone").in("id", ids);
+      if (e2) throw e2;
+      const profOf = id => (profs || []).find(p => p.id === id) || null;
+      return rows.map(r => ({ ...r, profile: profOf(r.profile_id) }));
+    },
+    async decideRs3AccessRequest(id, approve) {
+      const s = await this.session();
+      wrap(await sb.from("rs3_access_requests").update({
+        status: approve ? "approved" : "rejected",
+        decided_at: new Date().toISOString(),
+        decided_by: s.user.id,
+      }).eq("id", id));
+    },
+    async deleteRs3AccessRequest(id) {
+      wrap(await sb.from("rs3_access_requests").delete().eq("id", id));
+    },
+    // Riwayat percobaan post-test (TIDAK per-tahun, boleh diulang kapan saja
+    // sampai lulus — lihat v_rs3_test_results.sql). myRs3Latest() ambil
+    // percobaan TERBARU saja (utk tampilan status di beranda/halaman test);
+    // riwayat lengkap tak perlu ditampilkan di app ini utk saat ini.
+    async myRs3Latest() {
+      const s = await this.session();
+      if (!s) return null;
+      const { data, error } = await sb.from("rs3_test_results").select("*").eq("profile_id", s.user.id).order("created_at", { ascending:false }).limit(1).maybeSingle();
+      if (error) throw error;
+      return data || null;
+    },
+    // Menyimpan 1 percobaan BARU + (kalau lulus) otomatis menandai kelas
+    // "Rock Solid 3" selesai di profiles.classes milik JB3 HOME Tracker
+    // (index 2 dari 5 — lihat CLASS_LABELS di common.js JB3: Rock Solid 1/2/3,
+    // Lead To Serve 1/2). Baca-ubah-tulis manual (bukan RPC/SECURITY DEFINER)
+    // krn RLS profiles_update JB3 SUDAH mengizinkan "id = auth.uid()" utk
+    // update baris sendiri, dan trigger protect_profile() di sana HANYA
+    // membatasi kolom role/role2 — classes bebas ditulis pemiliknya sendiri,
+    // jadi tak perlu fungsi Postgres tambahan.
+    async saveRs3Result({ answers, correct, total, pct, band, passed }) {
+      const s = await this.session();
+      if (!s) throw new Error("Belum login");
+      wrap(await sb.from("rs3_test_results").insert({
+        profile_id: s.user.id, answers, correct, total, score_pct: pct, band, passed,
+      }));
+      if (passed) {
+        const { data: prof, error: e1 } = await sb.from("profiles").select("classes").eq("id", s.user.id).maybeSingle();
+        if (e1) throw e1;
+        const NCLASS = 5, RS3_IDX = 2;
+        let arr = Array.isArray(prof && prof.classes) && prof.classes.length === NCLASS ? [...prof.classes] : Array(NCLASS).fill(false);
+        arr[RS3_IDX] = true;
+        wrap(await sb.from("profiles").update({ classes:arr }).eq("id", s.user.id));
+      }
     },
   };
 };
