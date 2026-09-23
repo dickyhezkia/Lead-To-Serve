@@ -37,6 +37,9 @@
  *    DB.myRs3Status() / DB.requestRs3Access()          (peserta, post-test Rock Solid 3)
  *    DB.listAllRs3AccessRequests() / DB.decideRs3AccessRequest(id, approve) / DB.deleteRs3AccessRequest(id)  (Admin saja)
  *    DB.myRs3Latest() / DB.saveRs3Result({answers,correct,total,pct,band,passed})  (peserta, riwayat percobaan; lulus = auto-tandai kelas RS3 di JB3)
+ *    DB.myLts2Status() / DB.requestLts2Access()          (peserta, post-test Lead To Serve 2)
+ *    DB.listAllLts2AccessRequests() / DB.decideLts2AccessRequest(id, approve) / DB.deleteLts2AccessRequest(id)  (Admin saja)
+ *    DB.myLts2Latest() / DB.saveLts2Result({answers,correct,total,pct,band,passed})  (peserta, riwayat percobaan; lulus = auto-tandai kelas LTS2 di JB3)
  *    DB.listParticipantResults(year)  (Admin saja — hasil SEMUA peserta yg aksesnya disetujui)
  * ========================================================================== */
 window.makeDB = function makeDB(sb) {
@@ -302,6 +305,72 @@ window.makeDB = function makeDB(sb) {
       }
     },
 
+    // ---------- Lead To Serve 2 post-test (2026-09-23, "jika limit cukup,
+    // buatkan post test utk LTS2") — SAMA PERSIS pola RS3 di atas, tabel
+    // TERPISAH ("lts2_" prefix). Lihat supabase/v_lts2_access_requests.sql /
+    // v_lts2_test_results.sql. ----------
+    async myLts2Status() {
+      const s = await this.session();
+      if (!s) return null;
+      const { data, error } = await sb.from("lts2_access_requests").select("status").eq("profile_id", s.user.id).order("requested_at", { ascending:false }).limit(1).maybeSingle();
+      if (error) throw error;
+      return data ? data.status : null;
+    },
+    async requestLts2Access() {
+      const s = await this.session();
+      if (!s) throw new Error("Belum login");
+      wrap(await sb.from("lts2_access_requests").insert({ profile_id:s.user.id }));
+    },
+    async listAllLts2AccessRequests() {
+      const { data: reqs, error: e1 } = await sb.from("lts2_access_requests")
+        .select("id,profile_id,status,requested_at,decided_at")
+        .order("requested_at", { ascending:false });
+      if (e1) throw e1;
+      const rows = reqs || [];
+      if (!rows.length) return [];
+      const ids = [...new Set(rows.map(r => r.profile_id))];
+      const { data: profs, error: e2 } = await sb.from("profiles").select("id,name,phone").in("id", ids);
+      if (e2) throw e2;
+      const profOf = id => (profs || []).find(p => p.id === id) || null;
+      return rows.map(r => ({ ...r, profile: profOf(r.profile_id) }));
+    },
+    async decideLts2AccessRequest(id, approve) {
+      const s = await this.session();
+      wrap(await sb.from("lts2_access_requests").update({
+        status: approve ? "approved" : "rejected",
+        decided_at: new Date().toISOString(),
+        decided_by: s.user.id,
+      }).eq("id", id));
+    },
+    async deleteLts2AccessRequest(id) {
+      wrap(await sb.from("lts2_access_requests").delete().eq("id", id));
+    },
+    async myLts2Latest() {
+      const s = await this.session();
+      if (!s) return null;
+      const { data, error } = await sb.from("lts2_test_results").select("*").eq("profile_id", s.user.id).order("created_at", { ascending:false }).limit(1).maybeSingle();
+      if (error) throw error;
+      return data || null;
+    },
+    // Lulus -> menandai kelas "Lead To Serve 2" (index 4 dari 5, CLASS_LABELS
+    // JB3: Rock Solid 1/2/3, Lead To Serve 1/2) — pola SAMA PERSIS dgn
+    // saveRs3Result() di atas.
+    async saveLts2Result({ answers, correct, total, pct, band, passed }) {
+      const s = await this.session();
+      if (!s) throw new Error("Belum login");
+      wrap(await sb.from("lts2_test_results").insert({
+        profile_id: s.user.id, answers, correct, total, score_pct: pct, band, passed,
+      }));
+      if (passed) {
+        const { data: prof, error: e1 } = await sb.from("profiles").select("classes").eq("id", s.user.id).maybeSingle();
+        if (e1) throw e1;
+        const NCLASS = 5, LTS2_IDX = 4;
+        let arr = Array.isArray(prof && prof.classes) && prof.classes.length === NCLASS ? [...prof.classes] : Array(NCLASS).fill(false);
+        arr[LTS2_IDX] = true;
+        wrap(await sb.from("profiles").update({ classes:arr }).eq("id", s.user.id));
+      }
+    },
+
     // ---------- Admin saja: hasil SEMUA peserta yg aksesnya sudah disetujui
     // (2026-09-23, permintaan user: "admin dapat melihat setiap hasil test
     // dan asesment dari setiap pengguna yang telah mengikuti discipleship
@@ -314,39 +383,41 @@ window.makeDB = function makeDB(sb) {
     // jauh lebih murah drpd N query per peserta. ----------
     async listParticipantResults(year) {
       const [
-        { data: reqs1, error: e1 }, { data: reqs2, error: e2 },
+        { data: reqs1, error: e1 }, { data: reqs2, error: e2 }, { data: reqs3, error: e9 },
         { data: discs, error: e3 }, { data: ssds, error: e4 },
         { data: gifts, error: e5 }, { data: roadmaps, error: e6 },
-        { data: rs3s, error: e7 },
+        { data: rs3s, error: e7 }, { data: lts2s, error: e10 },
       ] = await Promise.all([
         sb.from("lts_access_requests").select("profile_id").eq("status", "approved"),
         sb.from("rs3_access_requests").select("profile_id").eq("status", "approved"),
+        sb.from("lts2_access_requests").select("profile_id").eq("status", "approved"),
         sb.from("lts_disc_results").select("*").eq("year", year),
         sb.from("lts_ssd_results").select("*").eq("year", year),
         sb.from("lts_gifts_results").select("*").eq("year", year),
         sb.from("lts_roadmap_results").select("*").eq("year", year),
         sb.from("rs3_test_results").select("*").order("created_at", { ascending:false }),
+        sb.from("lts2_test_results").select("*").order("created_at", { ascending:false }),
       ]);
-      [e1, e2, e3, e4, e5, e6, e7].forEach(e => { if (e) throw e; });
-      // Peserta yg dihitung = siapa pun yg akses LTS ATAU RS3-nya PERNAH
-      // disetujui (approved) — bukan cuma yg py hasil, spy Admin jg lihat
-      // org yg sudah diizinkan tp belum sempat isi apa2 (baris kosong).
-      const ids = [...new Set([...(reqs1 || []).map(r => r.profile_id), ...(reqs2 || []).map(r => r.profile_id)])];
+      [e1, e2, e3, e4, e5, e6, e7, e9, e10].forEach(e => { if (e) throw e; });
+      // Peserta yg dihitung = siapa pun yg akses LTS, RS3, ATAU LTS2-nya
+      // PERNAH disetujui (approved) — bukan cuma yg py hasil, spy Admin jg
+      // lihat org yg sudah diizinkan tp belum sempat isi apa2 (baris kosong).
+      const ids = [...new Set([...(reqs1 || []).map(r => r.profile_id), ...(reqs2 || []).map(r => r.profile_id), ...(reqs3 || []).map(r => r.profile_id)])];
       if (!ids.length) return [];
       const { data: profs, error: e8 } = await sb.from("profiles").select("id,name,phone").in("id", ids);
       if (e8) throw e8;
       const findFor = (arr, pid) => (arr || []).find(r => r.profile_id === pid) || null;
-      // rs3_test_results: BANYAK baris per orang (riwayat percobaan, lihat
-      // v_rs3_test_results.sql) — ambil yg PALING BARU per profil (array
-      // sudah diurutkan created_at desc dari query di atas).
-      const rs3Latest = {};
-      (rs3s || []).forEach(r => { if (!rs3Latest[r.profile_id]) rs3Latest[r.profile_id] = r; });
+      // rs3_test_results/lts2_test_results: BANYAK baris per orang (riwayat
+      // percobaan) — ambil yg PALING BARU per profil (array sudah diurutkan
+      // created_at desc dari query di atas).
+      const latestOf = rows => { const m = {}; (rows || []).forEach(r => { if (!m[r.profile_id]) m[r.profile_id] = r; }); return m; };
+      const rs3Latest = latestOf(rs3s), lts2Latest = latestOf(lts2s);
       return ids.map(id => {
         const prof = (profs || []).find(p => p.id === id) || { id, name:"?", phone:"" };
         return {
           profileId:id, name:prof.name, phone:prof.phone,
           disc: findFor(discs, id), ssd: findFor(ssds, id), gifts: findFor(gifts, id), roadmap: findFor(roadmaps, id),
-          rs3: rs3Latest[id] || null,
+          rs3: rs3Latest[id] || null, lts2: lts2Latest[id] || null,
         };
       });
     },

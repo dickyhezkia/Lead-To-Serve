@@ -204,6 +204,64 @@ window.LTS = (function () {
     return RS3_QUESTIONS.every(q => !!answers[String(q.no)]);
   }
 
+  // 2026-09-23 (permintaan user, "jika limit cukup, buatkan post test utk
+  // LTS2" — file yg ditunjuk ("LEAD TO SERVE 2-2.pdf"/"LEAD TO SERVE 2.pdf")
+  // TERNYATA berisi MATERI pelajaran (Servant Leadership/Pola Pelayanan
+  // Yesus/5F/Memahami Firman Tuhan/kisah Yusuf), BUKAN bank soal siap pakai
+  // spt file RS3 dulu — dikonfirmasi via AskUserQuestion: "buatkan soal dari
+  // materi ini, pilihan ganda 25 soal, 4 tingkat skor, bobot soal sedang".
+  // 25 soal DI BAWAH INI disusun Claude sendiri dari isi materi tsb (sama
+  // semangatnya dgn catatan DISC_GROUPS di atas — konten diturunkan dari
+  // materi asli, bukan kunci soal resmi yg memang tak ada). Kategorisasi &
+  // ambang skor SAMA PERSIS dgn RS3 (Excellent 90-100% / Better 75-89% /
+  // Good 50-74% / Underperform <50%, Good ke atas = lulus).
+  const LTS2_QUESTIONS = [
+    { "no": 1, "text": "Apa definisi dari Servant Leadership menurut materi?", "options": { "A": "Pemimpin yang bekerja untuk orang yang dipimpin dan memutuskan segalanya bagi mereka.", "B": "Sebuah proses memimpin / memberikan pengaruh / membantu orang lain untuk mencapai tujuan / visi tertentu.", "C": "Pemimpin yang menghindari tanggung jawab dan menyerahkan semua keputusan kepada bawahan.", "D": "Sebuah gaya manajemen yang berfokus pada efisiensi operasional semata." }, "correct": "B" },
+    { "no": 2, "text": "Apakah dua bagian dalam kepemimpinan pelayan (servant leadership) menurut materi?", "options": { "A": "Peran administratif dan peran finansial.", "B": "Peran pengajaran dan peran pengawasan.", "C": "Peran visioner/arahan (strategis) dan peran implementasi (operasional).", "D": "Peran sosial dan peran teknis." }, "correct": "C" },
+    { "no": 3, "text": "Menurut Filipi 2:6-8, apa yang dilakukan Yesus meski dalam rupa Allah?", "options": { "A": "Ia mempertahankan kesetaraan-Nya dengan Allah.", "B": "Ia mengosongkan diri-Nya, mengambil rupa seorang hamba, dan taat sampai mati di kayu salib.", "C": "Ia menuntut untuk dilayani oleh manusia.", "D": "Ia menghindari penderitaan dengan segala cara." }, "correct": "B" },
+    { "no": 4, "text": "Dalam Matius 4:18-22, siapa yang pertama kali dipanggil Yesus menjadi \"penjala manusia\"?", "options": { "A": "Yusuf dan saudara-saudaranya.", "B": "Simon Petrus dan Andreas.", "C": "Musa dan Harun.", "D": "Paulus dan Timotius." }, "correct": "B" },
+    { "no": 5, "text": "Dalam kisah Matius 14:13-20 (5 roti 2 ikan), apa yang mula-mula tergerak dalam hati Yesus saat melihat orang banyak?", "options": { "A": "Kekecewaan karena kehadiran mereka mengganggu waktu sunyi-Nya.", "B": "Belas kasihan (compassion), sehingga Ia menyembuhkan yang sakit.", "C": "Kemarahan karena mereka tidak membawa bekal.", "D": "Ketidakpedulian karena bukan tanggung jawab-Nya." }, "correct": "B" },
+    { "no": 6, "text": "Apa urutan prinsip pola pelayanan Yesus menurut materi?", "options": { "A": "Melihat kebutuhan -> tergerak belas kasihan -> melakukan sesuatu -> sesuatu/mujizat terjadi.", "B": "Melakukan sesuatu -> mujizat terjadi -> melihat kebutuhan -> belas kasihan.", "C": "Tergerak belas kasihan -> mengontrol hasil -> melihat kebutuhan -> selesai.", "D": "Melihat kebutuhan -> mengintervensi hasil -> mujizat terjadi." }, "correct": "A" },
+    { "no": 7, "text": "Menurut 1 Korintus 3:6, siapa yang memberi pertumbuhan setelah Paulus menanam dan Apolos menyiram?", "options": { "A": "Paulus sendiri, karena dialah yang memulai.", "B": "Apolos, karena dialah yang terakhir menyentuh pekerjaan itu.", "C": "Allah yang memberi pertumbuhan.", "D": "Jemaat itu sendiri, melalui usaha mereka." }, "correct": "C" },
+    { "no": 8, "text": "Apa yang dilakukan Yesus pertama kali setelah bangkit dan semua kekuasaan ada di tangan-Nya, sebagai contoh \"Servant King\"?", "options": { "A": "Mengumpulkan murid-murid untuk memberi perintah baru.", "B": "Membasuh kaki murid-murid-Nya.", "C": "Naik ke sorga tanpa berpamitan.", "D": "Menghukum orang-orang yang menyalibkan-Nya." }, "correct": "B" },
+    { "no": 9, "text": "Apa makna dari ungkapan \"Power is for Service\" dalam materi?", "options": { "A": "Kekuasaan adalah hak untuk memerintah tanpa dipertanyakan.", "B": "Kekuasaan adalah hak istimewa yang diberikan untuk melayani orang lain.", "C": "Kekuasaan hanya boleh dimiliki oleh pemimpin senior.", "D": "Kekuasaan adalah tujuan akhir dari kepemimpinan." }, "correct": "B" },
+    { "no": 10, "text": "Manakah yang TERMASUK ciri fokus kepada orang lain sebagai pemimpin yang melayani?", "options": { "A": "Memanfaatkan orang lain untuk mencapai target pribadi.", "B": "Memberikan nilai, tidak memanfaatkan, dan memperhatikan orang lain.", "C": "Mengontrol setiap keputusan yang diambil pengikut.", "D": "Menuntut loyalitas tanpa memberi apa pun sebagai balasan." }, "correct": "B" },
+    { "no": 11, "text": "Apa perbedaan utama sumber perubahan antara Inspirasi dan Intimidasi menurut materi?", "options": { "A": "Inspirasi dan Intimidasi sebenarnya sama saja, hanya istilah berbeda.", "B": "Pada Inspirasi, pemimpin berubah dahulu baru pengikutnya; pada Intimidasi, pemimpin menuntut pengikut yang berubah.", "C": "Intimidasi selalu lebih efektif dibanding Inspirasi dalam jangka panjang.", "D": "Inspirasi hanya berlaku untuk pemimpin gereja, Intimidasi untuk pemimpin bisnis." }, "correct": "B" },
+    { "no": 12, "text": "Manakah yang BUKAN salah satu cara belajar seorang pemimpin menurut materi?", "options": { "A": "Belajar dengan melakukan (bukan sekadar teori).", "B": "Belajar dengan observing/memperhatikan dan menjadi pendengar yang baik.", "C": "Belajar dari kesalahan diri sendiri atau orang lain.", "D": "Belajar hanya dari pengalaman pribadi tanpa perlu sumber lain." }, "correct": "D" },
+    { "no": 13, "text": "Dalam Matius 18:12-14 (perumpamaan domba yang hilang), apa makna \"pemimpin yang menghampiri\"?", "options": { "A": "Pemimpin yang duduk diam menunggu orang datang kepadanya.", "B": "Pemimpin yang mencari dan mendapatkan orang-orang yang terhilang atau membutuhkan.", "C": "Pemimpin yang hanya fokus pada domba yang sudah ada di dalam kandang.", "D": "Pemimpin yang mengabaikan yang tersesat demi menjaga yang sembilan puluh sembilan." }, "correct": "B" },
+    { "no": 14, "text": "Apa sajakah kelima elemen dalam Kerangka 5F untuk membangun hubungan?", "options": { "A": "Face, Facts, Feelings, Fears, Faith.", "B": "Focus, Faith, Family, Finance, Future.", "C": "Face, Function, Feelings, Freedom, Faith.", "D": "Facts, Fame, Fears, Faith, Function." }, "correct": "A" },
+    { "no": 15, "text": "Elemen 5F manakah yang berkaitan dengan mengetahui kehidupan pribadi seseorang dengan Tuhan, tujuan hidup, dan pergumulannya?", "options": { "A": "Face", "B": "Facts", "C": "Feelings", "D": "Faith" }, "correct": "D" },
+    { "no": 16, "text": "Apa makna dari pernyataan \"Kita tidak memakai orang untuk membangun gereja tetapi kita memakai gereja untuk membangun orang\"?", "options": { "A": "Gereja lebih penting daripada orang-orang di dalamnya.", "B": "Fokus kepemimpinan adalah pertumbuhan dan transformasi orang, bukan sekadar membesarkan organisasi.", "C": "Orang-orang harus dikorbankan demi kepentingan institusi gereja.", "D": "Gereja dan orang adalah dua hal yang tidak saling berkaitan." }, "correct": "B" },
+    { "no": 17, "text": "Menurut John Maxwell, pemimpin diumpamakan sebagai apa jika ia tidak mau bertumbuh?", "options": { "A": "Pintu yang selalu terbuka.", "B": "Tutup botol yang menghentikan pertumbuhan organisasi jika tertutup.", "C": "Jendela yang menerangi ruangan.", "D": "Akar pohon yang menopang segalanya." }, "correct": "B" },
+    { "no": 18, "text": "Berdasarkan 1 Yohanes 2:12-14, apa ciri tahap \"Ignorance\" (ketidaktahuan) dalam pertumbuhan rohani?", "options": { "A": "Seorang Kristen baru lahir secara rohani, belum memiliki banyak pengetahuan Alkitab.", "B": "Seorang Kristen yang sudah dewasa dan aktif memuridkan orang lain.", "C": "Seorang Kristen yang berfokus sepenuhnya kepada Tuhan.", "D": "Seorang Kristen yang sudah mengalahkan yang jahat dan kuat dalam iman." }, "correct": "A" },
+    { "no": 19, "text": "Tahap manakah dalam pertumbuhan rohani yang ditandai dengan fokus pada pemenuhan kebutuhan pribadi, termasuk motivasi doa yang salah (Yakobus 4:3)?", "options": { "A": "Ignorance", "B": "Self-centered", "C": "God-centered", "D": "Other-centered" }, "correct": "B" },
+    { "no": 20, "text": "Tahap pertumbuhan rohani \"Other-centered dan Intentional to Disciple\" ditandai dengan apa?", "options": { "A": "Ketergantungan penuh pada orang lain untuk bertumbuh.", "B": "Fokus pada kebutuhan orang lain dan secara aktif terlibat memuridkan orang lain.", "C": "Berhenti melayani karena sudah merasa cukup dewasa.", "D": "Kembali fokus pada kebutuhan dan kenyamanan pribadi." }, "correct": "B" },
+    { "no": 21, "text": "Menurut Efesus 4:11-13, untuk tujuan apa Tuhan memberikan rasul, nabi, pemberita Injil, gembala, dan pengajar?", "options": { "A": "Untuk memperlengkapi orang-orang kudus bagi pekerjaan pelayanan dan pembangunan tubuh Kristus.", "B": "Untuk menjadi pejabat tetap yang tidak boleh diganti.", "C": "Untuk mengatur keuangan gereja secara eksklusif.", "D": "Untuk membuat peraturan gereja yang kaku." }, "correct": "A" },
+    { "no": 22, "text": "Apa isi Amanat Agung dalam Matius 28:19-20?", "options": { "A": "Membangun gedung gereja yang megah di setiap kota.", "B": "Menjadikan semua bangsa murid, membaptis, dan mengajarkan mereka melakukan segala yang diperintahkan.", "C": "Mengumpulkan persembahan sebanyak-banyaknya.", "D": "Menghindari orang-orang yang belum percaya." }, "correct": "B" },
+    { "no": 23, "text": "Menurut materi \"Memahami Firman Tuhan\", apa sajakah tiga aspek penting dalam membaca Alkitab?", "options": { "A": "Knowledge (Observasi), Understanding (Interpretasi), dan Wisdom (Aplikasi).", "B": "Sejarah, Geografi, dan Budaya.", "C": "Nubuat, Hukum, dan Puisi.", "D": "Perjanjian Lama, Perjanjian Baru, dan Apokrifa." }, "correct": "A" },
+    { "no": 24, "text": "Alat bantu apa yang disarankan untuk menggali fakta dasar dari sebuah perikop Alkitab pada tahap Observasi?", "options": { "A": "Metode 5W1H (What, Who, Where, When, Why, How).", "B": "Metode SWOT.", "C": "Metode 5F.", "D": "Metode SMART Goals." }, "correct": "A" },
+    { "no": 25, "text": "Dalam kisah Yusuf dan saudara-saudaranya (Kejadian 50:15-21), apa prinsip rohani utama yang diajarkan tentang cara Tuhan bekerja?", "options": { "A": "Tuhan selalu menghukum orang yang berbuat jahat kepada kita.", "B": "Tuhan dapat mengubah hal yang dimaksudkan untuk kejahatan menjadi kebaikan bagi tujuan-Nya.", "C": "Kita harus membalas kejahatan dengan kejahatan agar keadilan tercapai.", "D": "Tuhan tidak ikut campur dalam situasi yang melibatkan kejahatan manusia." }, "correct": "B" },
+  ];
+  const LTS2_BANDS = [
+    { "key": "excellent", "label": "Excellent", "min": 90 },
+    { "key": "better", "label": "Better", "min": 75 },
+    { "key": "good", "label": "Good", "min": 50 },
+    { "key": "underperform", "label": "Underperform", "min": 0 },
+  ];
+  function computeLts2Result(answers) {
+    answers = answers || {};
+    let correct = 0;
+    LTS2_QUESTIONS.forEach(q => { if (answers[String(q.no)] === q.correct) correct++; });
+    const total = LTS2_QUESTIONS.length;
+    const pct = Math.round((correct / total) * 100);
+    const band = LTS2_BANDS.find(b => pct >= b.min) || LTS2_BANDS[LTS2_BANDS.length - 1];
+    return { correct, total, pct, bandKey: band.key, bandLabel: band.label, passed: pct >= 50 };
+  }
+  function lts2Complete(answers) {
+    answers = answers || {};
+    return LTS2_QUESTIONS.every(q => !!answers[String(q.no)]);
+  }
+
   return {
     esc,
     DISC_GROUPS, computeDiscGraphs, discComplete,
@@ -211,5 +269,6 @@ window.LTS = (function () {
     GIFTS_QUESTIONS, GIFTS_LIST, GIFTS_SCALE, computeGiftsScores, giftsComplete, giftName,
     ROADMAP_SECTIONS, HOLY_DISCONTENT_AREAS, DISC_PROFILES, SSD_INSIGHT,
     RS3_QUESTIONS, RS3_BANDS, computeRs3Result, rs3Complete,
+    LTS2_QUESTIONS, LTS2_BANDS, computeLts2Result, lts2Complete,
   };
 })();

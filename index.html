@@ -255,6 +255,7 @@
           <section class="page" data-page="ssd"><div id="ssdBody"></div></section>
           <section class="page" data-page="gifts"><div id="giftsBody"></div></section>
           <section class="page" data-page="rs3"><div id="rs3Body"></div></section>
+          <section class="page" data-page="lts2"><div id="lts2Body"></div></section>
           <section class="page" data-page="results"><div id="resultsBody"></div></section>
           <section class="page" data-page="resultdetail"><div id="resultdetailBody"></div></section>
           <section class="page" data-page="hasil"><div id="hasilBody"></div></section>
@@ -287,7 +288,8 @@
   const { esc, DISC_GROUPS, computeDiscGraphs, discComplete, ROADMAP_SECTIONS, HOLY_DISCONTENT_AREAS,
     SSD_QUESTIONS, SSD_CATEGORIES, SSD_SCALE, computeSsdScores, ssdComplete,
     GIFTS_QUESTIONS, GIFTS_LIST, GIFTS_SCALE, computeGiftsScores, giftsComplete, giftName,
-    DISC_PROFILES, SSD_INSIGHT, RS3_QUESTIONS, RS3_BANDS, computeRs3Result, rs3Complete } = window.LTS;
+    DISC_PROFILES, SSD_INSIGHT, RS3_QUESTIONS, RS3_BANDS, computeRs3Result, rs3Complete,
+    LTS2_QUESTIONS, LTS2_BANDS, computeLts2Result, lts2Complete } = window.LTS;
   const CURRENT_YEAR = new Date().getFullYear();
   const el = id => document.getElementById(id);
   const $ = s => document.querySelector(s);
@@ -304,7 +306,7 @@
   // 2026-09-22 susulan ("bangun assesment DISC dengan hasil masking, real,
   // stress"): myDisc (baris tahun INI, null kalau belum diisi) + draft.discPicks
   // (isian yg sedang dikerjakan, blm disimpan) ditambahkan.
-  const state = { page:"login", stack:[], persona:null, meId:null, myProfile:null, accessStatus:null, accessRequests:[], myDisc:null, myRoadmap:null, mySsd:null, myGifts:null, rs3AccessStatus:null, rs3AccessRequests:[], rs3Result:null, participantResults:null, viewProfileId:null, resultsFilter:"all", draft:{ discPicks:[], roadmapData:{}, ssdAnswers:{}, giftsAnswers:{}, rs3Answers:{} } };
+  const state = { page:"login", stack:[], persona:null, meId:null, myProfile:null, accessStatus:null, accessRequests:[], myDisc:null, myRoadmap:null, mySsd:null, myGifts:null, rs3AccessStatus:null, rs3AccessRequests:[], rs3Result:null, lts2AccessStatus:null, lts2AccessRequests:[], lts2Result:null, participantResults:null, viewProfileId:null, resultsFilter:"all", draft:{ discPicks:[], roadmapData:{}, ssdAnswers:{}, giftsAnswers:{}, rs3Answers:{}, lts2Answers:{} } };
   const NOCHROME = ["login"];
 
   function initials(name) { return String(name || "?").trim().split(/\s+/).slice(0, 2).map(w => w[0] || "").join("").toUpperCase() || "?"; }
@@ -344,6 +346,7 @@
     ssd: { h:"Skala Sikap Disfungsional", back:true },
     gifts: { h:"Karunia Rohani", back:true },
     rs3: { h:"Rock Solid 3 — Post-Test", back:true },
+    lts2: { h:"Lead To Serve 2 — Post-Test", back:true },
     results: { h:"Hasil Peserta", back:true },
     resultdetail: { h:"Hasil Peserta", back:true },
     strength: { h:"Strength", back:true },
@@ -500,8 +503,8 @@
     const isAdmin = state.persona === "ADMIN";
     const st = state.rs3AccessStatus, res = state.rs3Result;
     let tag = `<span class="tag tag--todo">Terkunci</span>`;
-    if (res && res.passed) tag = `<span class="tag tag--done">Lulus · ${esc(res.bandLabel)}</span>`;
-    else if (res) tag = `<span class="tag tag--todo">Belum Lulus · ${esc(res.bandLabel)}</span>`;
+    if (res && res.passed) tag = `<span class="tag tag--done">Lulus · ${esc(res.band)}</span>`;
+    else if (res) tag = `<span class="tag tag--todo">Belum Lulus · ${esc(res.band)}</span>`;
     else if (isAdmin || st === "approved") tag = `<span class="tag tag--todo">Belum</span>`;
     else if (st === "pending") tag = `<span class="tag tag--todo">Menunggu Admin</span>`;
     return `<button type="button" class="card pad" style="width:100%;text-align:left;display:flex;align-items:center;gap:12px;margin-bottom:12px;cursor:pointer;" data-goto="rs3">
@@ -513,10 +516,31 @@
       ${tag}
     </button>`;
   }
+  // 2026-09-23 (permintaan user, "jika limit cukup, buatkan post test utk
+  // LTS2") — SAMA PERSIS pola rs3CardHTML() di atas, alur akses TERPISAH
+  // (lts2AccessStatus/lts2_access_requests), kartu SELALU tampil di beranda.
+  function lts2CardHTML() {
+    const isAdmin = state.persona === "ADMIN";
+    const st = state.lts2AccessStatus, res = state.lts2Result;
+    let tag = `<span class="tag tag--todo">Terkunci</span>`;
+    if (res && res.passed) tag = `<span class="tag tag--done">Lulus · ${esc(res.band)}</span>`;
+    else if (res) tag = `<span class="tag tag--todo">Belum Lulus · ${esc(res.band)}</span>`;
+    else if (isAdmin || st === "approved") tag = `<span class="tag tag--todo">Belum</span>`;
+    else if (st === "pending") tag = `<span class="tag tag--todo">Menunggu Admin</span>`;
+    return `<button type="button" class="card pad" style="width:100%;text-align:left;display:flex;align-items:center;gap:12px;margin-bottom:12px;cursor:pointer;" data-goto="lts2">
+      <span style="flex:none;width:42px;height:42px;border-radius:12px;display:grid;place-items:center;font-size:20px;background:linear-gradient(150deg,#93683F,color-mix(in srgb,#93683F 70%,#000));">🤝</span>
+      <span style="flex:1;min-width:0;">
+        <b style="font-family:var(--font-display);font-size:14px;display:block;">Lead To Serve 2 — Post-Test</b>
+        <span class="sub" style="margin-top:2px;display:block;">25 soal pilihan ganda — Servant Leadership</span>
+      </span>
+      ${tag}
+    </button>`;
+  }
   RENDER.home = function () {
     const unlocked = state.persona === "ADMIN" || state.accessStatus === "approved";
     el("homeBody").innerHTML = `
       ${rs3CardHTML()}
+      ${lts2CardHTML()}
       ${unlocked ? discCardHTML() + ssdCardHTML() + giftsCardHTML() : ""}
       <div class="divider-note">Serve Road Map — 5 bagian refleksi yang menggabungkan kekuatan, pengalaman, relasi, visi, dan rencana pelayananmu jadi satu peta pribadi. Diperbarui setiap tahun.</div>
       ${unlocked ? serveGridHTML() : lockedHomeHTML()}
@@ -649,6 +673,48 @@
     `;
   };
 
+  // ---- Lead To Serve 2 post-test (2026-09-23, "jika limit cukup, buatkan
+  // post test utk LTS2") — SAMA PERSIS pola RENDER.rs3 di atas. ----
+  RENDER.lts2 = function () {
+    const isAdmin = state.persona === "ADMIN";
+    const st = state.lts2AccessStatus;
+    const unlocked = isAdmin || st === "approved";
+    if (!unlocked) {
+      let body;
+      if (st === "pending") body = `<div style="font-size:34px;margin-bottom:8px;">⏳</div>
+        <b style="display:block;font-family:var(--font-display);font-size:16px;margin-bottom:6px;">Menunggu Persetujuan</b>
+        <p class="sub" style="margin:0;">Permintaan aksesmu sudah terkirim ke Admin — post-test akan terbuka begitu disetujui.</p>`;
+      else if (st === "rejected") body = `<div style="font-size:34px;margin-bottom:8px;">🔒</div>
+        <b style="display:block;font-family:var(--font-display);font-size:16px;margin-bottom:6px;">Permintaan Belum Disetujui</b>
+        <p class="sub" style="margin:0 0 14px;">Hubungi Admin/gembala untuk info lebih lanjut, atau ajukan lagi.</p>
+        <button type="button" class="btn btn--primary" id="reqLts2Btn">Ajukan Lagi</button>`;
+      else body = `<div style="font-size:34px;margin-bottom:8px;">🔒</div>
+        <b style="display:block;font-family:var(--font-display);font-size:16px;margin-bottom:6px;">Post-Test Terkunci</b>
+        <p class="sub" style="margin:0 0 14px;">Ajukan permintaan ke Admin untuk mulai mengerjakan post-test Lead To Serve 2.</p>
+        <button type="button" class="btn btn--primary" id="reqLts2Btn">Ajukan Akses</button>`;
+      el("lts2Body").innerHTML = `<div class="card pad" style="text-align:center;padding:40px 20px;">${body}</div>`;
+      return;
+    }
+    const answers = state.draft.lts2Answers;
+    const last = state.lts2Result;
+    const lastHTML = last ? `<div class="card pad" style="margin-bottom:14px;">
+      <b style="display:block;font-family:var(--font-display);font-size:14px;margin-bottom:4px;">Hasil Terakhir</b>
+      <p class="sub" style="margin:0;">${last.correct}/${last.total} benar (${last.score_pct}%) — <b>${esc(last.band)}</b>${last.passed ? " ✅ Lulus" : " — belum lulus, boleh coba lagi di bawah"}</p>
+    </div>` : "";
+    const rows = LTS2_QUESTIONS.map(q => `<div class="qrow">
+      <div class="qtext"><span class="qno">${q.no}.</span>${esc(q.text)}</div>
+      <div style="display:flex;flex-direction:column;gap:6px;">${["A", "B", "C", "D"].map(k => `<button type="button" class="btn ${answers[q.no] === k ? "btn--primary" : "btn--ghost"}" style="text-align:left;white-space:normal;height:auto;min-height:auto;padding:10px 12px;font-size:13px;font-weight:600;" data-lts2ans="${q.no}:${k}">${k}) ${esc(q.options[k])}</button>`).join("")}</div>
+    </div>`).join("");
+    const doneCount = LTS2_QUESTIONS.filter(q => answers[q.no]).length;
+    const done = lts2Complete(answers);
+    el("lts2Body").innerHTML = `
+      ${lastHTML}
+      <div class="divider-note">25 soal pilihan ganda tentang modul Lead To Serve 2 (Servant Leadership). Skor <b>Good</b> (50%) ke atas dianggap lulus &amp; otomatis menandai kelas Lead To Serve 2 selesai.</div>
+      ${rows}
+      <button class="btn btn--primary" style="margin-top:14px;" id="lts2Save" ${done ? "" : "disabled"}>${done ? "Kirim Jawaban" : `Jawab semua soal (${doneCount}/${LTS2_QUESTIONS.length})`}</button>
+    `;
+  };
+
   // ---- Dashboard (Admin) ----
   // 2026-09-22 (permintaan user, "pada admin1 di Lead To Serve akan melihat
   // dashboard secara keseluruhan... buatkan dashboard untuk akun admin1"):
@@ -696,6 +762,7 @@
       ${rejected.length ? `<h2 class="section">Ditolak (${rejected.length})</h2>
       <div class="card pad">${rejected.map(nameRow).join("")}</div>` : ""}
       ${rs3DashboardHTML()}
+      ${lts2DashboardHTML()}
     `;
   };
   // 2026-09-23 (permintaan user, "buatkan link dari kartu carousel Rock
@@ -733,6 +800,39 @@
       <div class="card pad">${rejected.map(nameRow).join("")}</div>` : ""}
     `;
   }
+  // 2026-09-23 (permintaan user, "jika limit cukup, buatkan post test utk
+  // LTS2") — bagian Dashboard KETIGA, SAMA PERSIS pola rs3DashboardHTML()
+  // di atas, data-attribute BEDA (data-lts2appreq dst).
+  function lts2DashboardHTML() {
+    const all = state.lts2AccessRequests || [];
+    const pending = all.filter(r => r.status === "pending");
+    const approved = all.filter(r => r.status === "approved");
+    const rejected = all.filter(r => r.status === "rejected");
+    const nameRow = (r, delBtn) => `<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line);">
+      <span class="avatar" style="width:30px;height:30px;font-size:11px;">${esc(initials((r.profile || {}).name))}</span>
+      <span style="flex:1;min-width:0;"><b style="font-size:12.5px;">${esc((r.profile || {}).name || "?")}</b></span>
+      ${delBtn ? `<button type="button" class="btn btn--sm btn--ghost" style="color:var(--bad);border-color:var(--bad);" data-lts2delreq="${esc(r.id)}">Hapus</button>` : ""}
+    </div>`;
+    return `
+      <h2 class="section" style="margin-top:26px;">Lead To Serve 2 — Post-Test</h2>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px;">
+        <div class="card pad sm" style="text-align:center;"><b style="display:block;font-family:var(--font-display);font-size:22px;color:var(--good);">${approved.length}</b><span class="sub">Disetujui</span></div>
+        <div class="card pad sm" style="text-align:center;"><b style="display:block;font-family:var(--font-display);font-size:22px;color:var(--warn);">${pending.length}</b><span class="sub">Menunggu</span></div>
+        <div class="card pad sm" style="text-align:center;"><b style="display:block;font-family:var(--font-display);font-size:22px;color:var(--bad);">${rejected.length}</b><span class="sub">Ditolak</span></div>
+      </div>
+      <h2 class="section">Menunggu Keputusan</h2>
+      ${pending.length ? pending.map(r => `<div class="card pad" style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+        <span class="avatar">${esc(initials((r.profile || {}).name))}</span>
+        <span style="flex:1;min-width:0;"><b style="font-size:13px;">${esc((r.profile || {}).name || "?")}</b><div class="sub">${esc((r.profile || {}).phone || "")}</div></span>
+        <button type="button" class="btn btn--sm btn--ghost" style="color:var(--bad);border-color:var(--bad);" data-lts2rejreq="${esc(r.id)}">Tolak</button>
+        <button type="button" class="btn btn--sm btn--primary" data-lts2appreq="${esc(r.id)}">Setujui</button>
+      </div>`).join("") : `<div class="empty">Tidak ada permintaan yang menunggu.</div>`}
+      <h2 class="section">Sudah Disetujui (${approved.length})</h2>
+      <div class="card pad">${approved.length ? approved.map(r => nameRow(r, true)).join("") : `<div class="empty" style="padding:10px;">Belum ada.</div>`}</div>
+      ${rejected.length ? `<h2 class="section">Ditolak (${rejected.length})</h2>
+      <div class="card pad">${rejected.map(nameRow).join("")}</div>` : ""}
+    `;
+  }
 
   // 2026-09-23 (permintaan user, "admin dapat melihat setiap hasil test dan
   // asesment dari setiap pengguna yang telah mengikuti discipleship
@@ -758,17 +858,19 @@
       if (["D", "I", "S", "C"].includes(filter)) return domLetter(r) === filter;
       if (filter === "rs3pass") return r.rs3 && r.rs3.passed;
       if (filter === "rs3fail") return r.rs3 && !r.rs3.passed;
+      if (filter === "lts2pass") return r.lts2 && r.lts2.passed;
+      if (filter === "lts2fail") return r.lts2 && !r.lts2.passed;
       return true;
     });
     const chip = (key, label) => `<button type="button" class="btn btn--sm ${filter === key ? "btn--primary" : "btn--ghost"}" data-resultsfilter="${key}">${esc(label)}</button>`;
     el("resultsBody").innerHTML = `
       <div class="divider-note">Hasil test &amp; asesmen semua peserta Discipleship Journey yang aksesnya sudah disetujui (${rows.length} orang).</div>
       <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;">
-        ${chip("all", "Semua")}${chip("D", "D tinggi")}${chip("I", "I tinggi")}${chip("S", "S tinggi")}${chip("C", "C tinggi")}${chip("rs3pass", "RS3 Lulus")}${chip("rs3fail", "RS3 Belum")}
+        ${chip("all", "Semua")}${chip("D", "D tinggi")}${chip("I", "I tinggi")}${chip("S", "S tinggi")}${chip("C", "C tinggi")}${chip("rs3pass", "RS3 Lulus")}${chip("rs3fail", "RS3 Belum")}${chip("lts2pass", "LTS2 Lulus")}${chip("lts2fail", "LTS2 Belum")}
       </div>
       ${filtered.length ? filtered.map(r => {
         const dl = domLetter(r);
-        const tags = [dl ? `DISC ${dl}` : null, r.gifts ? "Karunia ✓" : null, r.ssd ? "SSD ✓" : null, r.roadmap ? "S-E-R-V-E" : null, r.rs3 ? (r.rs3.passed ? "RS3 Lulus" : "RS3 Belum Lulus") : null].filter(Boolean);
+        const tags = [dl ? `DISC ${dl}` : null, r.gifts ? "Karunia ✓" : null, r.ssd ? "SSD ✓" : null, r.roadmap ? "S-E-R-V-E" : null, r.rs3 ? (r.rs3.passed ? "RS3 Lulus" : "RS3 Belum Lulus") : null, r.lts2 ? (r.lts2.passed ? "LTS2 Lulus" : "LTS2 Belum Lulus") : null].filter(Boolean);
         return `<button type="button" class="card pad" style="width:100%;text-align:left;display:flex;align-items:center;gap:10px;margin-bottom:8px;cursor:pointer;" data-viewresult="${esc(r.profileId)}">
           <span class="avatar">${esc(initials(r.name))}</span>
           <span style="flex:1;min-width:0;"><b style="font-size:13px;display:block;">${esc(r.name)}</b><span class="sub" style="display:block;margin-top:2px;">${tags.length ? esc(tags.join(" · ")) : "Belum ada hasil"}</span></span>
@@ -788,7 +890,7 @@
         <b style="font-family:var(--font-display);font-size:16px;">${esc(r.name)}</b>
         <div class="sub" style="margin-top:3px;">${esc(r.phone || "")}</div>
       </div>
-      ${resultBodyHTML(r.disc, r.ssd, r.gifts, (r.roadmap && r.roadmap.data) || {}, r.rs3, false)}
+      ${resultBodyHTML(r.disc, r.ssd, r.gifts, (r.roadmap && r.roadmap.data) || {}, r.rs3, r.lts2, false)}
     `;
   };
 
@@ -1119,10 +1221,14 @@
   // mengontrol satu-satunya perbedaan: tombol "Isi ..." (masuk akal cuma utk
   // diri sendiri) vs pesan polos "Belum diisi" (utk org lain, Admin tak bisa
   // mengisikan punya org lain).
-  function resultBodyHTML(disc, ssd, gifts, roadmapData, rs3, viewingSelf) {
+  function resultBodyHTML(disc, ssd, gifts, roadmapData, rs3, lts2, viewingSelf) {
     const n = buildHasilNarrative(disc, ssd, gifts, roadmapData);
     const rs3HTML = rs3 ? `<div class="card pad"><p class="sub" style="margin:0;">${rs3.correct}/${rs3.total} benar (${rs3.score_pct}%) — <b>${esc(rs3.band)}</b>${rs3.passed ? " ✅ Lulus" : " — belum lulus"}</p></div>`
       : `<div class="card pad"><p class="sub" style="margin:0 0 ${viewingSelf ? 8 : 0}px;">Post-test Rock Solid 3 belum diambil${viewingSelf ? "" : " oleh peserta ini"}.</p>${viewingSelf ? `<button type="button" class="btn btn--ghost" data-goto="rs3">Ke Post-Test RS3</button>` : ""}</div>`;
+    // 2026-09-23 ("jika limit cukup, buatkan post test utk LTS2") — SAMA
+    // PERSIS pola rs3HTML di atas.
+    const lts2HTML = lts2 ? `<div class="card pad"><p class="sub" style="margin:0;">${lts2.correct}/${lts2.total} benar (${lts2.score_pct}%) — <b>${esc(lts2.band)}</b>${lts2.passed ? " ✅ Lulus" : " — belum lulus"}</p></div>`
+      : `<div class="card pad"><p class="sub" style="margin:0 0 ${viewingSelf ? 8 : 0}px;">Post-test Lead To Serve 2 belum diambil${viewingSelf ? "" : " oleh peserta ini"}.</p>${viewingSelf ? `<button type="button" class="btn btn--ghost" data-goto="lts2">Ke Post-Test LTS2</button>` : ""}</div>`;
     const discHTML = !disc ? `<div class="card pad" style="margin-bottom:12px;"><p class="sub" style="margin:0 0 ${viewingSelf ? 8 : 0}px;">DISC belum diisi${viewingSelf ? "" : " oleh peserta ini"}.</p>${viewingSelf ? `<button type="button" class="btn btn--ghost" data-goto="disc">Isi DISC</button>` : ""}</div>` : (() => {
       const g1 = disc.graph1, g2 = disc.graph2, g3 = disc.graph3;
       const max12 = Math.max(1, ...DISC_LETTERS.map(k => g1[k]), ...DISC_LETTERS.map(k => g2[k]));
@@ -1159,6 +1265,8 @@
     return `
       <h2 class="section">Rock Solid 3 — Post-Test</h2>
       ${rs3HTML}
+      <h2 class="section">Lead To Serve 2 — Post-Test</h2>
+      ${lts2HTML}
       <h2 class="section">DISC — Kepribadian</h2>
       ${discHTML}
       <h2 class="section">Skala Sikap Disfungsional</h2>
@@ -1175,10 +1283,10 @@
     const printBtn = `<button type="button" class="btn btn--ghost" style="margin-top:12px;" id="printSheetBtn">🖨️ Cetak Ringkasan Serve Road Map</button>`;
     const pdfServeBtn = `<button type="button" class="btn btn--ghost" style="margin-top:8px;" id="pdfServeBtn">⬇️ Unduh PDF — Ringkasan S-E-R-V-E (1 Lembar)</button>`;
     const pdfHasilBtn = `<button type="button" class="btn btn--primary" style="margin-top:8px;" id="pdfHasilBtn">⬇️ Unduh PDF — Hasil Asesmen Lengkap</button>`;
-    if (!state.myDisc && !state.mySsd && !state.myGifts && !state.rs3Result) {
+    if (!state.myDisc && !state.mySsd && !state.myGifts && !state.rs3Result && !state.lts2Result) {
       el("hasilBody").innerHTML = `<div class="card pad" style="text-align:center;padding:40px 20px;">
         <b style="display:block;font-family:var(--font-display);font-size:16px;margin-bottom:6px;">Hasil Asesmen</b>
-        <p class="sub" style="margin:0 0 14px;">Isi DISC, SSD, Karunia Rohani, atau post-test Rock Solid 3 dulu untuk melihat hasilnya di sini secara detail.</p>
+        <p class="sub" style="margin:0 0 14px;">Isi DISC, SSD, Karunia Rohani, atau post-test Rock Solid 3/Lead To Serve 2 dulu untuk melihat hasilnya di sini secara detail.</p>
         <button type="button" class="btn btn--primary" data-goto="disc" style="margin-bottom:8px;">Isi DISC</button>
         <button type="button" class="btn btn--primary" data-goto="ssd" style="margin-bottom:8px;">Isi SSD</button>
         <button type="button" class="btn btn--ghost" data-goto="gifts">Isi Karunia Rohani</button>
@@ -1188,7 +1296,7 @@
     }
     el("hasilBody").innerHTML = `
       <div class="divider-note">Hasil asesmen ${CURRENT_YEAR} — kepribadian, keahlian, & area pelayanan yang tepat untukmu.</div>
-      ${resultBodyHTML(state.myDisc, state.mySsd, state.myGifts, state.draft.roadmapData, state.rs3Result, true)}
+      ${resultBodyHTML(state.myDisc, state.mySsd, state.myGifts, state.draft.roadmapData, state.rs3Result, state.lts2Result, true)}
       ${printBtn}${pdfServeBtn}${pdfHasilBtn}
     `;
   };
@@ -1225,6 +1333,12 @@
     else state.rs3AccessStatus = await DB.myRs3Status();
     state.rs3Result = await DB.myRs3Latest();
     state.draft.rs3Answers = {};
+    // 2026-09-23 ("jika limit cukup, buatkan post test utk LTS2") — SAMA
+    // PERSIS pola RS3 di atas.
+    if (state.persona === "ADMIN") state.lts2AccessRequests = await DB.listAllLts2AccessRequests();
+    else state.lts2AccessStatus = await DB.myLts2Status();
+    state.lts2Result = await DB.myLts2Latest();
+    state.draft.lts2Answers = {};
     // 2026-09-22 ("bangun assesment DISC..."): baris tahun INI saja (skema
     // "1 baris/tahun" — lihat supabase/v_lts_disc_results.sql). draft.discPicks
     // diisi ulang dari data tersimpan spy form DISC lanjut dari isian
@@ -1313,7 +1427,7 @@
     }
     if (T.closest("#pfLogout") || T.closest("#rolePill")) {
       await DB.logout().catch(() => {});
-      Object.assign(state, { page:"login", stack:[], persona:null, meId:null, myProfile:null, accessStatus:null, accessRequests:[], myDisc:null, myRoadmap:null, mySsd:null, myGifts:null, rs3AccessStatus:null, rs3AccessRequests:[], rs3Result:null, participantResults:null, viewProfileId:null, resultsFilter:"all", draft:{ discPicks:[], roadmapData:{}, ssdAnswers:{}, giftsAnswers:{}, rs3Answers:{} } });
+      Object.assign(state, { page:"login", stack:[], persona:null, meId:null, myProfile:null, accessStatus:null, accessRequests:[], myDisc:null, myRoadmap:null, mySsd:null, myGifts:null, rs3AccessStatus:null, rs3AccessRequests:[], rs3Result:null, lts2AccessStatus:null, lts2AccessRequests:[], lts2Result:null, participantResults:null, viewProfileId:null, resultsFilter:"all", draft:{ discPicks:[], roadmapData:{}, ssdAnswers:{}, giftsAnswers:{}, rs3Answers:{}, lts2Answers:{} } });
       show("login", { replace:true });
       return;
     }
@@ -1334,6 +1448,13 @@
     // atas, target status/halaman beda (rs3AccessStatus/RENDER.rs3).
     if (T.closest("#reqRs3Btn")) {
       try { await DB.requestRs3Access(); state.rs3AccessStatus = "pending"; toast("Permintaan terkirim ke Admin."); RENDER.rs3(); }
+      catch (err) { toast("Gagal mengajukan: " + (err.message || err)); }
+      return;
+    }
+    // 2026-09-23 ("jika limit cukup, buatkan post test utk LTS2") — SAMA
+    // PERSIS pola #reqRs3Btn di atas.
+    if (T.closest("#reqLts2Btn")) {
+      try { await DB.requestLts2Access(); state.lts2AccessStatus = "pending"; toast("Permintaan terkirim ke Admin."); RENDER.lts2(); }
       catch (err) { toast("Gagal mengajukan: " + (err.message || err)); }
       return;
     }
@@ -1469,6 +1590,31 @@
       return;
     }
 
+    // 2026-09-23 ("jika limit cukup, buatkan post test utk LTS2") — SAMA
+    // PERSIS pola appReq/rejReq/delReq RS3 di atas.
+    const lts2AppReq = T.closest("[data-lts2appreq]"), lts2RejReq = T.closest("[data-lts2rejreq]");
+    if (lts2AppReq || lts2RejReq) {
+      const id = (lts2AppReq || lts2RejReq).dataset.lts2appreq || (lts2AppReq || lts2RejReq).dataset.lts2rejreq;
+      try {
+        await DB.decideLts2AccessRequest(id, !!lts2AppReq);
+        toast(lts2AppReq ? "Permintaan disetujui." : "Permintaan ditolak.");
+        state.lts2AccessRequests = await DB.listAllLts2AccessRequests();
+        RENDER.dashboard();
+      } catch (err) { toast("Gagal: " + (err.message || err)); }
+      return;
+    }
+    const lts2DelReq = T.closest("[data-lts2delreq]");
+    if (lts2DelReq) {
+      if (!confirm("Hapus persetujuan akses orang ini? Post-test LTS2 akan terkunci lagi baginya sampai mengajukan ulang.")) return;
+      try {
+        await DB.deleteLts2AccessRequest(lts2DelReq.dataset.lts2delreq);
+        toast("Persetujuan dihapus.");
+        state.lts2AccessRequests = await DB.listAllLts2AccessRequests();
+        RENDER.dashboard();
+      } catch (err) { toast("Gagal: " + (err.message || err)); }
+      return;
+    }
+
     // ---- Roster hasil peserta (Admin) — 2026-09-23, "admin dapat melihat
     // setiap hasil test dan asesment dari setiap pengguna" ----
     const resFilter = T.closest("[data-resultsfilter]");
@@ -1492,6 +1638,26 @@
         state.rs3Result = await DB.myRs3Latest();
         toast(result.passed ? `Lulus (${result.bandLabel})! Kelas Rock Solid 3 sudah ditandai selesai.` : `Belum lulus (${result.bandLabel}) — boleh coba lagi.`);
         RENDER.rs3();
+      } catch (err) { toast("Gagal mengirim: " + (err.message || err)); }
+      return;
+    }
+
+    // ---- Lead To Serve 2 post-test: pilih jawaban (data-lts2ans) & kirim
+    // (2026-09-23) — SAMA PERSIS pola RS3 di atas. ----
+    const lts2Ans = T.closest("[data-lts2ans]");
+    if (lts2Ans) {
+      const [no, key] = lts2Ans.dataset.lts2ans.split(":");
+      state.draft.lts2Answers[no] = key;
+      RENDER.lts2();
+      return;
+    }
+    if (T.closest("#lts2Save")) {
+      const result = computeLts2Result(state.draft.lts2Answers);
+      try {
+        await DB.saveLts2Result({ answers:state.draft.lts2Answers, correct:result.correct, total:result.total, pct:result.pct, band:result.bandLabel, passed:result.passed });
+        state.lts2Result = await DB.myLts2Latest();
+        toast(result.passed ? `Lulus (${result.bandLabel})! Kelas Lead To Serve 2 sudah ditandai selesai.` : `Belum lulus (${result.bandLabel}) — boleh coba lagi.`);
+        RENDER.lts2();
       } catch (err) { toast("Gagal mengirim: " + (err.message || err)); }
       return;
     }
