@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Lead To Serve 1</title>
+<title>Discipleship Journey</title>
 <meta name="description" content="Asesmen pribadi jemaat — Strength, Experience, Relationship, Vision, Expansion (Serve Road Map).">
 <link rel="apple-touch-icon" href="./icon-192.png?v=1">
 <meta name="theme-color" content="#241F30">
@@ -228,8 +228,8 @@
 <div class="stage">
   <div class="masthead">
     <div class="eyebrow">Gereja JB3</div>
-    <h1>Lead To Serve 1</h1>
-    <p>Asesmen pribadi — kenali kekuatan, karunia, dan panggilanmu untuk melayani.</p>
+    <h1>Discipleship Journey</h1>
+    <p>Kelas &amp; asesmen pemuridan JB3 — Rock Solid, Lead To Serve, dan seterusnya, dalam satu tempat.</p>
   </div>
   <div class="phone">
     <div class="screen-frame">
@@ -238,7 +238,7 @@
           <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
         </button>
         <img class="appbar__logo" src="./logo-mark.png" alt="JB3 Church">
-        <div class="appbar__title" id="appbarTitle">Lead To Serve 1</div>
+        <div class="appbar__title" id="appbarTitle">Discipleship Journey</div>
         <button class="rolepill" id="rolePill">Keluar</button>
       </header>
       <div class="identitybar hidden" id="identityBar"></div>
@@ -339,7 +339,7 @@
     { key:"expansion", letter:"E", title:"Expansion", desc:"Rencana aksi 3-6 bulan", dot:"#93683F" },
   ];
   const META = {
-    home: { h:"Lead To Serve 1", tab:"home" },
+    home: { h:"Discipleship Journey", tab:"home" },
     disc: { h:"DISC", back:true },
     ssd: { h:"Skala Sikap Disfungsional", back:true },
     gifts: { h:"Karunia Rohani", back:true },
@@ -375,7 +375,7 @@
     if (!chromeOn) return;
     const meta = META[state.page] || {};
     el("appbar").setAttribute("data-back", meta.back ? "true" : "false");
-    el("appbarTitle").textContent = meta.h || "Lead To Serve 1";
+    el("appbarTitle").textContent = meta.h || "Discipleship Journey";
     const idb = el("identityBar");
     idb.innerHTML = `<span class="ib-ava">${esc(initials(state.myProfile && state.myProfile.name))}</span>
       <span class="ib-main"><span class="ib-name">${esc((state.myProfile || {}).name || "")}</span>
@@ -393,7 +393,7 @@
     el("loginBody").innerHTML = `
       <div class="login">
         <div class="brandmark"><img src="./logo-mark.png" alt="JB3 Church"><div class="churchname">JB3 Church</div></div>
-        <h2>Lead To Serve 1</h2>
+        <h2>Discipleship Journey</h2>
         <p class="sub muted">Masuk pakai akun JB3 HOME Tracker Anda</p>
         <div class="field"><label>No. HP atau Nama</label><input id="liId" type="text" placeholder="08123456789 atau nama"></div>
         <div class="field"><label>Kata Sandi</label><input id="liPw" type="password" placeholder="Kata sandi"></div>
@@ -676,8 +676,9 @@
       ${delBtn ? `<button type="button" class="btn btn--sm btn--ghost" style="color:var(--bad);border-color:var(--bad);" data-delreq="${esc(r.id)}">Hapus</button>` : ""}
     </div>`;
     el("dashboardBody").innerHTML = `
-      <div class="divider-note">Ringkasan status akses asesmen Lead To Serve 1 — seluruh jemaat.</div>
+      <div class="divider-note">Ringkasan status akses tiap kelas Discipleship Journey — seluruh jemaat.</div>
       <button type="button" class="btn btn--primary" style="margin-bottom:14px;" data-goto="results">📊 Lihat Semua Hasil Peserta →</button>
+      <h2 class="section">Lead To Serve 1</h2>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px;">
         <div class="card pad sm" style="text-align:center;"><b style="display:block;font-family:var(--font-display);font-size:22px;color:var(--good);">${approved.length}</b><span class="sub">Disetujui</span></div>
         <div class="card pad sm" style="text-align:center;"><b style="display:block;font-family:var(--font-display);font-size:22px;color:var(--warn);">${pending.length}</b><span class="sub">Menunggu</span></div>
