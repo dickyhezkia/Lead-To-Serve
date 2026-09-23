@@ -1080,7 +1080,7 @@
           <div class="psblock"><b>Strength Statement</b>${psLine(rd.strengthStatement)}</div>
         </div>
         <div class="pscol"><h2>EXPERIENCE</h2>
-          <div class="psblock"><b>SSD (skor)</b>${ssd ? SSD_CATEGORIES.map(c => `<div class="psline">${esc(c.name)}: ${ssd.scores[c.code]}</div>`).join("") : psLine("")}</div>
+          <div class="psblock"><b>SSD (skor)</b>${ssd ? SSD_CATEGORIES.map(c => `<div class="psline">${esc(c.name)} (${esc(c.nameEn)}): ${ssd.scores[c.code]}</div>`).join("") : psLine("")}</div>
           <div class="psblock"><b>Titik Tertinggi</b>${psLine(rd.highPoint)}</div>
           <div class="psblock"><b>Titik Terendah</b>${psLine(rd.lowPoint)}</div>
         </div>
@@ -1140,8 +1140,8 @@
     if (ssd) {
       SSD_CATEGORIES.forEach(c => {
         const v = ssd.scores[c.code];
-        if (v < 0) ssdLow.push({ code:c.code, name:c.name, score:v, text:SSD_INSIGHT[c.code].low });
-        else ssdHealthy.push({ code:c.code, name:c.name, score:v });
+        if (v < 0) ssdLow.push({ code:c.code, name:c.name, nameEn:c.nameEn, score:v, text:SSD_INSIGHT[c.code].low });
+        else ssdHealthy.push({ code:c.code, name:c.name, nameEn:c.nameEn, score:v });
       });
       ssdLow.sort((a, b) => a.score - b.score);
     }
@@ -1194,7 +1194,7 @@
       <div class="rpsub">Cocok untuk Pelayanan</div>${rpul(n.discProfile.ministryFit)}` : `<div class="rphead">DISC</div>${rpp("Belum diisi.")}`}
       ${state.mySsd ? `
       <div class="rphead">Skala Sikap Disfungsional (SSD)</div>
-      ${n.ssdLow.length ? rpul(n.ssdLow.map(c => `${c.name}: ${c.text}`)) : rpp("Semua kategori relatif sehat — tidak ada pola pikir disfungsional yang menonjol.")}` : `<div class="rphead">Skala Sikap Disfungsional (SSD)</div>${rpp("Belum diisi.")}`}
+      ${n.ssdLow.length ? rpul(n.ssdLow.map(c => `${c.name} (${c.nameEn}): ${c.text}`)) : rpp("Semua kategori relatif sehat — tidak ada pola pikir disfungsional yang menonjol.")}` : `<div class="rphead">Skala Sikap Disfungsional (SSD)</div>${rpp("Belum diisi.")}`}
       ${state.myGifts ? `
       <div class="rphead">Karunia Rohani</div>
       <div class="rpsub">Paling Menonjol</div>${rpul(n.giftsTop3.map(g => `${g.name} — ${g.def}`))}
@@ -1245,9 +1245,9 @@
       </div>`;
     })();
     const ssdHTML = !ssd ? `<div class="card pad"><p class="sub" style="margin:0 0 ${viewingSelf ? 8 : 0}px;">SSD belum diisi${viewingSelf ? "" : " oleh peserta ini"}.</p>${viewingSelf ? `<button type="button" class="btn btn--ghost" data-goto="ssd">Isi SSD</button>` : ""}</div>` :
-      `<div class="card pad">${SSD_CATEGORIES.map(c => bar(c.name, ssd.scores[c.code], -15, 15, (ssd.scores[c.code] < 0 ? "var(--bad)" : "var(--good)"))).join("")}
+      `<div class="card pad">${SSD_CATEGORIES.map(c => bar(`${c.name} (${c.nameEn})`, ssd.scores[c.code], -15, 15, (ssd.scores[c.code] < 0 ? "var(--bad)" : "var(--good)"))).join("")}
       ${n.ssdLow.length
-        ? `<div class="sub" style="margin-top:10px;">${n.ssdLow.map(c => `<div style="margin-bottom:6px;"><b>${esc(c.name)}:</b> ${esc(c.text)}</div>`).join("")}</div>`
+        ? `<div class="sub" style="margin-top:10px;">${n.ssdLow.map(c => `<div style="margin-bottom:6px;"><b>${esc(c.name)} (${esc(c.nameEn)}):</b> ${esc(c.text)}</div>`).join("")}</div>`
         : `<p class="sub" style="margin-top:8px;">Semua kategori relatif sehat — tidak ada pola pikir disfungsional yang menonjol.</p>`}</div>`;
     const giftsHTML = !gifts ? `<div class="card pad"><p class="sub" style="margin:0 0 ${viewingSelf ? 8 : 0}px;">Karunia Rohani belum diisi${viewingSelf ? "" : " oleh peserta ini"}.</p>${viewingSelf ? `<button type="button" class="btn btn--ghost" data-goto="gifts">Isi Karunia Rohani</button>` : ""}</div>` :
       (() => {
