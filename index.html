@@ -1122,6 +1122,39 @@
   // menggambar (paint) elemen yg baru saja innerHTML+class-nya diubah pada
   // saat html2canvas mulai "memotret", hasilnya jg bisa kosong/putih.
   const waitPaint = () => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+  // 2026-09-23 (bug nyata, user kirim FOTO: "masih terpotong" — kali ini
+  // sisi KANAN kolom/baris terpotong rata, BUKAN soal halaman spt dugaan
+  // sebelumnya): akar masalah SEBENARNYA — html2canvas dgn opsi eksplisit
+  // `windowWidth` (dipakai spy holder yg lebar 900/1400px tak kepotong)
+  // me-render "jendela virtual" seukuran itu (900/1400px) utk MENGKLON
+  // SELURUH dokumen, termasuk `.phone`/`.screen-frame` yg LEBARNYA diatur
+  // @media responsif (bukan px tetap) — pada jendela virtual selebar
+  // 900-1400px, breakpoint `@media (max-width:480px)` (mode HP, `.phone{
+  // width:100%}`) TAK LAGI berlaku, jatuh ke `@media (min-width:640px)`
+  // (mode "simulator", `.phone{width:clamp(390px,40vw,520px)}`) — jadi
+  // `.screen-frame` DI DALAM KLON cuma ~390-520px, BUKAN 900-1400px sesuai
+  // holder. `#printSheetOverlay` (position:absolute;inset:0, anak
+  // .screen-frame) ikut kepotong ke lebar itu, & `overflow-x:auto`-nya
+  // (+ overflow:hidden bawaan .screen-frame) memotong SISA holder yg lebih
+  // lebar dari situ — persis pola "terpotong rata di kanan" di foto.
+  // Diperbaiki: SELAMA potret saja, `#printSheetOverlay` dipaksa lebar PERSIS
+  // sama dgn holder (px eksplisit, BUKAN inset:0 yg ikut lebar .screen-frame
+  // yg berubah-ubah di klon) + overflow SEMUA ancestor (.screen-frame +
+  // overlay sendiri) dibuka jd visible — dikembalikan apapun hasilnya.
+  const captureWidthUnlock = contentWidth => {
+    const overlay = el("printSheetOverlay");
+    const sf = document.querySelector(".screen-frame");
+    const prev = { w:overlay.style.width, l:overlay.style.left, r:overlay.style.right, oo:overlay.style.overflow, sfo:sf.style.overflow };
+    overlay.style.width = contentWidth;
+    overlay.style.left = "0";
+    overlay.style.right = "auto";
+    overlay.style.overflow = "visible";
+    sf.style.overflow = "visible";
+    return () => {
+      overlay.style.width = prev.w; overlay.style.left = prev.l; overlay.style.right = prev.r;
+      overlay.style.overflow = prev.oo; sf.style.overflow = prev.sfo;
+    };
+  };
   // 2026-09-23 (bug "pdf masih kosong", MASIH terjadi utk 2 lembar berbeda
   // stlh 2x percobaan sebelumnya — lihat catatan panjang di CSS
   // .printsheetoverlay utk diagnosa akarnya): wadah potret (#printSheetBody)
@@ -1132,10 +1165,12 @@
     if (!window.html2pdf) { toast("Fitur unduh PDF belum siap, coba lagi sebentar."); return; }
     const overlay = el("printSheetOverlay");
     const holder = el("printSheetBody");
+    const contentWidth = orientation === "landscape" ? "1400px" : "900px";
     holder.innerHTML = bodyHtml;
     holder.classList.add("printsheet--capture");
-    holder.style.width = orientation === "landscape" ? "1400px" : "900px";
+    holder.style.width = contentWidth;
     overlay.classList.add("active");
+    const relock = captureWidthUnlock(contentWidth);
     try {
       toast("Menyiapkan PDF…");
       await waitPaint();
@@ -1150,6 +1185,7 @@
     } catch (err) {
       toast("Gagal membuat PDF: " + (err.message || err));
     } finally {
+      relock();
       overlay.classList.remove("active");
       holder.classList.remove("printsheet--capture");
       holder.style.width = "";
@@ -1171,10 +1207,12 @@
     if (!(navigator.share && navigator.canShare)) { toast("Perangkat/browser ini tidak mendukung fitur Bagikan — gunakan tombol Unduh PDF, lalu bagikan filenya secara manual."); return; }
     const overlay = el("printSheetOverlay");
     const holder = el("printSheetBody");
+    const contentWidth = orientation === "landscape" ? "1400px" : "900px";
     holder.innerHTML = bodyHtml;
     holder.classList.add("printsheet--capture");
-    holder.style.width = orientation === "landscape" ? "1400px" : "900px";
+    holder.style.width = contentWidth;
     overlay.classList.add("active");
+    const relock = captureWidthUnlock(contentWidth);
     try {
       toast("Menyiapkan PDF untuk dibagikan…");
       await waitPaint();
@@ -1193,6 +1231,7 @@
       if (err && err.name === "AbortError") return;   // pengguna batal di dialog share — bukan error, diam saja
       toast("Gagal menyiapkan/membagikan PDF: " + (err.message || err));
     } finally {
+      relock();
       overlay.classList.remove("active");
       holder.classList.remove("printsheet--capture");
       holder.style.width = "";
