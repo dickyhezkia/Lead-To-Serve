@@ -280,6 +280,7 @@
           <section class="page" data-page="results"><div id="resultsBody"></div></section>
           <section class="page" data-page="resultdetail"><div id="resultdetailBody"></div></section>
           <section class="page" data-page="serveview"><div id="serveviewBody"></div></section>
+          <section class="page" data-page="hasilview"><div id="hasilviewBody"></div></section>
           <section class="page" data-page="hasil"><div id="hasilBody"></div></section>
           <section class="page" data-page="dashboard"><div id="dashboardBody"></div></section>
           <section class="page" data-page="profile"><div id="profileBody"></div></section>
@@ -376,7 +377,8 @@
     lts2: { h:"Lead To Serve 2 — Post-Test", back:true },
     results: { h:"Hasil Peserta", back:true },
     resultdetail: { h:"Hasil Peserta", back:true },
-    serveview: { h:"Serve Road Map", back:true },
+    serveview: { h:"LTS 1 Road Map", back:true },
+    hasilview: { h:"Hasil Asesmen Lengkap", back:true },
     strength: { h:"Strength", back:true },
     experience: { h:"Experience", back:true },
     relationship: { h:"Relationship", back:true },
@@ -1242,8 +1244,25 @@
       <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:12px;border:1px solid var(--line);">
         <div class="printsheet" style="display:block;width:1400px;">${printSheetHTML()}</div>
       </div>
-      <button type="button" class="btn btn--ghost" style="margin-top:14px;" id="pdfServeBtn">⬇️ Unduh PDF — Ringkasan S-E-R-V-E (1 Lembar)</button>
-      <button type="button" class="btn btn--ghost" style="margin-top:8px;" id="shareServeBtn">🔗 Bagikan PDF — Ringkasan S-E-R-V-E</button>
+      <button type="button" class="btn btn--ghost" style="margin-top:14px;" id="pdfServeBtn">⬇️ Unduh PDF — LTS 1 Road Map</button>
+      <button type="button" class="btn btn--ghost" style="margin-top:8px;" id="shareServeBtn">🔗 Bagikan PDF — LTS 1 Road Map</button>
+    `;
+  };
+
+  // 2026-09-23 (permintaan user, "Lihat Hasil Asesmen Lengkap tambahkan
+  // tombol share dan download"): SAMA PERSIS pola RENDER.serveview di atas
+  // (lihat sebelum diunduh, bukan lewat @media print) — cuma isinya narasi
+  // hasilReportHTML() (portrait, 900px) bukan lembar 5-kolom printSheetHTML()
+  // (landscape, 1400px). #pdfHasilBtn/#shareHasilBtn (handler sudah ada,
+  // dipakai jg oleh tombol lama di RENDER.hasil).
+  RENDER.hasilview = function () {
+    el("hasilviewBody").innerHTML = `
+      <div class="divider-note">Pratinjau lembar Hasil Asesmen lengkap — DISC, SSD, Karunia Rohani, Serve Road Map, & rekomendasi.</div>
+      <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:12px;border:1px solid var(--line);">
+        <div class="printsheet" style="display:block;width:900px;">${hasilReportHTML(buildHasilNarrative())}</div>
+      </div>
+      <button type="button" class="btn btn--ghost" style="margin-top:14px;" id="pdfHasilBtn">⬇️ Unduh PDF — Hasil Asesmen Lengkap</button>
+      <button type="button" class="btn btn--ghost" style="margin-top:8px;" id="shareHasilBtn">🔗 Bagikan PDF — Hasil Asesmen Lengkap</button>
     `;
   };
 
@@ -1427,15 +1446,27 @@
       ${recoHTML}
     `;
   }
+  // 2026-09-23 (permintaan user, "untuk Hasil kamu buat seperti ini: Lihat
+  // LTS 1 Road Map tambahkan tombol share dan download, Lihat Hasil Asesmen
+  // Lengkap tambahkan tombol share dan download"): dulu 5 tombol lepas
+  // (Lihat + Unduh Serve + Bagikan Serve + Unduh Hasil + Bagikan Hasil)
+  // ditumpuk mendatar — SEKARANG 2 KARTU, masing2 utk 1 lembar (LTS 1 Road
+  // Map / Hasil Asesmen Lengkap), isinya tombol Lihat (masuk ke halaman
+  // pratinjau RENDER.serveview/RENDER.hasilview yg py tombol Unduh+Bagikan
+  // SENDIRI juga) + Unduh + Bagikan LANGSUNG dari sini juga (2x akses ke
+  // fungsi yg sama, biar tak perlu masuk halaman Lihat dulu kalau cuma mau
+  // unduh/bagikan).
   RENDER.hasil = function () {
-    const printBtn = `<button type="button" class="btn btn--ghost" style="margin-top:12px;" data-goto="serveview">📄 Lihat Serve Road Map</button>`;
-    const pdfServeBtn = `<button type="button" class="btn btn--ghost" style="margin-top:8px;" id="pdfServeBtn">⬇️ Unduh PDF — Ringkasan S-E-R-V-E (1 Lembar)</button>`;
-    const pdfHasilBtn = `<button type="button" class="btn btn--primary" style="margin-top:8px;" id="pdfHasilBtn">⬇️ Unduh PDF — Hasil Asesmen Lengkap</button>`;
-    // 2026-09-23 (permintaan user, "...bisa diunduh dan share dalam bentuk
-    // pdf") — tombol Bagikan, sama isinya dgn tombol Unduh di atasnya
-    // masing2, cuma beda aksi (share langsung, bukan simpan file).
-    const shareServeBtn = `<button type="button" class="btn btn--ghost" style="margin-top:8px;" id="shareServeBtn">🔗 Bagikan PDF — Ringkasan S-E-R-V-E</button>`;
-    const shareHasilBtn = `<button type="button" class="btn btn--ghost" style="margin-top:8px;" id="shareHasilBtn">🔗 Bagikan PDF — Hasil Asesmen Lengkap</button>`;
+    const serveGroup = `<div class="card pad" style="margin-top:14px;">
+      <button type="button" class="btn btn--primary" data-goto="serveview">📄 Lihat LTS 1 Road Map</button>
+      <button type="button" class="btn btn--ghost" style="margin-top:8px;" id="pdfServeBtn">⬇️ Unduh PDF — LTS 1 Road Map</button>
+      <button type="button" class="btn btn--ghost" style="margin-top:8px;" id="shareServeBtn">🔗 Bagikan PDF — LTS 1 Road Map</button>
+    </div>`;
+    const hasilGroup = `<div class="card pad" style="margin-top:12px;">
+      <button type="button" class="btn btn--primary" data-goto="hasilview">📄 Lihat Hasil Asesmen Lengkap</button>
+      <button type="button" class="btn btn--ghost" style="margin-top:8px;" id="pdfHasilBtn">⬇️ Unduh PDF — Hasil Asesmen Lengkap</button>
+      <button type="button" class="btn btn--ghost" style="margin-top:8px;" id="shareHasilBtn">🔗 Bagikan PDF — Hasil Asesmen Lengkap</button>
+    </div>`;
     if (!state.myDisc && !state.mySsd && !state.myGifts && !state.rs3Result && !state.lts2Result) {
       el("hasilBody").innerHTML = `<div class="card pad" style="text-align:center;padding:40px 20px;">
         <b style="display:block;font-family:var(--font-display);font-size:16px;margin-bottom:6px;">Hasil Asesmen</b>
@@ -1444,13 +1475,13 @@
         <button type="button" class="btn btn--primary" data-goto="ssd" style="margin-bottom:8px;">Isi SSD</button>
         <button type="button" class="btn btn--ghost" data-goto="gifts">Isi Karunia Rohani</button>
       </div>
-      ${printBtn}${pdfServeBtn}${shareServeBtn}`;
+      ${serveGroup}`;
       return;
     }
     el("hasilBody").innerHTML = `
       <div class="divider-note">Hasil asesmen ${CURRENT_YEAR} — kepribadian, keahlian, & area pelayanan yang tepat untukmu.</div>
       ${resultBodyHTML(state.myDisc, state.mySsd, state.myGifts, state.draft.roadmapData, state.rs3Result, state.lts2Result, true)}
-      ${printBtn}${pdfServeBtn}${shareServeBtn}${pdfHasilBtn}${shareHasilBtn}
+      ${serveGroup}${hasilGroup}
     `;
   };
 
@@ -1679,7 +1710,7 @@
     // — nama file disertai nama peserta + tahun spy mudah dibedakan kalau
     // disimpan beberapa tahun berturut-turut.
     if (T.closest("#pdfServeBtn")) {
-      downloadPdf(printSheetHTML(), `Serve-Road-Map-${safeFileName((state.myProfile || {}).name)}-${CURRENT_YEAR}.pdf`, "landscape");
+      downloadPdf(printSheetHTML(), `LTS1-Road-Map-${safeFileName((state.myProfile || {}).name)}-${CURRENT_YEAR}.pdf`, "landscape");
       return;
     }
     if (T.closest("#pdfHasilBtn")) {
@@ -1690,7 +1721,7 @@
     // pdf") — SAMA PERSIS isinya dgn #pdfServeBtn/#pdfHasilBtn di atas, cuma
     // pakai sharePdf() (dialog Bagikan OS) bukan downloadPdf() (simpan file).
     if (T.closest("#shareServeBtn")) {
-      sharePdf(printSheetHTML(), `Serve-Road-Map-${safeFileName((state.myProfile || {}).name)}-${CURRENT_YEAR}.pdf`, "landscape");
+      sharePdf(printSheetHTML(), `LTS1-Road-Map-${safeFileName((state.myProfile || {}).name)}-${CURRENT_YEAR}.pdf`, "landscape");
       return;
     }
     if (T.closest("#shareHasilBtn")) {
