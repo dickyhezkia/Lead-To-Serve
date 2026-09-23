@@ -63,14 +63,27 @@ window.LTS = (function () {
   // diperhatikan/diperbaiki (lihat SSD_SCALE — skala dibalik: setuju dgn
   // pernyataan disfungsional = skor negatif). "low" = teks utk skor negatif,
   // "healthy" = teks generik utk skor 0/positif (relatif sehat di area itu).
+  // 2026-09-23 (permintaan user, "berikan penjelasan/keterangan hasil SSD" →
+  // dipilih "penjelasan tiap kategori, bukan cuma yang rendah"): tiap
+  // kategori SEKARANG jg py `def` — deskripsi NETRAL apa yg diukur kategori
+  // itu (BUKAN cuma peringatan spt `low`) — supaya ditampilkan utk SEMUA
+  // kategori (sehat maupun rendah), bukan cuma yg skornya negatif spt
+  // sebelumnya (lihat resultBodyHTML/hasilReportHTML di index.html).
   const SSD_INSIGHT = {
-    A: { low: "Skor di area Pengakuan menunjukkan kecenderungan menilai diri terlalu bergantung pada pengakuan/penerimaan orang lain — perlu belajar menemukan rasa aman dari identitas di dalam Kristus, bukan dari validasi orang lain." },
-    B: { low: "Skor di area Cinta menunjukkan kecenderungan menganggap dicintai/disayangi sebagai syarat mutlak untuk bahagia — perlu belajar bahwa kasih Tuhan tidak bersyarat, dan kehilangan kasih sesama bukan akhir dari segalanya." },
-    C: { low: "Skor di area Keberhasilan menunjukkan kecenderungan menilai diri terlalu bergantung pada pencapaian/prestasi — perlu belajar bahwa nilai diri tidak ditentukan oleh keberhasilan semata." },
-    D: { low: "Skor di area Perfeksionisme menunjukkan kecenderungan menuntut kesempurnaan dari diri sendiri secara berlebihan — perlu belajar menerima diri yang sedang bertumbuh, tidak harus selalu sempurna." },
-    E: { low: "Skor di area Perasaan Berhak menunjukkan kecenderungan merasa berhak diperlakukan istimewa atau dipenuhi keinginannya — perlu belajar rendah hati & bersyukur dengan apa yang ada." },
-    F: { low: "Skor di area Omnipotensi menunjukkan kecenderungan merasa harus mampu mengendalikan/menanggung segala sesuatu sendirian — perlu belajar menyerahkan kendali dan bersandar pada Tuhan & sesama." },
-    G: { low: "Skor di area Otonomi menunjukkan kecenderungan merasa kebahagiaan bergantung sepenuhnya pada kendali penuh atas hidupnya sendiri — perlu belajar bahwa hidup yang berserah bukan berarti kehilangan makna." },
+    A: { def: "Mengukur seberapa besar rasa aman & nilai diri Anda bergantung pada pengakuan/penerimaan dari orang lain.",
+      low: "Skor di area Pengakuan menunjukkan kecenderungan menilai diri terlalu bergantung pada pengakuan/penerimaan orang lain — perlu belajar menemukan rasa aman dari identitas di dalam Kristus, bukan dari validasi orang lain." },
+    B: { def: "Mengukur seberapa besar kebahagiaan Anda bergantung pada dicintai/disayangi oleh orang lain.",
+      low: "Skor di area Cinta menunjukkan kecenderungan menganggap dicintai/disayangi sebagai syarat mutlak untuk bahagia — perlu belajar bahwa kasih Tuhan tidak bersyarat, dan kehilangan kasih sesama bukan akhir dari segalanya." },
+    C: { def: "Mengukur seberapa besar nilai diri Anda bergantung pada pencapaian/keberhasilan/prestasi.",
+      low: "Skor di area Keberhasilan menunjukkan kecenderungan menilai diri terlalu bergantung pada pencapaian/prestasi — perlu belajar bahwa nilai diri tidak ditentukan oleh keberhasilan semata." },
+    D: { def: "Mengukur seberapa besar tuntutan Anda akan kesempurnaan dari diri sendiri.",
+      low: "Skor di area Perfeksionisme menunjukkan kecenderungan menuntut kesempurnaan dari diri sendiri secara berlebihan — perlu belajar menerima diri yang sedang bertumbuh, tidak harus selalu sempurna." },
+    E: { def: "Mengukur seberapa besar Anda merasa berhak diperlakukan istimewa atau dipenuhi keinginannya.",
+      low: "Skor di area Perasaan Berhak menunjukkan kecenderungan merasa berhak diperlakukan istimewa atau dipenuhi keinginannya — perlu belajar rendah hati & bersyukur dengan apa yang ada." },
+    F: { def: "Mengukur seberapa besar Anda merasa harus mampu mengendalikan/menanggung segala sesuatu sendirian.",
+      low: "Skor di area Omnipotensi menunjukkan kecenderungan merasa harus mampu mengendalikan/menanggung segala sesuatu sendirian — perlu belajar menyerahkan kendali dan bersandar pada Tuhan & sesama." },
+    G: { def: "Mengukur seberapa besar kebahagiaan Anda bergantung pada kendali penuh atas hidup Anda sendiri.",
+      low: "Skor di area Otonomi menunjukkan kecenderungan merasa kebahagiaan bergantung sepenuhnya pada kendali penuh atas hidupnya sendiri — perlu belajar bahwa hidup yang berserah bukan berarti kehilangan makna." },
     healthy: "Skor Anda di area ini relatif sehat — tidak menunjukkan pola pikir disfungsional yang signifikan.",
   };
 

@@ -1275,8 +1275,8 @@
     if (ssd) {
       SSD_CATEGORIES.forEach(c => {
         const v = ssd.scores[c.code];
-        if (v < 0) ssdLow.push({ code:c.code, name:c.name, nameEn:c.nameEn, score:v, text:SSD_INSIGHT[c.code].low });
-        else ssdHealthy.push({ code:c.code, name:c.name, nameEn:c.nameEn, score:v });
+        if (v < 0) ssdLow.push({ code:c.code, name:c.name, nameEn:c.nameEn, score:v, def:SSD_INSIGHT[c.code].def, text:SSD_INSIGHT[c.code].low });
+        else ssdHealthy.push({ code:c.code, name:c.name, nameEn:c.nameEn, score:v, def:SSD_INSIGHT[c.code].def });
       });
       ssdLow.sort((a, b) => a.score - b.score);
     }
@@ -1329,7 +1329,10 @@
       <div class="rpsub">Cocok untuk Pelayanan</div>${rpul(n.discProfile.ministryFit)}` : `<div class="rphead">DISC</div>${rpp("Belum diisi.")}`}
       ${state.mySsd ? `
       <div class="rphead">Skala Sikap Disfungsional (SSD)</div>
-      ${n.ssdLow.length ? rpul(n.ssdLow.map(c => `${c.name} (${c.nameEn}): ${c.text}`)) : rpp("Semua kategori relatif sehat — tidak ada pola pikir disfungsional yang menonjol.")}` : `<div class="rphead">Skala Sikap Disfungsional (SSD)</div>${rpp("Belum diisi.")}`}
+      ${SSD_CATEGORIES.map(c => {
+        const v = state.mySsd.scores[c.code], isLow = v < 0, info = SSD_INSIGHT[c.code];
+        return `<div class="rpsub">${esc(c.name)} (${esc(c.nameEn)})</div>${rpp(info.def)}${isLow ? rpp(info.low) : ""}`;
+      }).join("")}` : `<div class="rphead">Skala Sikap Disfungsional (SSD)</div>${rpp("Belum diisi.")}`}
       ${state.myGifts ? `
       <div class="rphead">Karunia Rohani</div>
       <div class="rpsub">Paling Menonjol</div>${rpul(n.giftsTop3.map(g => `${g.name} — ${g.def}`))}
@@ -1379,11 +1382,21 @@
         <div class="sub" style="margin-top:6px;"><b>Cocok untuk pelayanan:</b> ${n.discProfile.ministryFit.map(esc).join(" · ")}</div>
       </div>`;
     })();
+    // 2026-09-23 (permintaan user, "berikan penjelasan/keterangan hasil SSD"
+    // → "penjelasan tiap kategori, bukan cuma yang rendah"): SEBELUMNYA teks
+    // penjelasan HANYA muncul utk kategori berskor negatif (n.ssdLow) — kini
+    // SETIAP kategori (sehat maupun rendah) dapat deskripsi netral apa yg
+    // diukur (SSD_INSIGHT[code].def), ditambah catatan peringatan KHUSUS di
+    // bawahnya kalau skornya negatif (SSD_INSIGHT[code].low).
     const ssdHTML = !ssd ? `<div class="card pad"><p class="sub" style="margin:0 0 ${viewingSelf ? 8 : 0}px;">SSD belum diisi${viewingSelf ? "" : " oleh peserta ini"}.</p>${viewingSelf ? `<button type="button" class="btn btn--ghost" data-goto="ssd">Isi SSD</button>` : ""}</div>` :
-      `<div class="card pad">${SSD_CATEGORIES.map(c => bar(`${c.name} (${c.nameEn})`, ssd.scores[c.code], -15, 15, (ssd.scores[c.code] < 0 ? "var(--bad)" : "var(--good)"))).join("")}
-      ${n.ssdLow.length
-        ? `<div class="sub" style="margin-top:10px;">${n.ssdLow.map(c => `<div style="margin-bottom:6px;"><b>${esc(c.name)} (${esc(c.nameEn)}):</b> ${esc(c.text)}</div>`).join("")}</div>`
-        : `<p class="sub" style="margin-top:8px;">Semua kategori relatif sehat — tidak ada pola pikir disfungsional yang menonjol.</p>`}</div>`;
+      `<div class="card pad">${SSD_CATEGORIES.map(c => {
+        const v = ssd.scores[c.code], isLow = v < 0, info = SSD_INSIGHT[c.code];
+        return `<div style="margin-bottom:14px;">
+          ${bar(`${c.name} (${c.nameEn})`, v, -15, 15, isLow ? "var(--bad)" : "var(--good)")}
+          <p class="sub" style="margin:4px 0 0;">${esc(info.def)}</p>
+          ${isLow ? `<p class="sub" style="margin:4px 0 0;color:var(--bad);">${esc(info.low)}</p>` : ""}
+        </div>`;
+      }).join("")}</div>`;
     const giftsHTML = !gifts ? `<div class="card pad"><p class="sub" style="margin:0 0 ${viewingSelf ? 8 : 0}px;">Karunia Rohani belum diisi${viewingSelf ? "" : " oleh peserta ini"}.</p>${viewingSelf ? `<button type="button" class="btn btn--ghost" data-goto="gifts">Isi Karunia Rohani</button>` : ""}</div>` :
       (() => {
         const sc = gifts.scores;
