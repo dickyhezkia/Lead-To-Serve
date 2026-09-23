@@ -219,9 +219,18 @@
   .printsheet .rpul { font-size: 10px; line-height: 1.55; margin: 0 0 8px 16px; padding: 0; }
   /* Kontainer #printSheetBody normalnya display:none (lihat .printsheet di
      atas) — spy html2pdf.js (html2canvas) bisa "memotret" kontennya, harus
-     dirender nyata dulu (BUKAN display:none) tapi digeser jauh di luar layar
-     spy tak kelihatan berkedip di layar pengguna. */
-  .printsheet--capture { display: block !important; position: fixed !important; left: -10000px !important; top: 0 !important; }
+     dirender nyata dulu (BUKAN display:none).
+     2026-09-23 (bug nyata, user: "pdf bisa didownload tapi kosong"): versi
+     LAMA menggeser wadah ini `left:-10000px` (jauh di luar layar) — html2canvas
+     TERNYATA sering gagal/blank kalau elemen sumbernya ditaruh sejauh itu di
+     luar viewport (masalah umum yg dikenal luas pada library ini, terkait cara
+     ia menghitung ulang posisi scroll/viewport saat "memotret"). Diperbaiki:
+     wadah SEKARANG ditaruh SUNGGUH di dalam viewport (position:fixed;
+     top:0;left:0, z-index sangat tinggi, background putih solid) — SEMPAT
+     kelihatan sekilas (~1 detik) menutupi layar selagi PDF disiapkan, lalu
+     otomatis kembali disembunyikan (lihat downloadPdf()/sharePdf()) — trade-off
+     kecil demi hasil capture yg BENAR, jauh lebih penting drpd bebas-kedip. */
+  .printsheet--capture { display: block !important; position: fixed !important; top: 0 !important; left: 0 !important; z-index: 99999 !important; background: #fff !important; }
 </style>
 </head>
 <body>
@@ -1064,9 +1073,14 @@
   // "memotret" #printSheetBody jadi canvas lalu jadi file PDF yg LANGSUNG
   // terunduh (bukan lewat dialog print browser spt tombol Cetak yg sudah
   // ada). #printSheetBody normalnya display:none (dipakai jg oleh tombol
-  // Cetak yg mengandalkan @media print) — di sini digeser ke luar layar dulu
-  // (class .printsheet--capture) spy html2canvas bisa merender kontennya
-  // tanpa berkedip terlihat pengguna, lalu dikembalikan spt semula.
+  // Cetak yg mengandalkan @media print) — ditampilkan sungguhan sekilas
+  // (class .printsheet--capture, lihat CSS + catatan bug "pdf kosong" di
+  // sana) spy html2canvas bisa merender kontennya, lalu dikembalikan spt
+  // semula. `waitPaint()` (2 x requestAnimationFrame) dipanggil SEBELUM
+  // html2pdf mulai — tanpa ini, browser kadang belum sempat benar2
+  // menggambar (paint) elemen yg baru saja innerHTML+class-nya diubah pada
+  // saat html2canvas mulai "memotret", hasilnya jg bisa kosong/putih.
+  const waitPaint = () => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
   async function downloadPdf(bodyHtml, filename, orientation) {
     if (!window.html2pdf) { toast("Fitur unduh PDF belum siap, coba lagi sebentar."); return; }
     const holder = el("printSheetBody");
@@ -1075,11 +1089,12 @@
     holder.style.width = orientation === "landscape" ? "1400px" : "900px";
     try {
       toast("Menyiapkan PDF…");
+      await waitPaint();
       await window.html2pdf().set({
         margin: 8,
         filename,
         image: { type: "jpeg", quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff" },
+        html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff", scrollX: 0, scrollY: 0, windowWidth: holder.scrollWidth, windowHeight: holder.scrollHeight },
         jsPDF: { unit: "mm", format: "a4", orientation },
         pagebreak: { mode: ["css", "legacy"] },
       }).from(holder).save();
@@ -1110,11 +1125,12 @@
     holder.style.width = orientation === "landscape" ? "1400px" : "900px";
     try {
       toast("Menyiapkan PDF untuk dibagikan…");
+      await waitPaint();
       const blob = await window.html2pdf().set({
         margin: 8,
         filename,
         image: { type: "jpeg", quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff" },
+        html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff", scrollX: 0, scrollY: 0, windowWidth: holder.scrollWidth, windowHeight: holder.scrollHeight },
         jsPDF: { unit: "mm", format: "a4", orientation },
         pagebreak: { mode: ["css", "legacy"] },
       }).from(holder).outputPdf("blob");
