@@ -585,9 +585,33 @@
     }
     return "";
   }
+  // 2026-09-23 (permintaan user, "relationship itu berisi test DISC; dengan
+  // mengetahui kepribadian diri sendiri dan orang lain maka akan buat kita
+  // 3A (aware accept adapt) satu sama lain"): Relationship khusus dapat blok
+  // pengantar yg mengaitkan ke hasil tes DISC (bukan instrumen terpisah tanpa
+  // konteks) — kalau DISC tahun ini belum diisi, tombol ke sana; kalau sudah,
+  // ringkasan singkat huruf dominan ditampilkan di sini juga.
+  function relationshipIntroHTML() {
+    const disc = state.myDisc;
+    if (!disc) {
+      return `<div class="card pad" style="margin-bottom:14px;">
+        <b style="display:block;font-family:var(--font-display);font-size:14px;margin-bottom:4px;">Kenali dulu gaya kepribadianmu</b>
+        <p class="sub" style="margin:0 0 10px;">Relationship dimulai dari tes DISC — dengan mengetahui kepribadian diri sendiri & orang lain, kita bisa saling 3A (Aware, Accept, Adapt) dan membangun relasi yang baik demi mencapai visi bersama.</p>
+        <button type="button" class="btn btn--primary" data-goto="disc">Isi Tes DISC ${CURRENT_YEAR}</button>
+      </div>`;
+    }
+    const g = disc.graph3 || disc.graph1;
+    const dom = g ? ["D", "I", "S", "C"].reduce((a, b) => (g[b] > g[a] ? b : a), "D") : null;
+    return `<div class="card pad" style="margin-bottom:14px;">
+      <b style="display:block;font-family:var(--font-display);font-size:14px;margin-bottom:4px;">Hasil DISC ${CURRENT_YEAR}</b>
+      <p class="sub" style="margin:0 0 10px;">Gaya dominanmu: <b>${esc(dom || "-")}</b>. Dengan saling mengenal kepribadian, kita bisa 3A (Aware, Accept, Adapt) satu sama lain.</p>
+      <button type="button" class="btn btn--ghost" data-goto="disc">Lihat / Isi Ulang Tes DISC</button>
+    </div>`;
+  }
   function renderRoadmapSection(sectionKey, bodyId) {
     const sec = ROADMAP_SECTIONS.find(s => s.key === sectionKey);
     el(bodyId).innerHTML = `
+      ${sectionKey === "relationship" ? relationshipIntroHTML() : ""}
       <div class="divider-note">Isi dengan refleksi jujur — boleh disimpan bertahap, bisa diubah lagi kapan saja sebelum tahun berganti.</div>
       <div class="card pad">${sec.fields.map(fieldHTML).join("")}</div>
       <button class="btn btn--primary" style="margin-top:14px;" data-rmsave="${sectionKey}">Simpan ${esc(sec.title)}</button>
@@ -595,7 +619,7 @@
   }
   RENDER.strength = () => placeholderPage("strengthBody", "Strength");
   RENDER.experience = () => renderRoadmapSection("experience", "experienceBody");
-  RENDER.relationship = () => placeholderPage("relationshipBody", "Relationship");
+  RENDER.relationship = () => renderRoadmapSection("relationship", "relationshipBody");
   // 2026-09-23 (permintaan user, lengkap dgn screenshot lembar asli "JB3
   // SERVE ROADMAP"): field missionStatement + coreValue1..5 ditambahkan ke
   // ROADMAP_SECTIONS.vision di common.js — infrastruktur renderRoadmapSection/
@@ -669,13 +693,13 @@
           <div class="psblock"><b>SSD (skor)</b>${ssd ? SSD_CATEGORIES.map(c => `<div class="psline">${esc(c.name)}: ${ssd.scores[c.code]}</div>`).join("") : psLine("")}</div>
           <div class="psblock"><b>Titik Tertinggi</b>${psLine(rd.highPoint)}</div>
           <div class="psblock"><b>Titik Terendah</b>${psLine(rd.lowPoint)}</div>
-          <div class="psblock"><b>Adaptasi 3A</b>${psLine(rd.adaptation3A)}</div>
         </div>
         <div class="pscol"><h2>RELATIONSHIP</h2>
           <div class="psblock"><b>DISC (3 Graph)</b>${disc ? discGraphRow("Graph 1", disc.graph1) + discGraphRow("Graph 2", disc.graph2) + discGraphRow("Graph 3", disc.graph3) : psLine("")}</div>
           <div class="psblock"><b>Berjalan (mentor)</b>${psLine(rd.mentorWalking)}</div>
-          <div class="psblock"><b>Berdiri (buddy)</b>${psLine(rd.buddyStanding)}</div>
-          <div class="psblock"><b>Duduk (mentee)</b>${psLine(rd.menteeSitting)}</div>
+          <div class="psblock"><b>Duduk (buddy)</b>${psLine(rd.buddySitting)}</div>
+          <div class="psblock"><b>Berdiri (mentee)</b>${psLine(rd.menteeStanding)}</div>
+          <div class="psblock"><b>Adaptasi 3A</b>${psLine(rd.adaptation3A)}</div>
         </div>
         <div class="pscol"><h2>VISION</h2>
           <div class="psblock"><b>Area Holy Discontent</b>${psLine((rd.holyDiscontentAreas || []).join(", "))}</div>
