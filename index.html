@@ -220,17 +220,21 @@
   /* Kontainer #printSheetBody normalnya display:none (lihat .printsheet di
      atas) — spy html2pdf.js (html2canvas) bisa "memotret" kontennya, harus
      dirender nyata dulu (BUKAN display:none).
-     2026-09-23 (bug nyata, user: "pdf bisa didownload tapi kosong"): versi
-     LAMA menggeser wadah ini `left:-10000px` (jauh di luar layar) — html2canvas
-     TERNYATA sering gagal/blank kalau elemen sumbernya ditaruh sejauh itu di
-     luar viewport (masalah umum yg dikenal luas pada library ini, terkait cara
-     ia menghitung ulang posisi scroll/viewport saat "memotret"). Diperbaiki:
-     wadah SEKARANG ditaruh SUNGGUH di dalam viewport (position:fixed;
-     top:0;left:0, z-index sangat tinggi, background putih solid) — SEMPAT
-     kelihatan sekilas (~1 detik) menutupi layar selagi PDF disiapkan, lalu
-     otomatis kembali disembunyikan (lihat downloadPdf()/sharePdf()) — trade-off
-     kecil demi hasil capture yg BENAR, jauh lebih penting drpd bebas-kedip. */
-  .printsheet--capture { display: block !important; position: fixed !important; top: 0 !important; left: 0 !important; z-index: 99999 !important; background: #fff !important; }
+     2026-09-23 (bug nyata, user: "pdf bisa didownload tapi kosong", MASIH
+     kosong stlh percobaan pertama diperbaiki jadi `position:fixed`): akar
+     masalah SEBENARNYA — html2canvas TERKENAL bermasalah dgn elemen
+     `position:fixed` (bug lama & luas, library-nya tak sempurna meniru
+     fixed-positioning asli). DIPERPARAH di HP sungguhan: `body` di sini
+     SENDIRI jadi `position:fixed; overflow:hidden; height:100dvh` di layar
+     sempit (lihat @media max-width:480px di atas, pola "app shell" spy
+     halaman utama tak ikut discroll) — #printSheetBody yg jg fixed jadi anak
+     dari body yg fixed+overflow:hidden itu, kombinasi yg persis jadi sumber
+     bug dikenal luas ini. Diperbaiki BENAR kali ini: ganti ke
+     `position:absolute` (html2canvas jauh lebih andal dgn ini) — body-nya
+     SENDIRI jg dibuat sementara `overflow:visible` selagi "memotret" (lihat
+     downloadPdf()/sharePdf(), `document.body.style.overflow`), spy tak ada
+     lagi yg memotong wadah ini dari kombinasi manapun. */
+  .printsheet--capture { display: block !important; position: absolute !important; top: 0 !important; left: 0 !important; z-index: 99999 !important; background: #fff !important; }
 </style>
 </head>
 <body>
@@ -1083,12 +1087,20 @@
   // menggambar (paint) elemen yg baru saja innerHTML+class-nya diubah pada
   // saat html2canvas mulai "memotret", hasilnya jg bisa kosong/putih.
   const waitPaint = () => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+  // 2026-09-23 (bug "pdf masih kosong" berlanjut stlh percobaan pertama):
+  // `body` di layar sempit (≤480px, lihat @media di CSS) SENDIRI jadi
+  // `position:fixed; overflow:hidden; height:100dvh` (pola "app shell") —
+  // #printSheetBody yg anak body bisa terpotong oleh overflow:hidden itu
+  // walau sudah position:absolute. Di-nonaktifkan SEMENTARA selagi
+  // "memotret" (dikembalikan APAPUN hasilnya, sukses/gagal).
+  const bodyOverflowUnlock = () => { const prev = document.body.style.overflow; document.body.style.overflow = "visible"; return () => { document.body.style.overflow = prev; }; };
   async function downloadPdf(bodyHtml, filename, orientation) {
     if (!window.html2pdf) { toast("Fitur unduh PDF belum siap, coba lagi sebentar."); return; }
     const holder = el("printSheetBody");
     holder.innerHTML = bodyHtml;
     holder.classList.add("printsheet--capture");
     holder.style.width = orientation === "landscape" ? "1400px" : "900px";
+    const relock = bodyOverflowUnlock();
     try {
       toast("Menyiapkan PDF…");
       await waitPaint();
@@ -1103,6 +1115,7 @@
     } catch (err) {
       toast("Gagal membuat PDF: " + (err.message || err));
     } finally {
+      relock();
       holder.classList.remove("printsheet--capture");
       holder.style.width = "";
       holder.innerHTML = "";
@@ -1125,6 +1138,7 @@
     holder.innerHTML = bodyHtml;
     holder.classList.add("printsheet--capture");
     holder.style.width = orientation === "landscape" ? "1400px" : "900px";
+    const relock = bodyOverflowUnlock();
     try {
       toast("Menyiapkan PDF untuk dibagikan…");
       await waitPaint();
@@ -1143,6 +1157,7 @@
       if (err && err.name === "AbortError") return;   // pengguna batal di dialog share — bukan error, diam saja
       toast("Gagal menyiapkan/membagikan PDF: " + (err.message || err));
     } finally {
+      relock();
       holder.classList.remove("printsheet--capture");
       holder.style.width = "";
       holder.innerHTML = "";
