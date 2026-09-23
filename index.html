@@ -906,6 +906,13 @@
   // Expansion nanti, tinggal tambah 1 baris RENDER.xxx per bagian). ----
   function fieldHTML(f) {
     const val = state.draft.roadmapData[f.key];
+    // 2026-09-23 (permintaan user, "tambahkan 1 kolom lain-lain yang dapat
+    // diisi ketika pilih area holy discontent"): holyDiscontentOther SENGAJA
+    // dilewatkan (return "") kalau chip "Lain-lain" belum dipilih di
+    // holyDiscontentAreas — muncul otomatis begitu dipilih krn data-rmarea
+    // (lihat handler klik) sudah me-render ULANG seluruh section tiap
+    // toggle, tak perlu logic tambahan di luar sini.
+    if (f.key === "holyDiscontentOther" && !(Array.isArray(state.draft.roadmapData.holyDiscontentAreas) && state.draft.roadmapData.holyDiscontentAreas.includes("Lain-lain"))) return "";
     if (f.type === "textarea") return `<div class="field"><label>${esc(f.label)}</label><textarea data-rmfield="${f.key}">${esc(val || "")}</textarea></div>`;
     if (f.type === "text") return `<div class="field"><label>${esc(f.label)}</label><input type="text" data-rmfield="${f.key}" value="${esc(val || "")}"></div>`;
     if (f.type === "checkboxList") {
@@ -1092,7 +1099,7 @@
           <div class="psblock"><b>Adaptasi 3A</b>${psLine(rd.adaptation3A)}</div>
         </div>
         <div class="pscol"><h2>VISION</h2>
-          <div class="psblock"><b>Area Holy Discontent</b>${psLine((rd.holyDiscontentAreas || []).join(", "))}</div>
+          <div class="psblock"><b>Area Holy Discontent</b>${psLine((rd.holyDiscontentAreas || []).map(a => a === "Lain-lain" && rd.holyDiscontentOther ? `Lain-lain: ${rd.holyDiscontentOther}` : a).join(", "))}</div>
           <div class="psblock"><b>Holy Discontent Statement</b>${psLine(rd.holyDiscontentStatement)}</div>
         </div>
         <div class="pscol"><h2>IDENTITY & DIRECTION</h2>
