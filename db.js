@@ -37,6 +37,7 @@
  *    DB.myRs3Status() / DB.requestRs3Access()          (peserta, post-test Rock Solid 3)
  *    DB.listAllRs3AccessRequests() / DB.decideRs3AccessRequest(id, approve) / DB.deleteRs3AccessRequest(id)  (Admin saja)
  *    DB.myRs3Latest() / DB.saveRs3Result({answers,correct,total,pct,band,passed})  (peserta, riwayat percobaan; lulus = auto-tandai kelas RS3 di JB3)
+ *    DB.listParticipantResults(year)  (Admin saja — hasil SEMUA peserta yg aksesnya disetujui)
  * ========================================================================== */
 window.makeDB = function makeDB(sb) {
   "use strict";
@@ -299,6 +300,55 @@ window.makeDB = function makeDB(sb) {
         arr[RS3_IDX] = true;
         wrap(await sb.from("profiles").update({ classes:arr }).eq("id", s.user.id));
       }
+    },
+
+    // ---------- Admin saja: hasil SEMUA peserta yg aksesnya sudah disetujui
+    // (2026-09-23, permintaan user: "admin dapat melihat setiap hasil test
+    // dan asesment dari setiap pengguna yang telah mengikuti discipleship
+    // journey"). RLS tabel lts_disc_results/lts_ssd_results/lts_gifts_
+    // results/lts_roadmap_results/rs3_test_results SEMUANYA SUDAH mengizinkan
+    // is_admin() baca semua baris (dibuat sejak awal tiap tabel itu) — jadi
+    // TIDAK perlu migrasi baru sama sekali di sini, murni query baca.
+    // SENGAJA 1 query per-TABEL (bukan per-ORANG) — cuma ~8 query TOTAL
+    // apa pun jumlah peserta, lalu digabung manual di sini via profile_id —
+    // jauh lebih murah drpd N query per peserta. ----------
+    async listParticipantResults(year) {
+      const [
+        { data: reqs1, error: e1 }, { data: reqs2, error: e2 },
+        { data: discs, error: e3 }, { data: ssds, error: e4 },
+        { data: gifts, error: e5 }, { data: roadmaps, error: e6 },
+        { data: rs3s, error: e7 },
+      ] = await Promise.all([
+        sb.from("lts_access_requests").select("profile_id").eq("status", "approved"),
+        sb.from("rs3_access_requests").select("profile_id").eq("status", "approved"),
+        sb.from("lts_disc_results").select("*").eq("year", year),
+        sb.from("lts_ssd_results").select("*").eq("year", year),
+        sb.from("lts_gifts_results").select("*").eq("year", year),
+        sb.from("lts_roadmap_results").select("*").eq("year", year),
+        sb.from("rs3_test_results").select("*").order("created_at", { ascending:false }),
+      ]);
+      [e1, e2, e3, e4, e5, e6, e7].forEach(e => { if (e) throw e; });
+      // Peserta yg dihitung = siapa pun yg akses LTS ATAU RS3-nya PERNAH
+      // disetujui (approved) — bukan cuma yg py hasil, spy Admin jg lihat
+      // org yg sudah diizinkan tp belum sempat isi apa2 (baris kosong).
+      const ids = [...new Set([...(reqs1 || []).map(r => r.profile_id), ...(reqs2 || []).map(r => r.profile_id)])];
+      if (!ids.length) return [];
+      const { data: profs, error: e8 } = await sb.from("profiles").select("id,name,phone").in("id", ids);
+      if (e8) throw e8;
+      const findFor = (arr, pid) => (arr || []).find(r => r.profile_id === pid) || null;
+      // rs3_test_results: BANYAK baris per orang (riwayat percobaan, lihat
+      // v_rs3_test_results.sql) — ambil yg PALING BARU per profil (array
+      // sudah diurutkan created_at desc dari query di atas).
+      const rs3Latest = {};
+      (rs3s || []).forEach(r => { if (!rs3Latest[r.profile_id]) rs3Latest[r.profile_id] = r; });
+      return ids.map(id => {
+        const prof = (profs || []).find(p => p.id === id) || { id, name:"?", phone:"" };
+        return {
+          profileId:id, name:prof.name, phone:prof.phone,
+          disc: findFor(discs, id), ssd: findFor(ssds, id), gifts: findFor(gifts, id), roadmap: findFor(roadmaps, id),
+          rs3: rs3Latest[id] || null,
+        };
+      });
     },
   };
 };

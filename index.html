@@ -255,6 +255,8 @@
           <section class="page" data-page="ssd"><div id="ssdBody"></div></section>
           <section class="page" data-page="gifts"><div id="giftsBody"></div></section>
           <section class="page" data-page="rs3"><div id="rs3Body"></div></section>
+          <section class="page" data-page="results"><div id="resultsBody"></div></section>
+          <section class="page" data-page="resultdetail"><div id="resultdetailBody"></div></section>
           <section class="page" data-page="hasil"><div id="hasilBody"></div></section>
           <section class="page" data-page="dashboard"><div id="dashboardBody"></div></section>
           <section class="page" data-page="profile"><div id="profileBody"></div></section>
@@ -302,7 +304,7 @@
   // 2026-09-22 susulan ("bangun assesment DISC dengan hasil masking, real,
   // stress"): myDisc (baris tahun INI, null kalau belum diisi) + draft.discPicks
   // (isian yg sedang dikerjakan, blm disimpan) ditambahkan.
-  const state = { page:"login", stack:[], persona:null, meId:null, myProfile:null, accessStatus:null, accessRequests:[], myDisc:null, myRoadmap:null, mySsd:null, myGifts:null, rs3AccessStatus:null, rs3AccessRequests:[], rs3Result:null, draft:{ discPicks:[], roadmapData:{}, ssdAnswers:{}, giftsAnswers:{}, rs3Answers:{} } };
+  const state = { page:"login", stack:[], persona:null, meId:null, myProfile:null, accessStatus:null, accessRequests:[], myDisc:null, myRoadmap:null, mySsd:null, myGifts:null, rs3AccessStatus:null, rs3AccessRequests:[], rs3Result:null, participantResults:null, viewProfileId:null, resultsFilter:"all", draft:{ discPicks:[], roadmapData:{}, ssdAnswers:{}, giftsAnswers:{}, rs3Answers:{} } };
   const NOCHROME = ["login"];
 
   function initials(name) { return String(name || "?").trim().split(/\s+/).slice(0, 2).map(w => w[0] || "").join("").toUpperCase() || "?"; }
@@ -342,6 +344,8 @@
     ssd: { h:"Skala Sikap Disfungsional", back:true },
     gifts: { h:"Karunia Rohani", back:true },
     rs3: { h:"Rock Solid 3 — Post-Test", back:true },
+    results: { h:"Hasil Peserta", back:true },
+    resultdetail: { h:"Hasil Peserta", back:true },
     strength: { h:"Strength", back:true },
     experience: { h:"Experience", back:true },
     relationship: { h:"Relationship", back:true },
@@ -673,6 +677,7 @@
     </div>`;
     el("dashboardBody").innerHTML = `
       <div class="divider-note">Ringkasan status akses asesmen Lead To Serve 1 — seluruh jemaat.</div>
+      <button type="button" class="btn btn--primary" style="margin-bottom:14px;" data-goto="results">📊 Lihat Semua Hasil Peserta →</button>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px;">
         <div class="card pad sm" style="text-align:center;"><b style="display:block;font-family:var(--font-display);font-size:22px;color:var(--good);">${approved.length}</b><span class="sub">Disetujui</span></div>
         <div class="card pad sm" style="text-align:center;"><b style="display:block;font-family:var(--font-display);font-size:22px;color:var(--warn);">${pending.length}</b><span class="sub">Menunggu</span></div>
@@ -727,6 +732,64 @@
       <div class="card pad">${rejected.map(nameRow).join("")}</div>` : ""}
     `;
   }
+
+  // 2026-09-23 (permintaan user, "admin dapat melihat setiap hasil test dan
+  // asesment dari setiap pengguna yang telah mengikuti discipleship
+  // journey"): roster Admin — dimuat SEKALI (lazy, saat halaman ini pertama
+  // dibuka, bukan di loadAll() tiap login — query-nya cukup berat, ~8 query
+  // gabungan, tak perlu dijalankan kalau Admin tak pernah buka halaman ini)
+  // via DB.listParticipantResults(), disimpan di state.participantResults
+  // spy tak fetch ulang tiap kali RENDER.results dipanggil (mis. habis ganti
+  // filter). Filter D/I/S/C tinggi memenuhi kebutuhan lama yg sempat dicatat
+  // ("mencari siapa yang D nya tinggi, C nya tinggi") — gratis krn data DISC
+  // semua orang sudah ikut termuat di query roster ini.
+  RENDER.results = async function () {
+    if (state.participantResults === null) {
+      el("resultsBody").innerHTML = `<div class="card pad" style="text-align:center;padding:30px;"><span class="muted">Memuat data peserta…</span></div>`;
+      try { state.participantResults = await DB.listParticipantResults(CURRENT_YEAR); }
+      catch (err) { el("resultsBody").innerHTML = `<div class="empty">Gagal memuat: ${esc(err.message || err)}</div>`; return; }
+    }
+    const rows = state.participantResults || [];
+    const domLetter = r => r.disc ? DISC_LETTERS.reduce((a, b) => (r.disc.graph3[b] > r.disc.graph3[a] ? b : a), DISC_LETTERS[0]) : null;
+    const filter = state.resultsFilter || "all";
+    const filtered = rows.filter(r => {
+      if (filter === "all") return true;
+      if (["D", "I", "S", "C"].includes(filter)) return domLetter(r) === filter;
+      if (filter === "rs3pass") return r.rs3 && r.rs3.passed;
+      if (filter === "rs3fail") return r.rs3 && !r.rs3.passed;
+      return true;
+    });
+    const chip = (key, label) => `<button type="button" class="btn btn--sm ${filter === key ? "btn--primary" : "btn--ghost"}" data-resultsfilter="${key}">${esc(label)}</button>`;
+    el("resultsBody").innerHTML = `
+      <div class="divider-note">Hasil test &amp; asesmen semua peserta Discipleship Journey yang aksesnya sudah disetujui (${rows.length} orang).</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;">
+        ${chip("all", "Semua")}${chip("D", "D tinggi")}${chip("I", "I tinggi")}${chip("S", "S tinggi")}${chip("C", "C tinggi")}${chip("rs3pass", "RS3 Lulus")}${chip("rs3fail", "RS3 Belum")}
+      </div>
+      ${filtered.length ? filtered.map(r => {
+        const dl = domLetter(r);
+        const tags = [dl ? `DISC ${dl}` : null, r.gifts ? "Karunia ✓" : null, r.ssd ? "SSD ✓" : null, r.roadmap ? "S-E-R-V-E" : null, r.rs3 ? (r.rs3.passed ? "RS3 Lulus" : "RS3 Belum Lulus") : null].filter(Boolean);
+        return `<button type="button" class="card pad" style="width:100%;text-align:left;display:flex;align-items:center;gap:10px;margin-bottom:8px;cursor:pointer;" data-viewresult="${esc(r.profileId)}">
+          <span class="avatar">${esc(initials(r.name))}</span>
+          <span style="flex:1;min-width:0;"><b style="font-size:13px;display:block;">${esc(r.name)}</b><span class="sub" style="display:block;margin-top:2px;">${tags.length ? esc(tags.join(" · ")) : "Belum ada hasil"}</span></span>
+        </button>`;
+      }).join("") : `<div class="empty">Tidak ada peserta yang cocok dengan filter ini.</div>`}
+    `;
+  };
+  RENDER.resultdetail = function () {
+    const r = (state.participantResults || []).find(x => x.profileId === state.viewProfileId);
+    if (!r) { el("resultdetailBody").innerHTML = `<div class="empty">Data tidak ditemukan — kembali ke daftar dan coba lagi.</div>`; return; }
+    // renderChrome() sudah jalan lebih dulu (judul default "Hasil Peserta")
+    // — timpa dgn nama org itu spy appbar informatif, sama pola dgn halaman
+    // detail JB3 yg py judul dinamis.
+    const titleEl = el("appbarTitle"); if (titleEl) titleEl.textContent = r.name || "Hasil Peserta";
+    el("resultdetailBody").innerHTML = `
+      <div class="card pad" style="margin-bottom:14px;">
+        <b style="font-family:var(--font-display);font-size:16px;">${esc(r.name)}</b>
+        <div class="sub" style="margin-top:3px;">${esc(r.phone || "")}</div>
+      </div>
+      ${resultBodyHTML(r.disc, r.ssd, r.gifts, (r.roadmap && r.roadmap.data) || {}, r.rs3, false)}
+    `;
+  };
 
   function placeholderPage(bodyId, title) {
     el(bodyId).innerHTML = `<div class="card pad" style="text-align:center;padding:40px 20px;">
@@ -952,9 +1015,19 @@
   // Road Map sendiri jadi objek narasi — dipakai BERSAMA oleh tampilan layar
   // (hasilOnScreenHTML, gaya app biasa) & lembar PDF (hasilReportHTML, gaya
   // dokumen), spy logika interpretasi tak dobel ditulis.
-  function buildHasilNarrative() {
-    const rd = state.draft.roadmapData || {};
-    const disc = state.myDisc, ssd = state.mySsd, gifts = state.myGifts;
+  // 2026-09-23 (permintaan user, "admin dapat melihat setiap hasil test dan
+  // asesment dari setiap pengguna..."): parameter ditambahkan dgn DEFAULT
+  // jatuh balik ke state.my*/state.draft.roadmapData — pemanggilan LAMA
+  // `buildHasilNarrative()` tanpa argumen (RENDER.hasil, tombol PDF) TETAP
+  // berfungsi PERSIS spt sebelumnya; pemanggilan BARU dgn argumen eksplisit
+  // (RENDER.resultdetail, Admin lihat hasil org lain) memakai data ORANG
+  // ITU, bukan diri sendiri. Sengaja TIDAK dibuat 2 fungsi terpisah (dobel
+  // logic interpretasi DISC/SSD/Gifts yg cukup panjang, rawan divergen).
+  function buildHasilNarrative(disc, ssd, gifts, roadmapData) {
+    if (disc === undefined) disc = state.myDisc;
+    if (ssd === undefined) ssd = state.mySsd;
+    if (gifts === undefined) gifts = state.myGifts;
+    const rd = roadmapData !== undefined ? roadmapData : (state.draft.roadmapData || {});
     let discLetter = null, discProfile = null;
     if (disc) {
       discLetter = DISC_LETTERS.reduce((a, b) => (disc.graph3[b] > disc.graph3[a] ? b : a), DISC_LETTERS[0]);
@@ -1037,49 +1110,41 @@
   // grafik yg sudah ada — bukan cuma angka/bar spt sebelumnya. Dua tombol
   // unduh terpisah: PDF lembar ringkas S-E-R-V-E (1 halaman, sama dgn tombol
   // Cetak) & PDF laporan Hasil Asesmen lengkap (narasi, bisa >1 halaman).
-  RENDER.hasil = function () {
-    const printBtn = `<button type="button" class="btn btn--ghost" style="margin-top:12px;" id="printSheetBtn">🖨️ Cetak Ringkasan Serve Road Map</button>`;
-    const pdfServeBtn = `<button type="button" class="btn btn--ghost" style="margin-top:8px;" id="pdfServeBtn">⬇️ Unduh PDF — Ringkasan S-E-R-V-E (1 Lembar)</button>`;
-    const pdfHasilBtn = `<button type="button" class="btn btn--primary" style="margin-top:8px;" id="pdfHasilBtn">⬇️ Unduh PDF — Hasil Asesmen Lengkap</button>`;
-    if (!state.myDisc && !state.mySsd && !state.myGifts) {
-      el("hasilBody").innerHTML = `<div class="card pad" style="text-align:center;padding:40px 20px;">
-        <b style="display:block;font-family:var(--font-display);font-size:16px;margin-bottom:6px;">Hasil Asesmen</b>
-        <p class="sub" style="margin:0 0 14px;">Isi DISC, SSD, atau Karunia Rohani dulu untuk melihat hasilnya di sini secara detail.</p>
-        <button type="button" class="btn btn--primary" data-goto="disc" style="margin-bottom:8px;">Isi DISC</button>
-        <button type="button" class="btn btn--primary" data-goto="ssd" style="margin-bottom:8px;">Isi SSD</button>
-        <button type="button" class="btn btn--ghost" data-goto="gifts">Isi Karunia Rohani</button>
-      </div>
-      ${printBtn}${pdfServeBtn}`;
-      return;
-    }
-    const n = buildHasilNarrative();
-    const discHTML = !state.myDisc ? `<div class="card pad" style="margin-bottom:12px;"><p class="sub" style="margin:0 0 8px;">DISC belum diisi.</p><button type="button" class="btn btn--ghost" data-goto="disc">Isi DISC</button></div>` : (() => {
-      const g1 = state.myDisc.graph1, g2 = state.myDisc.graph2, g3 = state.myDisc.graph3;
+  // 2026-09-23 (permintaan user, "admin dapat melihat setiap hasil test dan
+  // asesment dari setiap pengguna yang telah mengikuti discipleship
+  // journey"): logic render DISC/SSD/Gifts/Roadmap/RS3 DIPINDAH ke sini dari
+  // RENDER.hasil supaya BISA DIPAKAI ULANG oleh RENDER.resultdetail (Admin
+  // lihat hasil org lain) — TANPA menduplikasi ~50 baris logic. `viewingSelf`
+  // mengontrol satu-satunya perbedaan: tombol "Isi ..." (masuk akal cuma utk
+  // diri sendiri) vs pesan polos "Belum diisi" (utk org lain, Admin tak bisa
+  // mengisikan punya org lain).
+  function resultBodyHTML(disc, ssd, gifts, roadmapData, rs3, viewingSelf) {
+    const n = buildHasilNarrative(disc, ssd, gifts, roadmapData);
+    const rs3HTML = rs3 ? `<div class="card pad"><p class="sub" style="margin:0;">${rs3.correct}/${rs3.total} benar (${rs3.score_pct}%) — <b>${esc(rs3.band)}</b>${rs3.passed ? " ✅ Lulus" : " — belum lulus"}</p></div>`
+      : `<div class="card pad"><p class="sub" style="margin:0 0 ${viewingSelf ? 8 : 0}px;">Post-test Rock Solid 3 belum diambil${viewingSelf ? "" : " oleh peserta ini"}.</p>${viewingSelf ? `<button type="button" class="btn btn--ghost" data-goto="rs3">Ke Post-Test RS3</button>` : ""}</div>`;
+    const discHTML = !disc ? `<div class="card pad" style="margin-bottom:12px;"><p class="sub" style="margin:0 0 ${viewingSelf ? 8 : 0}px;">DISC belum diisi${viewingSelf ? "" : " oleh peserta ini"}.</p>${viewingSelf ? `<button type="button" class="btn btn--ghost" data-goto="disc">Isi DISC</button>` : ""}</div>` : (() => {
+      const g1 = disc.graph1, g2 = disc.graph2, g3 = disc.graph3;
       const max12 = Math.max(1, ...DISC_LETTERS.map(k => g1[k]), ...DISC_LETTERS.map(k => g2[k]));
       const max3 = Math.max(1, ...DISC_LETTERS.map(k => Math.abs(g3[k])));
       return `<div class="card pad" style="margin-bottom:12px;">
         <b style="font-family:var(--font-display);font-size:14px;display:block;margin-bottom:4px;">${esc(n.discProfile.name)}</b>
         <p class="sub" style="margin:0 0 12px;">${esc(n.discProfile.desc)}</p>
-        ${discChartCard("Masking (Topeng)", "Cara Anda tampil & beradaptasi di depan orang lain.", g1, 0, max12, "var(--accent)")}
-        ${discChartCard("Stress", "Respons Anda saat tertekan / apa yang cenderung Anda tekan.", g2, 0, max12, "var(--bad)")}
-        ${discChartCard("Real (Kepribadian Asli)", "Gaya perilaku dasar Anda yang relatif stabil di segala situasi.", g3, -max3, max3, "var(--good)")}
+        ${discChartCard("Masking (Topeng)", "Cara tampil & beradaptasi di depan orang lain.", g1, 0, max12, "var(--accent)")}
+        ${discChartCard("Stress", "Respons saat tertekan / apa yang cenderung ditekan.", g2, 0, max12, "var(--bad)")}
+        ${discChartCard("Real (Kepribadian Asli)", "Gaya perilaku dasar yang relatif stabil di segala situasi.", g3, -max3, max3, "var(--good)")}
         <div class="sub" style="margin-top:10px;"><b>Kekuatan:</b> ${n.discProfile.strengths.map(esc).join(" · ")}</div>
         <div class="sub" style="margin-top:6px;"><b>Perlu diperhatikan:</b> ${n.discProfile.watchouts.map(esc).join(" · ")}</div>
         <div class="sub" style="margin-top:6px;"><b>Cocok untuk pelayanan:</b> ${n.discProfile.ministryFit.map(esc).join(" · ")}</div>
       </div>`;
     })();
-    const ssdHTML = !state.mySsd ? `<div class="card pad"><p class="sub" style="margin:0 0 8px;">SSD belum diisi.</p><button type="button" class="btn btn--ghost" data-goto="ssd">Isi SSD</button></div>` :
-      `<div class="card pad">${SSD_CATEGORIES.map(c => bar(c.name, state.mySsd.scores[c.code], -15, 15, (state.mySsd.scores[c.code] < 0 ? "var(--bad)" : "var(--good)"))).join("")}
+    const ssdHTML = !ssd ? `<div class="card pad"><p class="sub" style="margin:0 0 ${viewingSelf ? 8 : 0}px;">SSD belum diisi${viewingSelf ? "" : " oleh peserta ini"}.</p>${viewingSelf ? `<button type="button" class="btn btn--ghost" data-goto="ssd">Isi SSD</button>` : ""}</div>` :
+      `<div class="card pad">${SSD_CATEGORIES.map(c => bar(c.name, ssd.scores[c.code], -15, 15, (ssd.scores[c.code] < 0 ? "var(--bad)" : "var(--good)"))).join("")}
       ${n.ssdLow.length
         ? `<div class="sub" style="margin-top:10px;">${n.ssdLow.map(c => `<div style="margin-bottom:6px;"><b>${esc(c.name)}:</b> ${esc(c.text)}</div>`).join("")}</div>`
         : `<p class="sub" style="margin-top:8px;">Semua kategori relatif sehat — tidak ada pola pikir disfungsional yang menonjol.</p>`}</div>`;
-    // 2026-09-23 ("Karunia Rohani adalah bagian dari Strength. kamu buatkan
-    // isiannya"): 17 karunia diurutkan skor tertinggi → terendah (0-15 tiap
-    // karunia, 5 soal x skor 0-3), top3/next3 ditandai sesuai lembar asli
-    // ("Paling Menonjol"/"Cukup Menonjol").
-    const giftsHTML = !state.myGifts ? `<div class="card pad"><p class="sub" style="margin:0 0 8px;">Karunia Rohani belum diisi.</p><button type="button" class="btn btn--ghost" data-goto="gifts">Isi Karunia Rohani</button></div>` :
+    const giftsHTML = !gifts ? `<div class="card pad"><p class="sub" style="margin:0 0 ${viewingSelf ? 8 : 0}px;">Karunia Rohani belum diisi${viewingSelf ? "" : " oleh peserta ini"}.</p>${viewingSelf ? `<button type="button" class="btn btn--ghost" data-goto="gifts">Isi Karunia Rohani</button>` : ""}</div>` :
       (() => {
-        const sc = state.myGifts.scores;
+        const sc = gifts.scores;
         const ranked = GIFTS_LIST.map(g => g.code).sort((a, b) => sc.scores[b] - sc.scores[a]);
         return `<div class="card pad">
           <div class="sub" style="margin:0 0 8px;">${n.giftsTop3.map(g => `<div style="margin-bottom:6px;"><b>${esc(g.name)}</b> — ${esc(g.def)}</div>`).join("")}</div>
@@ -1088,20 +1153,41 @@
         </div>`;
       })();
     const ownHTML = n.own.length ? `<div class="card pad">${n.own.map(o => `<div class="field" style="margin-bottom:10px;"><label>${esc(o.label)}</label><p class="sub" style="margin:2px 0 0;white-space:pre-wrap;">${esc(o.text)}</p></div>`).join("")}</div>`
-      : `<div class="card pad"><p class="sub" style="margin:0;">Belum ada isian Serve Road Map — isi lewat menu S-E-R-V-E di beranda.</p></div>`;
+      : `<div class="card pad"><p class="sub" style="margin:0;">Belum ada isian Serve Road Map${viewingSelf ? " — isi lewat menu S-E-R-V-E di beranda." : " oleh peserta ini."}</p></div>`;
     const recoHTML = `<div class="card pad"><p class="sub" style="margin:0;">${n.recommendation ? esc(n.recommendation) : "Isi DISC & Karunia Rohani dulu untuk melihat rekomendasi di sini."}</p></div>`;
-    el("hasilBody").innerHTML = `
-      <div class="divider-note">Hasil asesmen ${CURRENT_YEAR} — kepribadian, keahlian, & area pelayanan yang tepat untukmu.</div>
+    return `
+      <h2 class="section">Rock Solid 3 — Post-Test</h2>
+      ${rs3HTML}
       <h2 class="section">DISC — Kepribadian</h2>
       ${discHTML}
       <h2 class="section">Skala Sikap Disfungsional</h2>
       ${ssdHTML}
       <h2 class="section">Karunia Rohani</h2>
       ${giftsHTML}
-      <h2 class="section">Ringkasan dari Isianmu Sendiri</h2>
+      <h2 class="section">Ringkasan dari Isian Serve Road Map</h2>
       ${ownHTML}
       <h2 class="section">Rekomendasi Pekerjaan/Pelayanan yang Cocok</h2>
       ${recoHTML}
+    `;
+  }
+  RENDER.hasil = function () {
+    const printBtn = `<button type="button" class="btn btn--ghost" style="margin-top:12px;" id="printSheetBtn">🖨️ Cetak Ringkasan Serve Road Map</button>`;
+    const pdfServeBtn = `<button type="button" class="btn btn--ghost" style="margin-top:8px;" id="pdfServeBtn">⬇️ Unduh PDF — Ringkasan S-E-R-V-E (1 Lembar)</button>`;
+    const pdfHasilBtn = `<button type="button" class="btn btn--primary" style="margin-top:8px;" id="pdfHasilBtn">⬇️ Unduh PDF — Hasil Asesmen Lengkap</button>`;
+    if (!state.myDisc && !state.mySsd && !state.myGifts && !state.rs3Result) {
+      el("hasilBody").innerHTML = `<div class="card pad" style="text-align:center;padding:40px 20px;">
+        <b style="display:block;font-family:var(--font-display);font-size:16px;margin-bottom:6px;">Hasil Asesmen</b>
+        <p class="sub" style="margin:0 0 14px;">Isi DISC, SSD, Karunia Rohani, atau post-test Rock Solid 3 dulu untuk melihat hasilnya di sini secara detail.</p>
+        <button type="button" class="btn btn--primary" data-goto="disc" style="margin-bottom:8px;">Isi DISC</button>
+        <button type="button" class="btn btn--primary" data-goto="ssd" style="margin-bottom:8px;">Isi SSD</button>
+        <button type="button" class="btn btn--ghost" data-goto="gifts">Isi Karunia Rohani</button>
+      </div>
+      ${printBtn}${pdfServeBtn}`;
+      return;
+    }
+    el("hasilBody").innerHTML = `
+      <div class="divider-note">Hasil asesmen ${CURRENT_YEAR} — kepribadian, keahlian, & area pelayanan yang tepat untukmu.</div>
+      ${resultBodyHTML(state.myDisc, state.mySsd, state.myGifts, state.draft.roadmapData, state.rs3Result, true)}
       ${printBtn}${pdfServeBtn}${pdfHasilBtn}
     `;
   };
@@ -1226,7 +1312,7 @@
     }
     if (T.closest("#pfLogout") || T.closest("#rolePill")) {
       await DB.logout().catch(() => {});
-      Object.assign(state, { page:"login", stack:[], persona:null, meId:null, myProfile:null, accessStatus:null, accessRequests:[], myDisc:null, myRoadmap:null, mySsd:null, myGifts:null, rs3AccessStatus:null, rs3AccessRequests:[], rs3Result:null, draft:{ discPicks:[], roadmapData:{}, ssdAnswers:{}, giftsAnswers:{}, rs3Answers:{} } });
+      Object.assign(state, { page:"login", stack:[], persona:null, meId:null, myProfile:null, accessStatus:null, accessRequests:[], myDisc:null, myRoadmap:null, mySsd:null, myGifts:null, rs3AccessStatus:null, rs3AccessRequests:[], rs3Result:null, participantResults:null, viewProfileId:null, resultsFilter:"all", draft:{ discPicks:[], roadmapData:{}, ssdAnswers:{}, giftsAnswers:{}, rs3Answers:{} } });
       show("login", { replace:true });
       return;
     }
@@ -1381,6 +1467,13 @@
       } catch (err) { toast("Gagal: " + (err.message || err)); }
       return;
     }
+
+    // ---- Roster hasil peserta (Admin) — 2026-09-23, "admin dapat melihat
+    // setiap hasil test dan asesment dari setiap pengguna" ----
+    const resFilter = T.closest("[data-resultsfilter]");
+    if (resFilter) { state.resultsFilter = resFilter.dataset.resultsfilter; RENDER.results(); return; }
+    const viewRes = T.closest("[data-viewresult]");
+    if (viewRes) { state.viewProfileId = viewRes.dataset.viewresult; show("resultdetail"); return; }
 
     // ---- Rock Solid 3 post-test: pilih jawaban (data-rs3ans) & kirim
     // (2026-09-23) — sama pola dgn DISC/SSD/Gifts di atas. ----
