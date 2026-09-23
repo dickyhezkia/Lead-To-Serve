@@ -31,6 +31,7 @@
  *    DB.listAllAccessRequests() / DB.decideAccessRequest(id, approve)  (Admin saja)
  *    DB.myDisc(year) / DB.saveDisc(year, {picks,graph1,graph2,graph3})  (peserta, 1 baris/tahun)
  *    DB.myRoadmap(year) / DB.saveRoadmapSection(year, patch)  (peserta, 1 baris/tahun, `data` gabungan semua bagian S-E-R-V-E)
+ *    DB.mySsd(year) / DB.saveSsd(year, {answers,scores})  (peserta, 1 baris/tahun)
  *    DB.deleteAccessRequest(id)  (Admin saja)
  * ========================================================================== */
 window.makeDB = function makeDB(sb) {
@@ -173,6 +174,25 @@ window.makeDB = function makeDB(sb) {
       const merged = { ...(existing && existing.data ? existing.data : {}), ...patch };
       wrap(await sb.from("lts_roadmap_results").upsert({
         profile_id: s.user.id, year, data: merged, updated_at: new Date().toISOString(),
+      }, { onConflict: "profile_id,year" }));
+    },
+
+    // ---------- SSD (2026-09-23, "tambahkan tools/isian SSD") — pola SAMA
+    // persis dgn DISC (myDisc/saveDisc di atas) — lihat
+    // supabase/v_lts_ssd_results.sql. scores dihitung di index.html (pakai
+    // computeSsdScores() dari common.js). ----------
+    async mySsd(year) {
+      const s = await this.session();
+      if (!s) return null;
+      const { data, error } = await sb.from("lts_ssd_results").select("*").eq("profile_id", s.user.id).eq("year", year).maybeSingle();
+      if (error) throw error;
+      return data || null;
+    },
+    async saveSsd(year, { answers, scores }) {
+      const s = await this.session();
+      if (!s) throw new Error("Belum login");
+      wrap(await sb.from("lts_ssd_results").upsert({
+        profile_id: s.user.id, year, answers, scores, updated_at: new Date().toISOString(),
       }, { onConflict: "profile_id,year" }));
     },
   };
