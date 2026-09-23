@@ -267,6 +267,7 @@
           <section class="page" data-page="lts2"><div id="lts2Body"></div></section>
           <section class="page" data-page="results"><div id="resultsBody"></div></section>
           <section class="page" data-page="resultdetail"><div id="resultdetailBody"></div></section>
+          <section class="page" data-page="serveview"><div id="serveviewBody"></div></section>
           <section class="page" data-page="hasil"><div id="hasilBody"></div></section>
           <section class="page" data-page="dashboard"><div id="dashboardBody"></div></section>
           <section class="page" data-page="profile"><div id="profileBody"></div></section>
@@ -358,6 +359,7 @@
     lts2: { h:"Lead To Serve 2 — Post-Test", back:true },
     results: { h:"Hasil Peserta", back:true },
     resultdetail: { h:"Hasil Peserta", back:true },
+    serveview: { h:"Serve Road Map", back:true },
     strength: { h:"Strength", back:true },
     experience: { h:"Experience", back:true },
     relationship: { h:"Relationship", back:true },
@@ -1194,6 +1196,27 @@
       </div>
     `;
   }
+  // 2026-09-23 (permintaan user, "ganti cetak ringkasa serve road map dengan
+  // Lihat Serve Road Map" + "pastikan tidak kosong, buat dalam bentuk
+  // landscape"): tombol "Cetak" (window.print(), tergantung dialog print
+  // browser & @media print — bisa beda2 hasilnya antar browser/OS) diganti
+  // jadi halaman "Lihat" SUNGGUHAN di dalam app — render biasa (BUKAN lewat
+  // html2canvas/window.print sama sekali), jadi TAK MUNGKIN kosong spt bug
+  // PDF sebelumnya (murni HTML biasa, tak ada library capture yg bisa gagal).
+  // Lebar 1400px tetap (sama dgn versi PDF landscape) di dalam wadah
+  // overflow-x:auto — bingkai .phone tak diubah (beda pola dgn RS3/Barista
+  // "wide-page"), pengguna geser ke samping utk lihat correspond ke 5 kolom
+  // aslinya ("landscape") tanpa perlu memutar/melebarkan bingkai HP.
+  RENDER.serveview = function () {
+    el("serveviewBody").innerHTML = `
+      <div class="divider-note">Geser ke samping untuk melihat seluruh lembar (format landscape, 5 kolom).</div>
+      <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:12px;border:1px solid var(--line);">
+        <div class="printsheet" style="display:block;width:1400px;">${printSheetHTML()}</div>
+      </div>
+      <button type="button" class="btn btn--ghost" style="margin-top:14px;" id="pdfServeBtn">⬇️ Unduh PDF — Ringkasan S-E-R-V-E (1 Lembar)</button>
+      <button type="button" class="btn btn--ghost" style="margin-top:8px;" id="shareServeBtn">🔗 Bagikan PDF — Ringkasan S-E-R-V-E</button>
+    `;
+  };
 
   // 2026-09-23 (permintaan user, "Hasil asesmen dari semua isian kamu buat
   // detail yang bisa dibaca dan juga di download"): satu fungsi merangkai
@@ -1363,7 +1386,7 @@
     `;
   }
   RENDER.hasil = function () {
-    const printBtn = `<button type="button" class="btn btn--ghost" style="margin-top:12px;" id="printSheetBtn">🖨️ Cetak Ringkasan Serve Road Map</button>`;
+    const printBtn = `<button type="button" class="btn btn--ghost" style="margin-top:12px;" data-goto="serveview">📄 Lihat Serve Road Map</button>`;
     const pdfServeBtn = `<button type="button" class="btn btn--ghost" style="margin-top:8px;" id="pdfServeBtn">⬇️ Unduh PDF — Ringkasan S-E-R-V-E (1 Lembar)</button>`;
     const pdfHasilBtn = `<button type="button" class="btn btn--primary" style="margin-top:8px;" id="pdfHasilBtn">⬇️ Unduh PDF — Hasil Asesmen Lengkap</button>`;
     // 2026-09-23 (permintaan user, "...bisa diunduh dan share dalam bentuk
@@ -1606,11 +1629,6 @@
         state.myGifts = await DB.myGifts(CURRENT_YEAR);
         show("home");
       } catch (err) { toast("Gagal simpan: " + (err.message || err)); }
-      return;
-    }
-    if (T.closest("#printSheetBtn")) {
-      el("printSheetBody").innerHTML = printSheetHTML();
-      window.print();
       return;
     }
     // 2026-09-23 (permintaan user, "bisa di download dalam bentuk pdf" +
