@@ -207,7 +207,7 @@
 <script>
 (function () {
   "use strict";
-  const { esc, DISC_GROUPS, computeDiscGraphs, discComplete } = window.LTS;
+  const { esc, DISC_GROUPS, computeDiscGraphs, discComplete, ROADMAP_SECTIONS, HOLY_DISCONTENT_AREAS } = window.LTS;
   const CURRENT_YEAR = new Date().getFullYear();
   const el = id => document.getElementById(id);
   const $ = s => document.querySelector(s);
@@ -224,7 +224,7 @@
   // 2026-09-22 susulan ("bangun assesment DISC dengan hasil masking, real,
   // stress"): myDisc (baris tahun INI, null kalau belum diisi) + draft.discPicks
   // (isian yg sedang dikerjakan, blm disimpan) ditambahkan.
-  const state = { page:"login", stack:[], persona:null, meId:null, myProfile:null, accessStatus:null, accessRequests:[], myDisc:null, draft:{ discPicks:[] } };
+  const state = { page:"login", stack:[], persona:null, meId:null, myProfile:null, accessStatus:null, accessRequests:[], myDisc:null, myRoadmap:null, draft:{ discPicks:[], roadmapData:{} } };
   const NOCHROME = ["login"];
 
   function initials(name) { return String(name || "?").trim().split(/\s+/).slice(0, 2).map(w => w[0] || "").join("").toUpperCase() || "?"; }
@@ -341,13 +341,25 @@
       <span class="tag ${done ? "tag--done" : "tag--todo"}">${done ? "Selesai" : "Belum"}</span>
     </button>`;
   }
-  const SERVE_GRID_HTML = `
-      <div class="serve-grid">
-        ${SERVE_SECTIONS.map(s => `<button type="button" class="serve-tile" style="--dot:${s.dot};" data-goto="${s.key}">
-          <span class="ic">${esc(s.letter)}</span>
-          <b>${esc(s.title)}</b>
-          <span class="sub muted">${esc(s.desc)}</span>
-        </button>`).join("")}
+  // 2026-09-23 ("kerjakan yang experience"): diubah dari const string jadi
+  // fungsi — ubin S-E-R-V-E sekarang tampilkan tag "Ada isian" kalau salah
+  // satu field bagiannya sudah terisi di draft.roadmapData (bukan cuma
+  // ikon+judul polos spt sebelumnya, sekarang punya status spt kartu DISC).
+  function serveGridHTML() {
+    return `<div class="serve-grid">
+        ${SERVE_SECTIONS.map(s => {
+          const sec = ROADMAP_SECTIONS.find(x => x.key === s.key);
+          const filled = sec && sec.fields.some(f => {
+            const v = state.draft.roadmapData[f.key];
+            return Array.isArray(v) ? v.length > 0 : !!v;
+          });
+          return `<button type="button" class="serve-tile" style="--dot:${s.dot};" data-goto="${s.key}">
+            <span class="ic">${esc(s.letter)}</span>
+            <b>${esc(s.title)}</b>
+            <span class="sub muted">${esc(s.desc)}</span>
+            ${filled ? `<span class="tag tag--done">Ada isian</span>` : ""}
+          </button>`;
+        }).join("")}
       </div>
       <button type="button" class="card pad" style="width:100%;text-align:left;display:flex;align-items:center;gap:12px;margin-top:12px;cursor:pointer;" data-goto="hasil">
         <span style="flex:none;width:42px;height:42px;border-radius:12px;display:grid;place-items:center;font-size:20px;background:linear-gradient(150deg,var(--accent),color-mix(in srgb,var(--accent) 70%,#000));">📊</span>
@@ -356,6 +368,7 @@
           <span class="sub" style="margin-top:2px;display:block;">Kepribadian, keahlian, pekerjaan yang tepat & yang perlu diperbaiki</span>
         </span>
       </button>`;
+  }
   // 2026-09-22 (permintaan user, "tombol assesment yang terkunci dan hanya
   // bisa dibuka dengan request ke admin"): utk PESERTA, S-E-R-V-E + Hasil
   // Asesmen baru tampil setelah accessStatus==="approved" — sebelum itu,
@@ -386,7 +399,7 @@
     el("homeBody").innerHTML = `
       ${unlocked ? discCardHTML() : ""}
       <div class="divider-note">Serve Road Map — 5 bagian refleksi yang menggabungkan kekuatan, pengalaman, relasi, visi, dan rencana pelayananmu jadi satu peta pribadi. Diperbarui setiap tahun.</div>
-      ${unlocked ? SERVE_GRID_HTML : lockedHomeHTML()}
+      ${unlocked ? serveGridHTML() : lockedHomeHTML()}
     `;
   };
 
@@ -475,8 +488,35 @@
       <p class="sub" style="margin:0;">Segera hadir — bagian isian ini sedang disiapkan.</p>
     </div>`;
   }
+  // ---- Serve Road Map, tiap bagian (2026-09-23, "kerjakan yang experience"
+  // — dibangun SATU-SATU per permintaan; fieldHTML/renderRoadmapSection
+  // GENERIK dipakai ulang persis sama utk Strength/Relationship/Vision/
+  // Expansion nanti, tinggal tambah 1 baris RENDER.xxx per bagian). ----
+  function fieldHTML(f) {
+    const val = state.draft.roadmapData[f.key];
+    if (f.type === "textarea") return `<div class="field"><label>${esc(f.label)}</label><textarea data-rmfield="${f.key}">${esc(val || "")}</textarea></div>`;
+    if (f.type === "text") return `<div class="field"><label>${esc(f.label)}</label><input type="text" data-rmfield="${f.key}" value="${esc(val || "")}"></div>`;
+    if (f.type === "checkboxList") {
+      const arr = Array.isArray(val) ? val : [];
+      return `<div class="field"><label>${esc(f.label)}</label>
+        <div class="roleseg" style="flex-wrap:wrap;">${HOLY_DISCONTENT_AREAS.map(a => `<button type="button" data-rmarea="${esc(a)}" aria-pressed="${arr.includes(a)}" style="flex:none;">${esc(a)}</button>`).join("")}</div>
+      </div>`;
+    }
+    if (f.type === "template") {
+      return `<div class="field"><label>${esc(f.label)}</label><textarea data-rmfield="${f.key}" placeholder="${esc(f.template)}">${esc(val || "")}</textarea></div>`;
+    }
+    return "";
+  }
+  function renderRoadmapSection(sectionKey, bodyId) {
+    const sec = ROADMAP_SECTIONS.find(s => s.key === sectionKey);
+    el(bodyId).innerHTML = `
+      <div class="divider-note">Isi dengan refleksi jujur — boleh disimpan bertahap, bisa diubah lagi kapan saja sebelum tahun berganti.</div>
+      <div class="card pad">${sec.fields.map(fieldHTML).join("")}</div>
+      <button class="btn btn--primary" style="margin-top:14px;" data-rmsave="${sectionKey}">Simpan ${esc(sec.title)}</button>
+    `;
+  }
   RENDER.strength = () => placeholderPage("strengthBody", "Strength");
-  RENDER.experience = () => placeholderPage("experienceBody", "Experience");
+  RENDER.experience = () => renderRoadmapSection("experience", "experienceBody");
   RENDER.relationship = () => placeholderPage("relationshipBody", "Relationship");
   RENDER.vision = () => placeholderPage("visionBody", "Vision");
   RENDER.expansion = () => placeholderPage("expansionBody", "Expansion");
@@ -563,6 +603,9 @@
     if (state.persona === "ADMIN" || state.accessStatus === "approved") {
       state.myDisc = await DB.myDisc(CURRENT_YEAR);
       state.draft.discPicks = (state.myDisc && state.myDisc.picks && state.myDisc.picks.length) ? state.myDisc.picks : [];
+      // 2026-09-23 ("kerjakan yang experience"): sama pola dgn DISC di atas.
+      state.myRoadmap = await DB.myRoadmap(CURRENT_YEAR);
+      state.draft.roadmapData = (state.myRoadmap && state.myRoadmap.data) ? { ...state.myRoadmap.data } : {};
     }
   }
 
@@ -634,7 +677,7 @@
     }
     if (T.closest("#pfLogout") || T.closest("#rolePill")) {
       await DB.logout().catch(() => {});
-      Object.assign(state, { page:"login", stack:[], persona:null, meId:null, myProfile:null, accessStatus:null, accessRequests:[], myDisc:null, draft:{ discPicks:[] } });
+      Object.assign(state, { page:"login", stack:[], persona:null, meId:null, myProfile:null, accessStatus:null, accessRequests:[], myDisc:null, myRoadmap:null, draft:{ discPicks:[], roadmapData:{} } });
       show("login", { replace:true });
       return;
     }
@@ -698,6 +741,41 @@
       } catch (err) { toast("Gagal: " + (err.message || err)); }
       return;
     }
+
+    // ---- Serve Road Map: checkbox Vision (data-rmarea) & tombol Simpan
+    // per bagian (data-rmsave) — 2026-09-23 ("kerjakan yang experience"),
+    // rmarea belum dipakai section "experience" tp digenerikkan sekalian
+    // spy Vision (checkboxList) nanti tinggal jalan, tak perlu diubah lagi. ----
+    const rmArea = T.closest("[data-rmarea]");
+    if (rmArea) {
+      const a = rmArea.dataset.rmarea;
+      // Satu2nya checkboxList di ROADMAP_SECTIONS skrg cuma "holyDiscontentAreas"
+      // (bagian Vision) — key-nya ditulis langsung, tak perlu dicari dari DOM.
+      const cur = Array.isArray(state.draft.roadmapData.holyDiscontentAreas) ? state.draft.roadmapData.holyDiscontentAreas.slice() : [];
+      const idx = cur.indexOf(a);
+      if (idx >= 0) cur.splice(idx, 1); else cur.push(a);
+      state.draft.roadmapData.holyDiscontentAreas = cur;
+      RENDER[state.page] && RENDER[state.page]();
+      return;
+    }
+    const rmSave = T.closest("[data-rmsave]");
+    if (rmSave) {
+      const sectionKey = rmSave.dataset.rmsave;
+      const sec = ROADMAP_SECTIONS.find(s => s.key === sectionKey);
+      const patch = Object.fromEntries(sec.fields.map(f => [f.key, state.draft.roadmapData[f.key]]));
+      try {
+        await DB.saveRoadmapSection(CURRENT_YEAR, patch);
+        toast(`${sec.title} disimpan.`);
+        state.myRoadmap = await DB.myRoadmap(CURRENT_YEAR);
+        show("home");
+      } catch (err) { toast("Gagal simpan: " + (err.message || err)); }
+      return;
+    }
+  });
+
+  document.addEventListener("input", e => {
+    const rm = e.target.closest("[data-rmfield]");
+    if (rm) state.draft.roadmapData[rm.dataset.rmfield] = rm.value;
   });
 
   boot();

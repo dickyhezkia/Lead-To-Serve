@@ -30,6 +30,8 @@
  *    DB.myAccessStatus() / DB.requestAccess()          (peserta)
  *    DB.listAllAccessRequests() / DB.decideAccessRequest(id, approve)  (Admin saja)
  *    DB.myDisc(year) / DB.saveDisc(year, {picks,graph1,graph2,graph3})  (peserta, 1 baris/tahun)
+ *    DB.myRoadmap(year) / DB.saveRoadmapSection(year, patch)  (peserta, 1 baris/tahun, `data` gabungan semua bagian S-E-R-V-E)
+ *    DB.deleteAccessRequest(id)  (Admin saja)
  * ========================================================================== */
 window.makeDB = function makeDB(sb) {
   "use strict";
@@ -146,6 +148,31 @@ window.makeDB = function makeDB(sb) {
       if (!s) throw new Error("Belum login");
       wrap(await sb.from("lts_disc_results").upsert({
         profile_id: s.user.id, year, picks, graph1, graph2, graph3, updated_at: new Date().toISOString(),
+      }, { onConflict: "profile_id,year" }));
+    },
+
+    // ---------- Serve Road Map / S-E-R-V-E (2026-09-23, "kerjakan yang
+    // experience" — pertama dari 5 bagian, dibangun satu-satu) — lihat
+    // supabase/v_lts_roadmap_results.sql. 1 baris/tahun, `data` jsonb
+    // menampung field SEMUA bagian yg sudah diisi (bukan 1 tabel per
+    // bagian) — saveRoadmapSection() MENGGABUNG (bukan menimpa) spy
+    // menyimpan 1 bagian tak menghapus bagian lain yg sudah diisi lebih
+    // dulu di tahun yg sama. ----------
+    async myRoadmap(year) {
+      const s = await this.session();
+      if (!s) return null;
+      const { data, error } = await sb.from("lts_roadmap_results").select("*").eq("profile_id", s.user.id).eq("year", year).maybeSingle();
+      if (error) throw error;
+      return data || null;
+    },
+    async saveRoadmapSection(year, patch) {
+      const s = await this.session();
+      if (!s) throw new Error("Belum login");
+      const { data: existing, error: e1 } = await sb.from("lts_roadmap_results").select("data").eq("profile_id", s.user.id).eq("year", year).maybeSingle();
+      if (e1) throw e1;
+      const merged = { ...(existing && existing.data ? existing.data : {}), ...patch };
+      wrap(await sb.from("lts_roadmap_results").upsert({
+        profile_id: s.user.id, year, data: merged, updated_at: new Date().toISOString(),
       }, { onConflict: "profile_id,year" }));
     },
   };
