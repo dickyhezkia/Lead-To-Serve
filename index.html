@@ -201,6 +201,26 @@
   .printsheet .psexp { display: grid; grid-template-columns: repeat(5, 1fr); border: 1px solid #000; border-top: none; }
   .printsheet .psexp > div { border-right: 1px solid #000; padding: 7px; font-size: 8.5px; }
   .printsheet .psexp > div:last-child { border-right: none; }
+  /* 2026-09-23 (bug nyata, user: "hasil unduhan asesmen dan road map
+     terpotong"): akar masalah — `pagebreak: {mode:["css","legacy"]}` di
+     downloadPdf()/sharePdf() tak py aturan CSS page-break APAPUN utk
+     dipatuhi mode "css"-nya, jadi SELALU jatuh ke mode "legacy" (potong
+     piksel mentah tanpa peduli batas elemen) tiap kali kontennya lebih
+     tinggi dari 1 halaman A4 — teks/kolom terpotong PAS di tengah kalimat
+     kalau kebetulan jatuh di batas halaman. Diperbaiki: SEMUA blok konten
+     (kolom S-E-R-V-E, sel Expansion, tiap baris narasi Hasil Asesmen) diberi
+     `page-break-inside:avoid` (+`break-inside` versi modern) — html2pdf.js
+     mode "css" jd bisa geser SELURUH blok itu ke halaman berikutnya kalau
+     tak muat, bukan memotongnya di tengah. Lembar Road Map "1 Lembar" bisa
+     jd 2 halaman kalau isiannya sangat panjang — itu tukar-tambah yg
+     disengaja (2 halaman utuh jauh lebih baik drpd 1 halaman yg datanya
+     hilang separuh). `pagebreak` mode jg diganti ke ["css","avoid-all"]
+     (avoid-all = jaring pengaman otomatis utk elemen manapun yg lolos dari
+     daftar CSS di atas, GANTI legacy yg justru sumber masalahnya). */
+  .printsheet .pscol, .printsheet .psexp > div, .printsheet .psblock,
+  .printsheet .rphead, .printsheet .rpsub, .printsheet .rpp, .printsheet .rpul li {
+    page-break-inside: avoid; break-inside: avoid;
+  }
   @media print {
     body * { visibility: hidden; }
     .printsheet, .printsheet * { visibility: visible; }
@@ -1125,7 +1145,7 @@
         image: { type: "jpeg", quality: 0.98 },
         html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff", scrollX: 0, scrollY: 0, windowWidth: holder.scrollWidth, windowHeight: holder.scrollHeight },
         jsPDF: { unit: "mm", format: "a4", orientation },
-        pagebreak: { mode: ["css", "legacy"] },
+        pagebreak: { mode: ["css", "avoid-all"] },
       }).from(holder).save();
     } catch (err) {
       toast("Gagal membuat PDF: " + (err.message || err));
@@ -1164,7 +1184,7 @@
         image: { type: "jpeg", quality: 0.98 },
         html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff", scrollX: 0, scrollY: 0, windowWidth: holder.scrollWidth, windowHeight: holder.scrollHeight },
         jsPDF: { unit: "mm", format: "a4", orientation },
-        pagebreak: { mode: ["css", "legacy"] },
+        pagebreak: { mode: ["css", "avoid-all"] },
       }).from(holder).outputPdf("blob");
       const file = new File([blob], filename, { type: "application/pdf" });
       if (!navigator.canShare({ files: [file] })) { toast("Perangkat ini tidak mendukung berbagi file PDF — gunakan tombol Unduh PDF saja."); return; }
