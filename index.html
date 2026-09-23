@@ -444,14 +444,35 @@
   // fungsi — ubin S-E-R-V-E sekarang tampilkan tag "Ada isian" kalau salah
   // satu field bagiannya sudah terisi di draft.roadmapData (bukan cuma
   // ikon+judul polos spt sebelumnya, sekarang punya status spt kartu DISC).
+  // Dipakai bareng serveGridHTML() (tag "Ada isian" per ubin) & banner
+  // "Lengkap" baru di bawah — 1 tempat spy definisi "terisi" konsisten.
+  const serveSectionFilled = key => {
+    const sec = ROADMAP_SECTIONS.find(x => x.key === key);
+    return !!(sec && sec.fields.some(f => {
+      const v = state.draft.roadmapData[f.key];
+      return Array.isArray(v) ? v.length > 0 : !!v;
+    }));
+  };
   function serveGridHTML() {
-    return `<div class="serve-grid">
+    const allFilled = SERVE_SECTIONS.every(s => serveSectionFilled(s.key));
+    // 2026-09-23 (permintaan user, "setelah LTS1 diisi semua, kamu buatkan
+    // dalam 1 halaman penuh ... bisa diunduh dan share dalam bentuk pdf"):
+    // begitu KELIMA bagian S-E-R-V-E sudah py isian, banner ini muncul di
+    // atas ubin S-E-R-V-E, mengarahkan langsung ke halaman Hasil Asesmen —
+    // tombol Unduh/Bagikan PDF-nya sendiri sudah ada di sana (lihat
+    // pdfServeBtn/shareServeBtn di RENDER.hasil), banner ini murni supaya
+    // org yg baru selesai isi LANGSUNG tahu ke mana harus pergi, tak perlu
+    // menebak2 dulu.
+    const completeBanner = allFilled ? `<button type="button" class="card pad" style="width:100%;text-align:left;display:flex;align-items:center;gap:12px;margin-bottom:12px;cursor:pointer;background:linear-gradient(150deg,color-mix(in srgb,var(--good) 18%,var(--surface)),var(--surface));border-color:var(--good);" data-goto="hasil">
+      <span style="flex:none;width:42px;height:42px;border-radius:12px;display:grid;place-items:center;font-size:20px;background:linear-gradient(150deg,var(--good),color-mix(in srgb,var(--good) 70%,#000));">🎉</span>
+      <span style="flex:1;min-width:0;">
+        <b style="font-family:var(--font-display);font-size:14px;display:block;">Serve Road Map Lengkap!</b>
+        <span class="sub" style="margin-top:2px;display:block;">Lihat ringkasan 1 halaman, lalu unduh atau bagikan sebagai PDF →</span>
+      </span>
+    </button>` : "";
+    return `${completeBanner}<div class="serve-grid">
         ${SERVE_SECTIONS.map(s => {
-          const sec = ROADMAP_SECTIONS.find(x => x.key === s.key);
-          const filled = sec && sec.fields.some(f => {
-            const v = state.draft.roadmapData[f.key];
-            return Array.isArray(v) ? v.length > 0 : !!v;
-          });
+          const filled = serveSectionFilled(s.key);
           return `<button type="button" class="serve-tile" style="--dot:${s.dot};" data-goto="${s.key}">
             <span class="ic">${esc(s.letter)}</span>
             <b>${esc(s.title)}</b>
@@ -1070,6 +1091,45 @@
       holder.innerHTML = "";
     }
   }
+  // 2026-09-23 (permintaan user, "...bisa diunduh dan share dalam bentuk
+  // pdf"): downloadPdf() di atas sudah bisa UNDUH — ini tambahannya, BAGIKAN
+  // langsung (WhatsApp/Email/dll) lewat Web Share API level-2 (`navigator.
+  // share` dgn `files`), didukung browser mobile modern (Chrome/Safari
+  // Android & iOS) tapi TIDAK semua desktop — makanya dicek dulu via
+  // `navigator.canShare({files:...})` sebelum dicoba, & pesan jelas kalau
+  // tak didukung (arahkan pakai tombol Unduh PDF saja). Sama pola dgn
+  // downloadPdf() (isi #printSheetBody off-screen dulu), bedanya PDF di sini
+  // diambil sbg Blob (`outputPdf("blob")`) lalu dibungkus jadi File utk
+  // dioper ke navigator.share(), BUKAN langsung men-trigger unduhan.
+  async function sharePdf(bodyHtml, filename, orientation) {
+    if (!window.html2pdf) { toast("Fitur PDF belum siap, coba lagi sebentar."); return; }
+    if (!(navigator.share && navigator.canShare)) { toast("Perangkat/browser ini tidak mendukung fitur Bagikan — gunakan tombol Unduh PDF, lalu bagikan filenya secara manual."); return; }
+    const holder = el("printSheetBody");
+    holder.innerHTML = bodyHtml;
+    holder.classList.add("printsheet--capture");
+    holder.style.width = orientation === "landscape" ? "1400px" : "900px";
+    try {
+      toast("Menyiapkan PDF untuk dibagikan…");
+      const blob = await window.html2pdf().set({
+        margin: 8,
+        filename,
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff" },
+        jsPDF: { unit: "mm", format: "a4", orientation },
+        pagebreak: { mode: ["css", "legacy"] },
+      }).from(holder).outputPdf("blob");
+      const file = new File([blob], filename, { type: "application/pdf" });
+      if (!navigator.canShare({ files: [file] })) { toast("Perangkat ini tidak mendukung berbagi file PDF — gunakan tombol Unduh PDF saja."); return; }
+      await navigator.share({ files: [file], title: filename });
+    } catch (err) {
+      if (err && err.name === "AbortError") return;   // pengguna batal di dialog share — bukan error, diam saja
+      toast("Gagal menyiapkan/membagikan PDF: " + (err.message || err));
+    } finally {
+      holder.classList.remove("printsheet--capture");
+      holder.style.width = "";
+      holder.innerHTML = "";
+    }
+  }
   function printSheetHTML() {
     const rd = state.draft.roadmapData || {};
     const disc = state.myDisc, ssd = state.mySsd, gifts = state.myGifts;
@@ -1290,6 +1350,11 @@
     const printBtn = `<button type="button" class="btn btn--ghost" style="margin-top:12px;" id="printSheetBtn">🖨️ Cetak Ringkasan Serve Road Map</button>`;
     const pdfServeBtn = `<button type="button" class="btn btn--ghost" style="margin-top:8px;" id="pdfServeBtn">⬇️ Unduh PDF — Ringkasan S-E-R-V-E (1 Lembar)</button>`;
     const pdfHasilBtn = `<button type="button" class="btn btn--primary" style="margin-top:8px;" id="pdfHasilBtn">⬇️ Unduh PDF — Hasil Asesmen Lengkap</button>`;
+    // 2026-09-23 (permintaan user, "...bisa diunduh dan share dalam bentuk
+    // pdf") — tombol Bagikan, sama isinya dgn tombol Unduh di atasnya
+    // masing2, cuma beda aksi (share langsung, bukan simpan file).
+    const shareServeBtn = `<button type="button" class="btn btn--ghost" style="margin-top:8px;" id="shareServeBtn">🔗 Bagikan PDF — Ringkasan S-E-R-V-E</button>`;
+    const shareHasilBtn = `<button type="button" class="btn btn--ghost" style="margin-top:8px;" id="shareHasilBtn">🔗 Bagikan PDF — Hasil Asesmen Lengkap</button>`;
     if (!state.myDisc && !state.mySsd && !state.myGifts && !state.rs3Result && !state.lts2Result) {
       el("hasilBody").innerHTML = `<div class="card pad" style="text-align:center;padding:40px 20px;">
         <b style="display:block;font-family:var(--font-display);font-size:16px;margin-bottom:6px;">Hasil Asesmen</b>
@@ -1298,13 +1363,13 @@
         <button type="button" class="btn btn--primary" data-goto="ssd" style="margin-bottom:8px;">Isi SSD</button>
         <button type="button" class="btn btn--ghost" data-goto="gifts">Isi Karunia Rohani</button>
       </div>
-      ${printBtn}${pdfServeBtn}`;
+      ${printBtn}${pdfServeBtn}${shareServeBtn}`;
       return;
     }
     el("hasilBody").innerHTML = `
       <div class="divider-note">Hasil asesmen ${CURRENT_YEAR} — kepribadian, keahlian, & area pelayanan yang tepat untukmu.</div>
       ${resultBodyHTML(state.myDisc, state.mySsd, state.myGifts, state.draft.roadmapData, state.rs3Result, state.lts2Result, true)}
-      ${printBtn}${pdfServeBtn}${pdfHasilBtn}
+      ${printBtn}${pdfServeBtn}${shareServeBtn}${pdfHasilBtn}${shareHasilBtn}
     `;
   };
 
@@ -1543,6 +1608,17 @@
     }
     if (T.closest("#pdfHasilBtn")) {
       downloadPdf(hasilReportHTML(buildHasilNarrative()), `Hasil-Asesmen-${safeFileName((state.myProfile || {}).name)}-${CURRENT_YEAR}.pdf`, "portrait");
+      return;
+    }
+    // 2026-09-23 (permintaan user, "...bisa diunduh dan share dalam bentuk
+    // pdf") — SAMA PERSIS isinya dgn #pdfServeBtn/#pdfHasilBtn di atas, cuma
+    // pakai sharePdf() (dialog Bagikan OS) bukan downloadPdf() (simpan file).
+    if (T.closest("#shareServeBtn")) {
+      sharePdf(printSheetHTML(), `Serve-Road-Map-${safeFileName((state.myProfile || {}).name)}-${CURRENT_YEAR}.pdf`, "landscape");
+      return;
+    }
+    if (T.closest("#shareHasilBtn")) {
+      sharePdf(hasilReportHTML(buildHasilNarrative()), `Hasil-Asesmen-${safeFileName((state.myProfile || {}).name)}-${CURRENT_YEAR}.pdf`, "portrait");
       return;
     }
     const appReq = T.closest("[data-appreq]"), rejReq = T.closest("[data-rejreq]");
