@@ -237,32 +237,17 @@
   .printsheet .rpsub { font-size: 10.5px; font-weight: bold; margin: 9px 0 3px; }
   .printsheet .rpp { font-size: 10px; line-height: 1.55; margin: 0 0 7px; }
   .printsheet .rpul { font-size: 10px; line-height: 1.55; margin: 0 0 8px 16px; padding: 0; }
-  /* Kontainer #printSheetBody normalnya display:none (lihat .printsheet di
-     atas) — spy html2pdf.js (html2canvas) bisa "memotret" kontennya, harus
-     dirender nyata dulu (BUKAN display:none). `.printsheet--capture` di sini
-     HANYA menangani itu (override display:none bawaan .printsheet) —
-     positioning/overlay-nya kini tanggung jawab `.printsheetoverlay` di bawah. */
-  .printsheet--capture { display: block !important; }
-  /* 2026-09-23: percobaan #1 ("pdf kosong") & #2 ("lihat sudah bisa tapi
-     unduhnya masih kosong") SAMA-SAMA gagal (dikonfirmasi user, 2x, utk 2
-     lembar berbeda — Serve Road Map & Hasil Asesmen — jadi bukan soal
-     konten, tapi mekanisme "potret"-nya sendiri). Ternyata akar masalahnya
-     BUKAN cuma soal position:fixed vs absolute — #printSheetBody SELAMA INI
-     anak langsung dari <body>, DI LUAR .phone/.screen-frame sepenuhnya,
-     sebuah lokasi yg TAK PERNAH dites bisa dirender benar. Satu-satunya yg
-     TERBUKTI benar dari user ("lihat sudah bisa") adalah halaman "Lihat
-     Serve Road Map" (RENDER.serveview) — krn ia dirender NORMAL di dalam
-     .screen-frame/.scroll spt halaman lain, bukan lewat trik posisi
-     apapun. Perbaikan kali ini: pindahkan wadah potret ke DALAM
-     .screen-frame (jadi overlay di atas halaman aktif, BUKAN anak <body>)
-     — persis mekanisme render yg sudah terbukti. Tak ada lagi acakan
-     position:fixed/absolute pada #printSheetBody sendiri, tak ada lagi
-     body.style.overflow — .screen-frame SENDIRI tak pernah position:fixed/
-     overflow:hidden-pada-body (itu cuma properti <body> di layar sempit,
-     yg skrg sudah tak relevan krn wadah ini bukan anak body lagi). */
-  .printsheetoverlay { display: none; }
-  .printsheetoverlay.active { display: block; position: absolute; inset: 0; z-index: 500; background: #fff; overflow: auto; }
-  .printsheetoverlay__scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  /* 2026-09-23: wadah potret html2canvas (#printSheetOverlay/#printSheetBody,
+     `.printsheet--capture`, `.printsheetoverlay*`) yg dulu ada di sini SUDAH
+     DIHAPUS — 4 percobaan berturut2 memperbaikinya (2x "PDF kosong", 2x
+     "terpotong", riwayat lengkap di memory project) semua gagal krn akar
+     masalahnya adalah PENDEKATANNYA sendiri (screenshot DOM via html2canvas,
+     rentan thd breakpoint/overflow ancestor manapun) — BUKAN detail
+     posisi/overflow yg terus-menerus diperbaiki. PDF sekarang digambar
+     LANGSUNG pakai jsPDF (lihat buildRoadMapPdf()/buildHasilPdf()), TANPA
+     html2canvas sama sekali. `.printsheet` (base style di atas) TETAP
+     dipakai — bukan lagi utk potret, tapi utk halaman "Lihat" (RENDER.
+     serveview/hasilview, render HTML biasa, tak pernah py masalah ini). */
 </style>
 </head>
 <body>
@@ -307,26 +292,22 @@
         </div>
       </div>
       <nav class="tabbar hidden" id="tabbar"></nav>
-      <!-- 2026-09-23 (bug "pdf masih kosong", percobaan ke-3): wadah potret PDF
-           dipindah ke SINI, di DALAM .screen-frame (dulunya anak <body>, di
-           LUAR .phone sepenuhnya — lihat catatan panjang di CSS
-           .printsheetoverlay). Jadi overlay di atas halaman aktif, dirender
-           lewat mekanisme normal yg sama dgn halaman "Lihat Serve Road Map"
-           yg SUDAH terbukti benar (bukan lewat @media print lagi — tombol
-           Cetak lama sudah dihapus, lihat RENDER.hasil). -->
-      <div class="printsheetoverlay" id="printSheetOverlay">
-        <div class="printsheetoverlay__scroll"><div class="printsheet" id="printSheetBody"></div></div>
-      </div>
     </div>
   </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-<!-- 2026-09-23 (permintaan user, "bisa di download dalam bentuk pdf"): html2pdf.js
-     (bundel html2canvas+jsPDF) — mengubah #printSheetBody (lembar ringkasan
-     S-E-R-V-E yg sama dgn tombol Cetak) jadi file PDF yg langsung terunduh,
-     tanpa lewat dialog print browser. Versi dipatok (bukan @latest) spy stabil. -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<!-- 2026-09-23 (bug "masih tetap sama" — foto user membuktikan 4 percobaan
+     berturut2 di atas html2canvas/html2pdf.js SEMUA gagal, 2x kosong + 2x
+     terpotong, akar masalah selalu soal bagaimana html2canvas "memotret" DOM
+     — kelas bug yg sama berulang): DIGANTI TOTAL — html2pdf.js/html2canvas
+     DICOPOT, diganti jsPDF MURNI (tanpa html2canvas sama sekali). PDF
+     digambar LANGSUNG pakai koordinat mm (teks/garis/kotak), BUKAN
+     "memotret" elemen HTML — jadi TAK MUNGKIN lagi kena bug lebar/posisi
+     viewport spt sebelumnya (tak ada DOM yg direndernya ke kanvas, tak ada
+     breakpoint CSS yg bisa salah kebaca). Lihat buildRoadMapPdf()/
+     buildHasilPdf() di bawah. Versi dipatok (bukan @latest) spy stabil. -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="./config.js"></script>
 <script src="./common.js"></script>
 <script src="./db.js"></script>
@@ -1109,133 +1090,272 @@
   }
   const psLine = val => `<div class="psline">${esc(val || "")}</div>`;
   const safeFileName = s => String(s || "peserta").trim().replace(/[^a-zA-Z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "peserta";
-  // 2026-09-23 (permintaan user, "bisa di download dalam bentuk pdf"):
-  // html2pdf.js (html2canvas+jsPDF, dimuat via <script> di bawah body) —
-  // "memotret" #printSheetBody jadi canvas lalu jadi file PDF yg LANGSUNG
-  // terunduh (bukan lewat dialog print browser spt tombol Cetak yg sudah
-  // ada). #printSheetBody normalnya display:none (dipakai jg oleh tombol
-  // Cetak yg mengandalkan @media print) — ditampilkan sungguhan sekilas
-  // (class .printsheet--capture, lihat CSS + catatan bug "pdf kosong" di
-  // sana) spy html2canvas bisa merender kontennya, lalu dikembalikan spt
-  // semula. `waitPaint()` (2 x requestAnimationFrame) dipanggil SEBELUM
-  // html2pdf mulai — tanpa ini, browser kadang belum sempat benar2
-  // menggambar (paint) elemen yg baru saja innerHTML+class-nya diubah pada
-  // saat html2canvas mulai "memotret", hasilnya jg bisa kosong/putih.
-  const waitPaint = () => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
-  // 2026-09-23 (bug nyata, user kirim FOTO: "masih terpotong" — kali ini
-  // sisi KANAN kolom/baris terpotong rata, BUKAN soal halaman spt dugaan
-  // sebelumnya): akar masalah SEBENARNYA — html2canvas dgn opsi eksplisit
-  // `windowWidth` (dipakai spy holder yg lebar 900/1400px tak kepotong)
-  // me-render "jendela virtual" seukuran itu (900/1400px) utk MENGKLON
-  // SELURUH dokumen, termasuk `.phone`/`.screen-frame` yg LEBARNYA diatur
-  // @media responsif (bukan px tetap) — pada jendela virtual selebar
-  // 900-1400px, breakpoint `@media (max-width:480px)` (mode HP, `.phone{
-  // width:100%}`) TAK LAGI berlaku, jatuh ke `@media (min-width:640px)`
-  // (mode "simulator", `.phone{width:clamp(390px,40vw,520px)}`) — jadi
-  // `.screen-frame` DI DALAM KLON cuma ~390-520px, BUKAN 900-1400px sesuai
-  // holder. `#printSheetOverlay` (position:absolute;inset:0, anak
-  // .screen-frame) ikut kepotong ke lebar itu, & `overflow-x:auto`-nya
-  // (+ overflow:hidden bawaan .screen-frame) memotong SISA holder yg lebih
-  // lebar dari situ — persis pola "terpotong rata di kanan" di foto.
-  // Diperbaiki: SELAMA potret saja, `#printSheetOverlay` dipaksa lebar PERSIS
-  // sama dgn holder (px eksplisit, BUKAN inset:0 yg ikut lebar .screen-frame
-  // yg berubah-ubah di klon) + overflow SEMUA ancestor (.screen-frame +
-  // overlay sendiri) dibuka jd visible — dikembalikan apapun hasilnya.
-  const captureWidthUnlock = contentWidth => {
-    const overlay = el("printSheetOverlay");
-    const sf = document.querySelector(".screen-frame");
-    const prev = { w:overlay.style.width, l:overlay.style.left, r:overlay.style.right, oo:overlay.style.overflow, sfo:sf.style.overflow };
-    overlay.style.width = contentWidth;
-    overlay.style.left = "0";
-    overlay.style.right = "auto";
-    overlay.style.overflow = "visible";
-    sf.style.overflow = "visible";
-    return () => {
-      overlay.style.width = prev.w; overlay.style.left = prev.l; overlay.style.right = prev.r;
-      overlay.style.overflow = prev.oo; sf.style.overflow = prev.sfo;
+  // 2026-09-23 (user: "masih tetap sama, coba kamu perbaiki Road Map tetap
+  // landscape A4 sedangkan Asesmen lengkap Potrait A4. dan buat fit to
+  // screen iphone dan android" — 4 percobaan berturut2 memperbaiki
+  // html2canvas/html2pdf.js SEMUA gagal, lihat catatan panjang yg SUDAH
+  // DIHAPUS di sini + di memory project): PDF SEKARANG digambar LANGSUNG
+  // pakai jsPDF murni (koordinat mm, teks/garis/kotak) — BUKAN "memotret"
+  // elemen HTML sama sekali, jadi TAK ADA LAGI ketergantungan pada
+  // .phone/.screen-frame/breakpoint CSS/overflow ancestor manapun saat PDF
+  // dibuat — kelas bug yg berulang 4x itu jadi TAK MUNGKIN terjadi lagi
+  // (tak ada DOM yg dirender ke kanvas). `#printSheetOverlay`/
+  // `#printSheetBody`/`.printsheet--capture` (bekas wadah potret) sudah
+  // dihapus dari HTML/CSS — sisa `.printsheet` (base style) TETAP dipakai,
+  // krn itu jg dipakai halaman "Lihat" (RENDER.serveview/hasilview, render
+  // HTML biasa, tak pernah py masalah ini).
+  function pdfReady() { return !!(window.jspdf && window.jspdf.jsPDF); }
+  // Alur teks vertikal (dipakai buildHasilPdf) — otomatis pindah halaman
+  // (doc.addPage()) kalau blok berikutnya tak muat lagi, JADI TAK PERNAH
+  // ada teks terpotong: kalau tak muat, digeser UTUH ke halaman baru.
+  function pdfFlow(doc, M) {
+    const PW = doc.internal.pageSize.getWidth(), PH = doc.internal.pageSize.getHeight();
+    let y = M;
+    const ensure = h => { if (y + h > PH - M) { doc.addPage(); y = M; } };
+    return {
+      get y() { return y; },
+      heading1(text) {
+        doc.setFont("helvetica", "bold"); doc.setFontSize(14);
+        ensure(doc.getLineHeight() + 2);
+        doc.text(text, PW / 2, y + doc.getLineHeight() * 0.7, { align: "center" });
+        y += doc.getLineHeight() + 2;
+      },
+      centerLine(text) {
+        doc.setFont("helvetica", "bold"); doc.setFontSize(11);
+        ensure(doc.getLineHeight() + 2);
+        doc.text(text, PW / 2, y + doc.getLineHeight() * 0.7, { align: "center" });
+        y += doc.getLineHeight() + 3;
+      },
+      metaLine(left, right) {
+        doc.setLineWidth(0.4); doc.setDrawColor(0);
+        ensure(10);
+        doc.line(M, y, PW - M, y); y += 4;
+        doc.setFont("helvetica", "normal"); doc.setFontSize(9);
+        doc.text(left, M, y); doc.text(right, PW - M, y, { align: "right" });
+        y += 2; doc.line(M, y, PW - M, y); y += 5;
+      },
+      head(text) {
+        doc.setFont("helvetica", "bold"); doc.setFontSize(11.5);
+        ensure(doc.getLineHeight() + 6);
+        y += 2; doc.text(text, M, y); y += 1.3;
+        doc.setLineWidth(0.5); doc.setDrawColor(0); doc.line(M, y, PW - M, y);
+        y += 4;
+      },
+      sub(text) {
+        doc.setFont("helvetica", "bold"); doc.setFontSize(9.5);
+        ensure(doc.getLineHeight() + 2);
+        doc.text(text, M, y); y += doc.getLineHeight() + 1.3;
+      },
+      para(text) {
+        doc.setFont("helvetica", "normal"); doc.setFontSize(9);
+        const lines = doc.splitTextToSize(String(text || "-"), PW - 2 * M);
+        const h = lines.length * doc.getLineHeight();
+        ensure(h);
+        doc.text(lines, M, y); y += h + 2.5;
+      },
+      bullets(arr) {
+        doc.setFont("helvetica", "normal"); doc.setFontSize(9);
+        if (!arr || !arr.length) { this.para("-"); return; }
+        arr.forEach(t => {
+          const lines = doc.splitTextToSize("• " + t, PW - 2 * M - 3);
+          const h = lines.length * doc.getLineHeight();
+          ensure(h);
+          doc.text(lines, M + 3, y); y += h + 1;
+        });
+        y += 1.5;
+      },
     };
-  };
-  // 2026-09-23 (bug "pdf masih kosong", MASIH terjadi utk 2 lembar berbeda
-  // stlh 2x percobaan sebelumnya — lihat catatan panjang di CSS
-  // .printsheetoverlay utk diagnosa akarnya): wadah potret (#printSheetBody)
-  // skrg overlay DI DALAM .screen-frame (lihat #printSheetOverlay di HTML),
-  // bukan lagi anak <body>. Tinggal tampilkan overlay-nya (.active),
-  // isi+lebarkan holder, tunggu paint, potret, lalu sembunyikan lagi.
-  async function downloadPdf(bodyHtml, filename, orientation) {
-    if (!window.html2pdf) { toast("Fitur unduh PDF belum siap, coba lagi sebentar."); return; }
-    const overlay = el("printSheetOverlay");
-    const holder = el("printSheetBody");
-    const contentWidth = orientation === "landscape" ? "1400px" : "900px";
-    holder.innerHTML = bodyHtml;
-    holder.classList.add("printsheet--capture");
-    holder.style.width = contentWidth;
-    overlay.classList.add("active");
-    const relock = captureWidthUnlock(contentWidth);
-    try {
-      toast("Menyiapkan PDF…");
-      await waitPaint();
-      await window.html2pdf().set({
-        margin: 8,
-        filename,
-        image: { type: "jpeg", quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff", scrollX: 0, scrollY: 0, windowWidth: holder.scrollWidth, windowHeight: holder.scrollHeight },
-        jsPDF: { unit: "mm", format: "a4", orientation },
-        pagebreak: { mode: ["css", "avoid-all"] },
-      }).from(holder).save();
-    } catch (err) {
-      toast("Gagal membuat PDF: " + (err.message || err));
-    } finally {
-      relock();
-      overlay.classList.remove("active");
-      holder.classList.remove("printsheet--capture");
-      holder.style.width = "";
-      holder.innerHTML = "";
+  }
+  // Lembar "JB3 SERVE ROADMAP" — A4 landscape TETAP (permintaan user),
+  // tabel 5-kolom digambar manual (doc.rect/doc.line/doc.text) — ukuran
+  // font MENGECIL OTOMATIS (8pt→5.5pt floor) sampai seluruh tabel muat 1
+  // halaman, jadi TAK PERNAH ada kolom yg lebih tinggi dari halaman (akar
+  // masalah "terpotong" yg lama, lihat riwayat di memory project).
+  function buildRoadMapPdf() {
+    const rd = state.draft.roadmapData || {};
+    const disc = state.myDisc, ssd = state.mySsd, gifts = state.myGifts;
+    const doc = new window.jspdf.jsPDF({ unit: "mm", format: "a4", orientation: "landscape" });
+    const PW = doc.internal.pageSize.getWidth(), PH = doc.internal.pageSize.getHeight();
+    const M = 10;
+    let y = M;
+    doc.setFont("helvetica", "bold"); doc.setFontSize(14);
+    doc.text("JB3 SERVE ROADMAP", PW / 2, y + 4, { align: "center" });
+    y += 9;
+    doc.setLineWidth(0.4); doc.setDrawColor(0); doc.line(M, y, PW - M, y); y += 4.5;
+    doc.setFont("helvetica", "normal"); doc.setFontSize(9);
+    doc.text(`Nama: ${(state.myProfile || {}).name || ""}`, M, y);
+    doc.text(`Tanggal Cetak: ${fmtDateID(new Date().toISOString())}`, PW - M, y, { align: "right" });
+    y += 2.5; doc.line(M, y, PW - M, y); y += 5;
+    const tableTop = y;
+    const discGraphText = g => `D:${g.D} I:${g.I} S:${g.S} C:${g.C}`;
+    const cols = [
+      { title: "STRENGTH", blocks: [
+        ["Karunia Rohani Paling Menonjol", gifts ? gifts.scores.top3.map(giftName).join(", ") : ""],
+        ["Karunia Rohani Cukup Menonjol", gifts ? gifts.scores.next3.map(giftName).join(", ") : ""],
+        ["Bisa (Ability)", rd.abilityText],
+        ["Suka (Passion)", rd.passionText],
+        ["Bisa & Suka", rd.abilityPassionText],
+        ["Strength Statement", rd.strengthStatement],
+      ] },
+      { title: "EXPERIENCE", blocks: [
+        ["SSD (skor)", ssd ? SSD_CATEGORIES.map(c => `${c.name} (${c.nameEn}): ${ssd.scores[c.code]}`).join("; ") : ""],
+        ["Titik Tertinggi", rd.highPoint],
+        ["Titik Terendah", rd.lowPoint],
+      ] },
+      { title: "RELATIONSHIP", blocks: [
+        ["DISC (3 Graph)", disc ? `Graph 1 — ${discGraphText(disc.graph1)}; Graph 2 — ${discGraphText(disc.graph2)}; Graph 3 — ${discGraphText(disc.graph3)}` : ""],
+        ["Berjalan (mentor)", rd.mentorWalking],
+        ["Duduk (buddy)", rd.buddySitting],
+        ["Berdiri (mentee)", rd.menteeStanding],
+        ["Adaptasi 3A", rd.adaptation3A],
+      ] },
+      { title: "VISION", blocks: [
+        ["Area Holy Discontent", (rd.holyDiscontentAreas || []).map(a => a === "Lain-lain" && rd.holyDiscontentOther ? `Lain-lain: ${rd.holyDiscontentOther}` : a).join(", ")],
+        ["Holy Discontent Statement", rd.holyDiscontentStatement],
+      ] },
+      { title: "IDENTITY & DIRECTION", blocks: [
+        ["Vision Statement", rd.visionStatement],
+        ["Mission Statement", rd.missionStatement],
+        ["Core Values", [1, 2, 3, 4, 5].map(n => rd["coreValue" + n] ? `${n}. ${rd["coreValue" + n]}` : "").filter(Boolean).join("; ")],
+      ] },
+    ];
+    const expCols = [["1. Goal", rd.goal], ["2. Measurement", rd.measurement], ["3. When", rd.when], ["4. How", rd.how], ["5. Who", rd.who]];
+    const colW = (PW - 2 * M) / cols.length, pad = 2.3, headerH = 6.5;
+    const expColW = (PW - 2 * M) / expCols.length;
+    const measure = fSize => {
+      doc.setFontSize(fSize);
+      const colHeights = cols.map(col => {
+        let h = headerH + 2;
+        col.blocks.forEach(([, value]) => {
+          h += doc.getLineHeight();
+          h += doc.splitTextToSize(String(value || "-"), colW - pad * 2).length * doc.getLineHeight() + 1.6;
+        });
+        return h;
+      });
+      let expMaxLines = 1;
+      expCols.forEach(([, value]) => { expMaxLines = Math.max(expMaxLines, doc.splitTextToSize(String(value || "-"), expColW - pad * 2).length); });
+      const expH = headerH + doc.getLineHeight() * (expMaxLines + 1) + 3;
+      return { maxH: Math.max(...colHeights), expH };
+    };
+    // Kecilkan font (8pt→5.5pt) sampai TABEL + baris Expansion sama2 muat
+    // di sisa halaman (bukan cuma tabelnya spt versi sblmnya — itu celah yg
+    // bisa bikin baris Expansion sendiri lolos ngepas/kepotong kalau
+    // isiannya panjang). Kalau di batas bawah 5.5pt MASIH tak cukup (kasus
+    // sangat jarang, isian amat sangat panjang), baris Expansion digambar di
+    // HALAMAN BARU sbg jalan aman terakhir — TETAP tak pernah terpotong.
+    let fSize = 8, m = measure(fSize);
+    while (m.maxH + 5 + m.expH > PH - tableTop - M && fSize > 5.5) {
+      fSize -= 0.4; m = measure(fSize);
     }
+    const maxH = m.maxH;
+    doc.setLineWidth(0.3); doc.setDrawColor(0);
+    doc.rect(M, tableTop, PW - 2 * M, maxH);
+    cols.forEach((col, i) => {
+      const x = M + i * colW;
+      if (i > 0) doc.line(x, tableTop, x, tableTop + maxH);
+      doc.setFillColor(236, 236, 236);
+      doc.rect(x, tableTop, colW, headerH, "F"); doc.rect(x, tableTop, colW, headerH);
+      doc.setFont("helvetica", "bold"); doc.setFontSize(fSize + 0.5);
+      doc.text(col.title, x + colW / 2, tableTop + headerH / 2 + 1.3, { align: "center" });
+      doc.setFontSize(fSize);
+      let cy = tableTop + headerH + 4;
+      col.blocks.forEach(([label, value]) => {
+        doc.setFont("helvetica", "bold"); doc.text(label, x + pad, cy);
+        cy += doc.getLineHeight();
+        doc.setFont("helvetica", "normal");
+        const lines = doc.splitTextToSize(String(value || "-"), colW - pad * 2);
+        doc.text(lines, x + pad, cy);
+        cy += lines.length * doc.getLineHeight() + 1.6;
+      });
+    });
+    y = tableTop + maxH + 5;
+    // Jalan aman terakhir (lihat komentar di measure()/shrink-loop di atas):
+    // kalau SETELAH dikecilkan ke font terkecil baris Expansion ini tetap
+    // tak muat di sisa halaman ini, pindah ke halaman baru dulu.
+    doc.setFontSize(fSize);
+    if (y + m.expH > PH - M) { doc.addPage(); y = M; }
+    doc.setFont("helvetica", "bold"); doc.setFontSize(fSize + 0.5);
+    doc.setFillColor(236, 236, 236);
+    doc.rect(M, y, PW - 2 * M, headerH, "F"); doc.rect(M, y, PW - 2 * M, headerH);
+    doc.text("EXPANSION — ACTION PLAN", PW / 2, y + headerH / 2 + 1.3, { align: "center" });
+    y += headerH;
+    doc.setFontSize(fSize);
+    let expMaxLines = 1;
+    const expWrapped = expCols.map(([, value]) => {
+      const lines = doc.splitTextToSize(String(value || "-"), expColW - pad * 2);
+      expMaxLines = Math.max(expMaxLines, lines.length);
+      return lines;
+    });
+    const expH = doc.getLineHeight() * (expMaxLines + 1) + 3;
+    doc.rect(M, y, PW - 2 * M, expH);
+    expCols.forEach(([label], i) => {
+      const x = M + i * expColW;
+      if (i > 0) doc.line(x, y, x, y + expH);
+      doc.setFont("helvetica", "bold"); doc.text(label, x + pad, y + doc.getLineHeight() + 1);
+      doc.setFont("helvetica", "normal"); doc.text(expWrapped[i], x + pad, y + doc.getLineHeight() * 2 + 1);
+    });
+    return doc;
+  }
+  // Lembar "Hasil Asesmen Lengkap" — A4 portrait TETAP (permintaan user),
+  // narasi mengalir lewat pdfFlow() di atas (pindah halaman otomatis kalau
+  // perlu, tak pernah terpotong).
+  function buildHasilPdf() {
+    const n = buildHasilNarrative();
+    const doc = new window.jspdf.jsPDF({ unit: "mm", format: "a4", orientation: "portrait" });
+    const M = 16;
+    const f = pdfFlow(doc, M);
+    f.heading1("HASIL ASESMEN — LEAD TO SERVE 1");
+    f.centerLine((state.myProfile || {}).name || "");
+    f.metaLine(`Tahun: ${CURRENT_YEAR}`, `Tanggal Cetak: ${fmtDateID(new Date().toISOString())}`);
+    if (n.discProfile) {
+      f.head("DISC — Kepribadian");
+      f.sub(n.discProfile.name);
+      f.para(n.discProfile.desc);
+      f.sub("Kekuatan"); f.bullets(n.discProfile.strengths);
+      f.sub("Perlu Diperhatikan"); f.bullets(n.discProfile.watchouts);
+      f.sub("Cocok untuk Pelayanan"); f.bullets(n.discProfile.ministryFit);
+    } else { f.head("DISC"); f.para("Belum diisi."); }
+    if (state.mySsd) {
+      f.head("Skala Sikap Disfungsional (SSD)");
+      SSD_CATEGORIES.forEach(c => {
+        const v = state.mySsd.scores[c.code], isLow = v < 0, info = SSD_INSIGHT[c.code];
+        f.sub(`${c.name} (${c.nameEn})`);
+        f.para(info.def);
+        if (isLow) f.para(info.low);
+      });
+    } else { f.head("Skala Sikap Disfungsional (SSD)"); f.para("Belum diisi."); }
+    if (state.myGifts) {
+      f.head("Karunia Rohani");
+      f.sub("Paling Menonjol"); f.bullets(n.giftsTop3.map(g => `${g.name} — ${g.def}`));
+      f.sub("Cukup Menonjol"); f.bullets(n.giftsNext3.map(g => g.name));
+    } else { f.head("Karunia Rohani"); f.para("Belum diisi."); }
+    f.head("Ringkasan dari Isianmu Sendiri (Serve Road Map)");
+    if (n.own.length) n.own.forEach(o => { f.sub(o.label); f.para(o.text); });
+    else f.para("Belum ada isian Serve Road Map.");
+    f.head("Rekomendasi Pekerjaan/Pelayanan yang Cocok");
+    f.para(n.recommendation || "Isi DISC & Karunia Rohani dulu untuk melihat rekomendasi di sini.");
+    return doc;
+  }
+  function downloadPdf(buildFn, filename) {
+    if (!pdfReady()) { toast("Fitur unduh PDF belum siap, coba lagi sebentar."); return; }
+    try { buildFn().save(filename); }
+    catch (err) { toast("Gagal membuat PDF: " + (err.message || err)); }
   }
   // 2026-09-23 (permintaan user, "...bisa diunduh dan share dalam bentuk
-  // pdf"): downloadPdf() di atas sudah bisa UNDUH — ini tambahannya, BAGIKAN
-  // langsung (WhatsApp/Email/dll) lewat Web Share API level-2 (`navigator.
-  // share` dgn `files`), didukung browser mobile modern (Chrome/Safari
-  // Android & iOS) tapi TIDAK semua desktop — makanya dicek dulu via
-  // `navigator.canShare({files:...})` sebelum dicoba, & pesan jelas kalau
-  // tak didukung (arahkan pakai tombol Unduh PDF saja). Sama pola dgn
-  // downloadPdf() (isi #printSheetBody off-screen dulu), bedanya PDF di sini
-  // diambil sbg Blob (`outputPdf("blob")`) lalu dibungkus jadi File utk
-  // dioper ke navigator.share(), BUKAN langsung men-trigger unduhan.
-  async function sharePdf(bodyHtml, filename, orientation) {
-    if (!window.html2pdf) { toast("Fitur PDF belum siap, coba lagi sebentar."); return; }
+  // pdf"): sama seperti downloadPdf() tapi diambil sbg Blob (`doc.output
+  // ("blob")`) lalu dibungkus jadi File utk dioper ke navigator.share()
+  // (Web Share API level-2), BUKAN langsung men-trigger unduhan.
+  async function sharePdf(buildFn, filename) {
+    if (!pdfReady()) { toast("Fitur PDF belum siap, coba lagi sebentar."); return; }
     if (!(navigator.share && navigator.canShare)) { toast("Perangkat/browser ini tidak mendukung fitur Bagikan — gunakan tombol Unduh PDF, lalu bagikan filenya secara manual."); return; }
-    const overlay = el("printSheetOverlay");
-    const holder = el("printSheetBody");
-    const contentWidth = orientation === "landscape" ? "1400px" : "900px";
-    holder.innerHTML = bodyHtml;
-    holder.classList.add("printsheet--capture");
-    holder.style.width = contentWidth;
-    overlay.classList.add("active");
-    const relock = captureWidthUnlock(contentWidth);
     try {
-      toast("Menyiapkan PDF untuk dibagikan…");
-      await waitPaint();
-      const blob = await window.html2pdf().set({
-        margin: 8,
-        filename,
-        image: { type: "jpeg", quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff", scrollX: 0, scrollY: 0, windowWidth: holder.scrollWidth, windowHeight: holder.scrollHeight },
-        jsPDF: { unit: "mm", format: "a4", orientation },
-        pagebreak: { mode: ["css", "avoid-all"] },
-      }).from(holder).outputPdf("blob");
+      const blob = buildFn().output("blob");
       const file = new File([blob], filename, { type: "application/pdf" });
       if (!navigator.canShare({ files: [file] })) { toast("Perangkat ini tidak mendukung berbagi file PDF — gunakan tombol Unduh PDF saja."); return; }
       await navigator.share({ files: [file], title: filename });
     } catch (err) {
       if (err && err.name === "AbortError") return;   // pengguna batal di dialog share — bukan error, diam saja
       toast("Gagal menyiapkan/membagikan PDF: " + (err.message || err));
-    } finally {
-      relock();
-      overlay.classList.remove("active");
-      holder.classList.remove("printsheet--capture");
-      holder.style.width = "";
-      holder.innerHTML = "";
     }
   }
   function printSheetHTML() {
@@ -1297,15 +1417,41 @@
   // overflow-x:auto — bingkai .phone tak diubah (beda pola dgn RS3/Barista
   // "wide-page"), pengguna geser ke samping utk lihat correspond ke 5 kolom
   // aslinya ("landscape") tanpa perlu memutar/melebarkan bingkai HP.
+  // 2026-09-23 (permintaan user, "buat fit to screen iphone dan android"):
+  // lembar 1400px/900px SEBELUMNYA cuma bisa dilihat penuh dgn geser ke
+  // samping (overflow-x:auto) — sekarang diperkecil OTOMATIS (CSS
+  // transform:scale, dihitung dari lebar wadah SUNGGUHAN saat itu — jd
+  // otomatis benar di layar iPhone, Android, ATAUPUN simulator desktop,
+  // bukan breakpoint tertentu yg bisa salah tebak) spy PAS masuk lebar
+  // layar tanpa perlu geser sama sekali. Tinggi wadah ikut disesuaikan
+  // (naturalHeight*scale) spy tak ada ruang kosong sisa di bawah.
+  function fitPreviewToScreen(wrapId) {
+    requestAnimationFrame(() => {
+      const wrap = el(wrapId);
+      const inner = wrap && wrap.firstElementChild;
+      if (!wrap || !inner) return;
+      const naturalW = inner.offsetWidth, naturalH = inner.offsetHeight;
+      if (!naturalW || !naturalH) return;
+      const scale = Math.min(1, wrap.clientWidth / naturalW);
+      inner.style.transformOrigin = "top left";
+      inner.style.transform = `scale(${scale})`;
+      wrap.style.height = Math.ceil(naturalH * scale) + "px";
+    });
+  }
+  window.addEventListener("resize", () => {
+    if (state.page === "serveview") fitPreviewToScreen("serveviewFit");
+    if (state.page === "hasilview") fitPreviewToScreen("hasilviewFit");
+  });
   RENDER.serveview = function () {
     el("serveviewBody").innerHTML = `
-      <div class="divider-note">Geser ke samping untuk melihat seluruh lembar (format landscape, 5 kolom).</div>
-      <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:12px;border:1px solid var(--line);">
+      <div class="divider-note">Lembar (format landscape, 5 kolom) — otomatis diperkecil supaya pas di layar.</div>
+      <div id="serveviewFit" style="overflow:hidden;border-radius:12px;border:1px solid var(--line);">
         <div class="printsheet" style="display:block;width:1400px;">${printSheetHTML()}</div>
       </div>
       <button type="button" class="btn btn--ghost" style="margin-top:14px;" id="pdfServeBtn">⬇️ Unduh PDF — LTS 1 Road Map</button>
       <button type="button" class="btn btn--ghost" style="margin-top:8px;" id="shareServeBtn">🔗 Bagikan PDF — LTS 1 Road Map</button>
     `;
+    fitPreviewToScreen("serveviewFit");
   };
 
   // 2026-09-23 (permintaan user, "Lihat Hasil Asesmen Lengkap tambahkan
@@ -1316,13 +1462,14 @@
   // dipakai jg oleh tombol lama di RENDER.hasil).
   RENDER.hasilview = function () {
     el("hasilviewBody").innerHTML = `
-      <div class="divider-note">Pratinjau lembar Hasil Asesmen lengkap — DISC, SSD, Karunia Rohani, Serve Road Map, & rekomendasi.</div>
-      <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:12px;border:1px solid var(--line);">
+      <div class="divider-note">Pratinjau lembar Hasil Asesmen lengkap — DISC, SSD, Karunia Rohani, Serve Road Map, & rekomendasi. Otomatis diperkecil supaya pas di layar.</div>
+      <div id="hasilviewFit" style="overflow:hidden;border-radius:12px;border:1px solid var(--line);">
         <div class="printsheet" style="display:block;width:900px;">${hasilReportHTML(buildHasilNarrative())}</div>
       </div>
       <button type="button" class="btn btn--ghost" style="margin-top:14px;" id="pdfHasilBtn">⬇️ Unduh PDF — Hasil Asesmen Lengkap</button>
       <button type="button" class="btn btn--ghost" style="margin-top:8px;" id="shareHasilBtn">🔗 Bagikan PDF — Hasil Asesmen Lengkap</button>
     `;
+    fitPreviewToScreen("hasilviewFit");
   };
 
   // 2026-09-23 (permintaan user, "Hasil asesmen dari semua isian kamu buat
@@ -1769,22 +1916,22 @@
     // — nama file disertai nama peserta + tahun spy mudah dibedakan kalau
     // disimpan beberapa tahun berturut-turut.
     if (T.closest("#pdfServeBtn")) {
-      downloadPdf(printSheetHTML(), `LTS1-Road-Map-${safeFileName((state.myProfile || {}).name)}-${CURRENT_YEAR}.pdf`, "landscape");
+      downloadPdf(buildRoadMapPdf, `LTS1-Road-Map-${safeFileName((state.myProfile || {}).name)}-${CURRENT_YEAR}.pdf`);
       return;
     }
     if (T.closest("#pdfHasilBtn")) {
-      downloadPdf(hasilReportHTML(buildHasilNarrative()), `Hasil-Asesmen-${safeFileName((state.myProfile || {}).name)}-${CURRENT_YEAR}.pdf`, "portrait");
+      downloadPdf(buildHasilPdf, `Hasil-Asesmen-${safeFileName((state.myProfile || {}).name)}-${CURRENT_YEAR}.pdf`);
       return;
     }
     // 2026-09-23 (permintaan user, "...bisa diunduh dan share dalam bentuk
     // pdf") — SAMA PERSIS isinya dgn #pdfServeBtn/#pdfHasilBtn di atas, cuma
     // pakai sharePdf() (dialog Bagikan OS) bukan downloadPdf() (simpan file).
     if (T.closest("#shareServeBtn")) {
-      sharePdf(printSheetHTML(), `LTS1-Road-Map-${safeFileName((state.myProfile || {}).name)}-${CURRENT_YEAR}.pdf`, "landscape");
+      sharePdf(buildRoadMapPdf, `LTS1-Road-Map-${safeFileName((state.myProfile || {}).name)}-${CURRENT_YEAR}.pdf`);
       return;
     }
     if (T.closest("#shareHasilBtn")) {
-      sharePdf(hasilReportHTML(buildHasilNarrative()), `Hasil-Asesmen-${safeFileName((state.myProfile || {}).name)}-${CURRENT_YEAR}.pdf`, "portrait");
+      sharePdf(buildHasilPdf, `Hasil-Asesmen-${safeFileName((state.myProfile || {}).name)}-${CURRENT_YEAR}.pdf`);
       return;
     }
     const appReq = T.closest("[data-appreq]"), rejReq = T.closest("[data-rejreq]");
