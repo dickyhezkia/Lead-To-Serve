@@ -66,7 +66,13 @@ window.LTS = (function () {
       scores[g.code] = g.questions.reduce((sum, no) => sum + (Number(answers[String(no)]) || 0), 0);
     });
     const ranked = GIFTS_LIST.map(g => g.code).sort((a, b) => scores[b] - scores[a]);
-    return { scores, top3: ranked.slice(0, 3), bottom3: ranked.slice(-3).reverse() };
+    // 2026-09-23 (permintaan user, "Karunia Rohani adalah bagian dari
+    // Strength"): pengelompokan disesuaikan dgn lembar asli JB3 SERVE
+    // ROADMAP (image referensi) — peringkat 1-3 = "Paling Menonjol",
+    // peringkat 4-6 = "Cukup Menonjol". SEBELUMNYA field ini bernama
+    // "bottom3" dan isinya 3 PALING RENDAH (kebalikannya) — itu salah,
+    // sekarang diganti "next3" (posisi 4-6, bukan yg paling rendah).
+    return { scores, top3: ranked.slice(0, 3), next3: ranked.slice(3, 6) };
   }
   function giftsComplete(answers) {
     answers = answers || {};

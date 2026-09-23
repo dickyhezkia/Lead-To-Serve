@@ -32,6 +32,7 @@
  *    DB.myDisc(year) / DB.saveDisc(year, {picks,graph1,graph2,graph3})  (peserta, 1 baris/tahun)
  *    DB.myRoadmap(year) / DB.saveRoadmapSection(year, patch)  (peserta, 1 baris/tahun, `data` gabungan semua bagian S-E-R-V-E)
  *    DB.mySsd(year) / DB.saveSsd(year, {answers,scores})  (peserta, 1 baris/tahun)
+ *    DB.myGifts(year) / DB.saveGifts(year, {answers,scores})  (peserta, 1 baris/tahun)
  *    DB.deleteAccessRequest(id)  (Admin saja)
  * ========================================================================== */
 window.makeDB = function makeDB(sb) {
@@ -192,6 +193,26 @@ window.makeDB = function makeDB(sb) {
       const s = await this.session();
       if (!s) throw new Error("Belum login");
       wrap(await sb.from("lts_ssd_results").upsert({
+        profile_id: s.user.id, year, answers, scores, updated_at: new Date().toISOString(),
+      }, { onConflict: "profile_id,year" }));
+    },
+
+    // ---------- Karunia Rohani / Spiritual Gifts (2026-09-23, "Karunia
+    // Rohani adalah bagian dari Strength. kamu buatkan isiannya") — pola SAMA
+    // persis dgn DISC/SSD di atas — lihat supabase/v_lts_gifts_results.sql.
+    // scores dihitung di index.html (pakai computeGiftsScores() dari
+    // common.js). ----------
+    async myGifts(year) {
+      const s = await this.session();
+      if (!s) return null;
+      const { data, error } = await sb.from("lts_gifts_results").select("*").eq("profile_id", s.user.id).eq("year", year).maybeSingle();
+      if (error) throw error;
+      return data || null;
+    },
+    async saveGifts(year, { answers, scores }) {
+      const s = await this.session();
+      if (!s) throw new Error("Belum login");
+      wrap(await sb.from("lts_gifts_results").upsert({
         profile_id: s.user.id, year, answers, scores, updated_at: new Date().toISOString(),
       }, { onConflict: "profile_id,year" }));
     },

@@ -237,6 +237,7 @@
           <section class="page" data-page="expansion"><div id="expansionBody"></div></section>
           <section class="page" data-page="disc"><div id="discBody"></div></section>
           <section class="page" data-page="ssd"><div id="ssdBody"></div></section>
+          <section class="page" data-page="gifts"><div id="giftsBody"></div></section>
           <section class="page" data-page="hasil"><div id="hasilBody"></div></section>
           <section class="page" data-page="dashboard"><div id="dashboardBody"></div></section>
           <section class="page" data-page="profile"><div id="profileBody"></div></section>
@@ -260,7 +261,8 @@
 (function () {
   "use strict";
   const { esc, DISC_GROUPS, computeDiscGraphs, discComplete, ROADMAP_SECTIONS, HOLY_DISCONTENT_AREAS,
-    SSD_QUESTIONS, SSD_CATEGORIES, SSD_SCALE, computeSsdScores, ssdComplete } = window.LTS;
+    SSD_QUESTIONS, SSD_CATEGORIES, SSD_SCALE, computeSsdScores, ssdComplete,
+    GIFTS_QUESTIONS, GIFTS_LIST, GIFTS_SCALE, computeGiftsScores, giftsComplete, giftName } = window.LTS;
   const CURRENT_YEAR = new Date().getFullYear();
   const el = id => document.getElementById(id);
   const $ = s => document.querySelector(s);
@@ -277,7 +279,7 @@
   // 2026-09-22 susulan ("bangun assesment DISC dengan hasil masking, real,
   // stress"): myDisc (baris tahun INI, null kalau belum diisi) + draft.discPicks
   // (isian yg sedang dikerjakan, blm disimpan) ditambahkan.
-  const state = { page:"login", stack:[], persona:null, meId:null, myProfile:null, accessStatus:null, accessRequests:[], myDisc:null, myRoadmap:null, mySsd:null, draft:{ discPicks:[], roadmapData:{}, ssdAnswers:{} } };
+  const state = { page:"login", stack:[], persona:null, meId:null, myProfile:null, accessStatus:null, accessRequests:[], myDisc:null, myRoadmap:null, mySsd:null, myGifts:null, draft:{ discPicks:[], roadmapData:{}, ssdAnswers:{}, giftsAnswers:{} } };
   const NOCHROME = ["login"];
 
   function initials(name) { return String(name || "?").trim().split(/\s+/).slice(0, 2).map(w => w[0] || "").join("").toUpperCase() || "?"; }
@@ -315,6 +317,7 @@
     home: { h:"Lead To Serve 1", tab:"home" },
     disc: { h:"DISC", back:true },
     ssd: { h:"Skala Sikap Disfungsional", back:true },
+    gifts: { h:"Karunia Rohani", back:true },
     strength: { h:"Strength", back:true },
     experience: { h:"Experience", back:true },
     relationship: { h:"Relationship", back:true },
@@ -400,6 +403,12 @@
   }
   const discCardHTML = () => instrumentCardHTML("disc", "🧭", "#4472A8", `DISC ${CURRENT_YEAR}`, "28 kelompok kata — kenali gaya kepribadianmu", !!state.myDisc);
   const ssdCardHTML = () => instrumentCardHTML("ssd", "🪞", "#93683F", `SSD ${CURRENT_YEAR}`, "35 pernyataan — pola pikir & keyakinan diri", !!state.mySsd);
+  // 2026-09-23 (permintaan user, "Karunia Rohani adalah bagian dari
+  // Strength. kamu buatkan isiannya") — instrumen ke-3, kartu di beranda
+  // sama pola dgn DISC/SSD; RENDER.strength dapat blok pengantar yg
+  // menautkannya (sama pola spt relationshipIntroHTML() menautkan DISC
+  // ke Relationship).
+  const giftsCardHTML = () => instrumentCardHTML("gifts", "🎁", "#B5623B", `Karunia Rohani ${CURRENT_YEAR}`, "85 pernyataan — 17 karunia rohani", !!state.myGifts);
   // 2026-09-23 ("kerjakan yang experience"): diubah dari const string jadi
   // fungsi — ubin S-E-R-V-E sekarang tampilkan tag "Ada isian" kalau salah
   // satu field bagiannya sudah terisi di draft.roadmapData (bukan cuma
@@ -456,7 +465,7 @@
   RENDER.home = function () {
     const unlocked = state.persona === "ADMIN" || state.accessStatus === "approved";
     el("homeBody").innerHTML = `
-      ${unlocked ? discCardHTML() + ssdCardHTML() : ""}
+      ${unlocked ? discCardHTML() + ssdCardHTML() + giftsCardHTML() : ""}
       <div class="divider-note">Serve Road Map — 5 bagian refleksi yang menggabungkan kekuatan, pengalaman, relasi, visi, dan rencana pelayananmu jadi satu peta pribadi. Diperbarui setiap tahun.</div>
       ${unlocked ? serveGridHTML() : lockedHomeHTML()}
     `;
@@ -510,6 +519,32 @@
         <b>STS</b>=Sangat Tidak Sesuai · <b>TS</b>=Tidak Sesuai · <b>ATS</b>=Agak Tidak Sesuai · <b>AS</b>=Agak Sesuai · <b>S</b>=Sesuai · <b>SS</b>=Sangat Sesuai</div>
       ${rows}
       <button class="btn btn--primary" style="margin-top:14px;" id="ssdSave" ${done ? "" : "disabled"}>${done ? "Simpan Hasil SSD" : `Jawab semua pernyataan (${doneCount}/35)`}</button>
+    `;
+  };
+
+  // ---- Karunia Rohani / Spiritual Gifts (2026-09-23, "Karunia Rohani
+  // adalah bagian dari Strength. kamu buatkan isiannya") — 85 pernyataan,
+  // jawab dgn skala 4 pilihan (Sangat/Kadang/Sedikit/Tidak). Data dari
+  // GIFTS_QUESTIONS/GIFTS_SCALE di common.js (tak disentuh sejak awal
+  // proyek, sama pola dgn DISC_GROUPS/SSD_QUESTIONS). Pola render SAMA
+  // persis dgn RENDER.ssd — cuma skala & jumlah soal beda. ----
+  RENDER.gifts = function () {
+    // Catatan: computeGiftsScores() di common.js mengharap answers berisi
+    // ANGKA skor (0-3, lihat komentarnya) — BEDA dgn SSD yg menyimpan kode
+    // skala ("STS" dst) dan mencarinya lewat SSD_SCALE. Jadi di sini yg
+    // disimpan adalah o.score (angka), bukan o.code.
+    const answers = state.draft.giftsAnswers;
+    const rows = GIFTS_QUESTIONS.map(q => `<div class="qrow">
+      <div class="qtext"><span class="qno">${q.no}.</span>${esc(q.text)}</div>
+      <div class="roleseg">${GIFTS_SCALE.map(o => `<button type="button" data-giftsans="${q.no}:${o.score}" aria-pressed="${String(answers[q.no]) === String(o.score)}">${esc(o.label)}</button>`).join("")}</div>
+    </div>`).join("");
+    const doneCount = GIFTS_QUESTIONS.filter(q => answers[q.no]).length;
+    const done = giftsComplete(answers);
+    el("giftsBody").innerHTML = `
+      <div class="divider-note">Pilih seberapa sering pernyataan ini menggambarkan diri Anda. Tidak ada jawaban benar/salah — makin jujur, makin bermanfaat hasilnya.<br><br>
+        <b>Sangat</b>=selalu/sangat menggambarkan · <b>Kadang</b>=cukup sering · <b>Sedikit</b>=jarang · <b>Tidak</b>=tidak menggambarkan sama sekali</div>
+      ${rows}
+      <button class="btn btn--primary" style="margin-top:14px;" id="giftsSave" ${done ? "" : "disabled"}>${done ? "Simpan Hasil Karunia Rohani" : `Jawab semua pernyataan (${doneCount}/${GIFTS_QUESTIONS.length})`}</button>
     `;
   };
 
@@ -608,10 +643,31 @@
       <button type="button" class="btn btn--ghost" data-goto="disc">Lihat / Isi Ulang Tes DISC</button>
     </div>`;
   }
+  // 2026-09-23 (permintaan user, "Karunia Rohani adalah bagian dari
+  // Strength. kamu buatkan isiannya") — Strength dapat blok pengantar yg
+  // menautkan ke tes Karunia Rohani, pola SAMA persis dgn
+  // relationshipIntroHTML() yg menautkan Relationship ke DISC.
+  function strengthIntroHTML() {
+    const g = state.myGifts;
+    if (!g) {
+      return `<div class="card pad" style="margin-bottom:14px;">
+        <b style="display:block;font-family:var(--font-display);font-size:14px;margin-bottom:4px;">Temukan dulu Karunia Rohanimu</b>
+        <p class="sub" style="margin:0 0 10px;">Strength dimulai dari mengenali karunia rohani yang Tuhan berikan — hasilnya menolongmu menjawab "Bisa" & "Suka" di bawah ini dengan lebih tepat.</p>
+        <button type="button" class="btn btn--primary" data-goto="gifts">Isi Tes Karunia Rohani ${CURRENT_YEAR}</button>
+      </div>`;
+    }
+    const top3 = (g.scores && g.scores.top3) || [];
+    return `<div class="card pad" style="margin-bottom:14px;">
+      <b style="display:block;font-family:var(--font-display);font-size:14px;margin-bottom:4px;">Karunia Rohani ${CURRENT_YEAR} — Paling Menonjol</b>
+      <p class="sub" style="margin:0 0 10px;">${top3.map(c => esc(giftName(c))).join(", ") || "-"}</p>
+      <button type="button" class="btn btn--ghost" data-goto="gifts">Lihat / Isi Ulang Tes Karunia Rohani</button>
+    </div>`;
+  }
   function renderRoadmapSection(sectionKey, bodyId) {
     const sec = ROADMAP_SECTIONS.find(s => s.key === sectionKey);
     el(bodyId).innerHTML = `
       ${sectionKey === "relationship" ? relationshipIntroHTML() : ""}
+      ${sectionKey === "strength" ? strengthIntroHTML() : ""}
       <div class="divider-note">Isi dengan refleksi jujur — boleh disimpan bertahap, bisa diubah lagi kapan saja sebelum tahun berganti.</div>
       <div class="card pad">${sec.fields.map(fieldHTML).join("")}</div>
       <button class="btn btn--primary" style="margin-top:14px;" data-rmsave="${sectionKey}">Simpan ${esc(sec.title)}</button>
@@ -677,13 +733,15 @@
   const psLine = val => `<div class="psline">${esc(val || "")}</div>`;
   function printSheetHTML() {
     const rd = state.draft.roadmapData || {};
-    const disc = state.myDisc, ssd = state.mySsd;
+    const disc = state.myDisc, ssd = state.mySsd, gifts = state.myGifts;
     const discGraphRow = (label, g) => `<div class="psline">${label} — D:${g.D} I:${g.I} S:${g.S} C:${g.C}</div>`;
     return `
       <h1>JB3 SERVE ROADMAP</h1>
       <div class="psmeta"><span>Nama: <b>${esc((state.myProfile || {}).name || "")}</b></span><span>Tanggal Cetak: <b>${fmtDateID(new Date().toISOString())}</b></span></div>
       <div class="pscols">
         <div class="pscol"><h2>STRENGTH</h2>
+          <div class="psblock"><b>Karunia Rohani Paling Menonjol</b>${gifts ? psLine(gifts.scores.top3.map(giftName).join(", ")) : psLine("")}</div>
+          <div class="psblock"><b>Karunia Rohani Cukup Menonjol</b>${gifts ? psLine(gifts.scores.next3.map(giftName).join(", ")) : psLine("")}</div>
           <div class="psblock"><b>Bisa (Ability)</b>${psLine(rd.abilityText)}</div>
           <div class="psblock"><b>Suka (Passion)</b>${psLine(rd.passionText)}</div>
           <div class="psblock"><b>Bisa & Suka</b>${psLine(rd.abilityPassionText)}</div>
@@ -723,12 +781,13 @@
   }
   RENDER.hasil = function () {
     const printBtn = `<button type="button" class="btn btn--ghost" style="margin-top:12px;" id="printSheetBtn">🖨️ Cetak Ringkasan Serve Road Map</button>`;
-    if (!state.myDisc && !state.mySsd) {
+    if (!state.myDisc && !state.mySsd && !state.myGifts) {
       el("hasilBody").innerHTML = `<div class="card pad" style="text-align:center;padding:40px 20px;">
         <b style="display:block;font-family:var(--font-display);font-size:16px;margin-bottom:6px;">Hasil Asesmen</b>
-        <p class="sub" style="margin:0 0 14px;">Isi DISC atau SSD dulu untuk melihat hasilnya di sini. Bagian keahlian & rekomendasi pekerjaan (dari Karunia Rohani/Serve Road Map) segera menyusul.</p>
+        <p class="sub" style="margin:0 0 14px;">Isi DISC, SSD, atau Karunia Rohani dulu untuk melihat hasilnya di sini. Bagian rekomendasi pekerjaan/pelayanan (dari Serve Road Map) segera menyusul.</p>
         <button type="button" class="btn btn--primary" data-goto="disc" style="margin-bottom:8px;">Isi DISC</button>
-        <button type="button" class="btn btn--ghost" data-goto="ssd">Isi SSD</button>
+        <button type="button" class="btn btn--primary" data-goto="ssd" style="margin-bottom:8px;">Isi SSD</button>
+        <button type="button" class="btn btn--ghost" data-goto="gifts">Isi Karunia Rohani</button>
       </div>
       ${printBtn}`;
       return;
@@ -746,13 +805,28 @@
     const ssdHTML = !state.mySsd ? `<div class="card pad"><p class="sub" style="margin:0 0 8px;">SSD belum diisi.</p><button type="button" class="btn btn--ghost" data-goto="ssd">Isi SSD</button></div>` :
       `<div class="card pad">${SSD_CATEGORIES.map(c => bar(c.name, state.mySsd.scores[c.code], -15, 15, (state.mySsd.scores[c.code] < 0 ? "var(--bad)" : "var(--good)"))).join("")}
       <p class="sub" style="margin-top:6px;">Skor negatif = area keyakinan diri yang perlu diperhatikan/diperbaiki.</p></div>`;
+    // 2026-09-23 ("Karunia Rohani adalah bagian dari Strength. kamu buatkan
+    // isiannya"): 17 karunia diurutkan skor tertinggi → terendah (0-15 tiap
+    // karunia, 5 soal x skor 0-3), top3/next3 ditandai sesuai lembar asli
+    // ("Paling Menonjol"/"Cukup Menonjol").
+    const giftsHTML = !state.myGifts ? `<div class="card pad"><p class="sub" style="margin:0 0 8px;">Karunia Rohani belum diisi.</p><button type="button" class="btn btn--ghost" data-goto="gifts">Isi Karunia Rohani</button></div>` :
+      (() => {
+        const sc = state.myGifts.scores;
+        const ranked = GIFTS_LIST.map(g => g.code).sort((a, b) => sc.scores[b] - sc.scores[a]);
+        return `<div class="card pad">
+          <p class="sub" style="margin:0 0 8px;"><b>Paling Menonjol:</b> ${sc.top3.map(giftName).join(", ")}<br><b>Cukup Menonjol:</b> ${sc.next3.map(giftName).join(", ")}</p>
+          ${ranked.map(code => bar(giftName(code), sc.scores[code], 0, 15, sc.top3.includes(code) ? "var(--accent)" : (sc.next3.includes(code) ? "var(--good)" : "var(--line-strong)"))).join("")}
+        </div>`;
+      })();
     el("hasilBody").innerHTML = `
       <div class="divider-note">Hasil asesmen ${CURRENT_YEAR} — kepribadian & pola pikirmu.</div>
       <h2 class="section">DISC</h2>
       ${discHTML}
       <h2 class="section">Skala Sikap Disfungsional</h2>
       ${ssdHTML}
-      <p class="sub" style="margin-top:10px;">Keahlian, rekomendasi pekerjaan/pelayanan yang cocok (dari Karunia Rohani/Serve Road Map) segera menyusul di sini.</p>
+      <h2 class="section">Karunia Rohani</h2>
+      ${giftsHTML}
+      <p class="sub" style="margin-top:10px;">Rekomendasi pekerjaan/pelayanan yang cocok (dari Serve Road Map) segera menyusul di sini.</p>
       ${printBtn}
     `;
   };
@@ -794,6 +868,10 @@
       // 2026-09-23 ("tambahkan tools/isian SSD"): sama pola dgn DISC/Roadmap.
       state.mySsd = await DB.mySsd(CURRENT_YEAR);
       state.draft.ssdAnswers = (state.mySsd && state.mySsd.answers) ? { ...state.mySsd.answers } : {};
+      // 2026-09-23 ("Karunia Rohani adalah bagian dari Strength. kamu
+      // buatkan isiannya"): sama pola dgn DISC/SSD di atas.
+      state.myGifts = await DB.myGifts(CURRENT_YEAR);
+      state.draft.giftsAnswers = (state.myGifts && state.myGifts.answers) ? { ...state.myGifts.answers } : {};
     }
   }
 
@@ -865,7 +943,7 @@
     }
     if (T.closest("#pfLogout") || T.closest("#rolePill")) {
       await DB.logout().catch(() => {});
-      Object.assign(state, { page:"login", stack:[], persona:null, meId:null, myProfile:null, accessStatus:null, accessRequests:[], myDisc:null, myRoadmap:null, mySsd:null, draft:{ discPicks:[], roadmapData:{}, ssdAnswers:{} } });
+      Object.assign(state, { page:"login", stack:[], persona:null, meId:null, myProfile:null, accessStatus:null, accessRequests:[], myDisc:null, myRoadmap:null, mySsd:null, myGifts:null, draft:{ discPicks:[], roadmapData:{}, ssdAnswers:{}, giftsAnswers:{} } });
       show("login", { replace:true });
       return;
     }
@@ -919,6 +997,26 @@
         await DB.saveSsd(CURRENT_YEAR, { answers:state.draft.ssdAnswers, scores });
         toast("Hasil SSD disimpan.");
         state.mySsd = await DB.mySsd(CURRENT_YEAR);
+        show("home");
+      } catch (err) { toast("Gagal simpan: " + (err.message || err)); }
+      return;
+    }
+
+    // ---- Karunia Rohani answers (2026-09-23, "Karunia Rohani adalah
+    // bagian dari Strength. kamu buatkan isiannya") ----
+    const ga = T.closest("[data-giftsans]");
+    if (ga) {
+      const [no, val] = ga.dataset.giftsans.split(":");
+      state.draft.giftsAnswers[no] = Number(val);
+      RENDER.gifts();
+      return;
+    }
+    if (T.closest("#giftsSave")) {
+      const scores = computeGiftsScores(state.draft.giftsAnswers);
+      try {
+        await DB.saveGifts(CURRENT_YEAR, { answers:state.draft.giftsAnswers, scores });
+        toast("Hasil Karunia Rohani disimpan.");
+        state.myGifts = await DB.myGifts(CURRENT_YEAR);
         show("home");
       } catch (err) { toast("Gagal simpan: " + (err.message || err)); }
       return;
