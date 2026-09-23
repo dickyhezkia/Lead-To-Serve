@@ -206,6 +206,22 @@
     .printsheet, .printsheet * { visibility: visible; }
     .printsheet { display: block; position: absolute; left: 0; top: 0; width: 100%; }
   }
+  /* 2026-09-23 (permintaan user, "Hasil asesmen dari semua isian kamu buat
+     detail yang bisa dibaca dan juga di download"): varian narasi utk lembar
+     "Hasil Asesmen" lengkap — beda dari .pscols (tabel ringkas 5-kolom) krn
+     ini paragraf panjang yg perlu dibaca, dipakai bareng #printSheetBody yg
+     sama (lihat downloadPdf() — kontennya diganti-ganti tergantung tombol). */
+  .printsheet .rpname { font-size: 16px; text-align: center; margin: 0 0 2px; }
+  .printsheet .rphead { font-size: 12.5px; font-weight: bold; margin: 16px 0 6px; border-bottom: 2px solid #000; padding-bottom: 3px; }
+  .printsheet .rphead:first-of-type { margin-top: 10px; }
+  .printsheet .rpsub { font-size: 10.5px; font-weight: bold; margin: 9px 0 3px; }
+  .printsheet .rpp { font-size: 10px; line-height: 1.55; margin: 0 0 7px; }
+  .printsheet .rpul { font-size: 10px; line-height: 1.55; margin: 0 0 8px 16px; padding: 0; }
+  /* Kontainer #printSheetBody normalnya display:none (lihat .printsheet di
+     atas) — spy html2pdf.js (html2canvas) bisa "memotret" kontennya, harus
+     dirender nyata dulu (BUKAN display:none) tapi digeser jauh di luar layar
+     spy tak kelihatan berkedip di layar pengguna. */
+  .printsheet--capture { display: block !important; position: fixed !important; left: -10000px !important; top: 0 !important; }
 </style>
 </head>
 <body>
@@ -254,6 +270,11 @@
 <div class="printsheet" id="printSheetBody"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<!-- 2026-09-23 (permintaan user, "bisa di download dalam bentuk pdf"): html2pdf.js
+     (bundel html2canvas+jsPDF) — mengubah #printSheetBody (lembar ringkasan
+     S-E-R-V-E yg sama dgn tombol Cetak) jadi file PDF yg langsung terunduh,
+     tanpa lewat dialog print browser. Versi dipatok (bukan @latest) spy stabil. -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script src="./config.js"></script>
 <script src="./common.js"></script>
 <script src="./db.js"></script>
@@ -262,7 +283,8 @@
   "use strict";
   const { esc, DISC_GROUPS, computeDiscGraphs, discComplete, ROADMAP_SECTIONS, HOLY_DISCONTENT_AREAS,
     SSD_QUESTIONS, SSD_CATEGORIES, SSD_SCALE, computeSsdScores, ssdComplete,
-    GIFTS_QUESTIONS, GIFTS_LIST, GIFTS_SCALE, computeGiftsScores, giftsComplete, giftName } = window.LTS;
+    GIFTS_QUESTIONS, GIFTS_LIST, GIFTS_SCALE, computeGiftsScores, giftsComplete, giftName,
+    DISC_PROFILES, SSD_INSIGHT } = window.LTS;
   const CURRENT_YEAR = new Date().getFullYear();
   const el = id => document.getElementById(id);
   const $ = s => document.querySelector(s);
@@ -731,6 +753,39 @@
     try { return new Date(iso).toLocaleDateString("id-ID", { day:"numeric", month:"long", year:"numeric" }); } catch (e) { return "-"; }
   }
   const psLine = val => `<div class="psline">${esc(val || "")}</div>`;
+  const safeFileName = s => String(s || "peserta").trim().replace(/[^a-zA-Z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "peserta";
+  // 2026-09-23 (permintaan user, "bisa di download dalam bentuk pdf"):
+  // html2pdf.js (html2canvas+jsPDF, dimuat via <script> di bawah body) —
+  // "memotret" #printSheetBody jadi canvas lalu jadi file PDF yg LANGSUNG
+  // terunduh (bukan lewat dialog print browser spt tombol Cetak yg sudah
+  // ada). #printSheetBody normalnya display:none (dipakai jg oleh tombol
+  // Cetak yg mengandalkan @media print) — di sini digeser ke luar layar dulu
+  // (class .printsheet--capture) spy html2canvas bisa merender kontennya
+  // tanpa berkedip terlihat pengguna, lalu dikembalikan spt semula.
+  async function downloadPdf(bodyHtml, filename, orientation) {
+    if (!window.html2pdf) { toast("Fitur unduh PDF belum siap, coba lagi sebentar."); return; }
+    const holder = el("printSheetBody");
+    holder.innerHTML = bodyHtml;
+    holder.classList.add("printsheet--capture");
+    holder.style.width = orientation === "landscape" ? "1400px" : "900px";
+    try {
+      toast("Menyiapkan PDF…");
+      await window.html2pdf().set({
+        margin: 8,
+        filename,
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff" },
+        jsPDF: { unit: "mm", format: "a4", orientation },
+        pagebreak: { mode: ["css", "legacy"] },
+      }).from(holder).save();
+    } catch (err) {
+      toast("Gagal membuat PDF: " + (err.message || err));
+    } finally {
+      holder.classList.remove("printsheet--capture");
+      holder.style.width = "";
+      holder.innerHTML = "";
+    }
+  }
   function printSheetHTML() {
     const rd = state.draft.roadmapData || {};
     const disc = state.myDisc, ssd = state.mySsd, gifts = state.myGifts;
@@ -779,32 +834,131 @@
       </div>
     `;
   }
+
+  // 2026-09-23 (permintaan user, "Hasil asesmen dari semua isian kamu buat
+  // detail yang bisa dibaca dan juga di download"): satu fungsi merangkai
+  // interpretasi dari SEMUA instrumen (DISC/SSD/Karunia Rohani) + isian Serve
+  // Road Map sendiri jadi objek narasi — dipakai BERSAMA oleh tampilan layar
+  // (hasilOnScreenHTML, gaya app biasa) & lembar PDF (hasilReportHTML, gaya
+  // dokumen), spy logika interpretasi tak dobel ditulis.
+  function buildHasilNarrative() {
+    const rd = state.draft.roadmapData || {};
+    const disc = state.myDisc, ssd = state.mySsd, gifts = state.myGifts;
+    let discLetter = null, discProfile = null;
+    if (disc) {
+      discLetter = DISC_LETTERS.reduce((a, b) => (disc.graph3[b] > disc.graph3[a] ? b : a), DISC_LETTERS[0]);
+      discProfile = DISC_PROFILES[discLetter];
+    }
+    const ssdLow = [], ssdHealthy = [];
+    if (ssd) {
+      SSD_CATEGORIES.forEach(c => {
+        const v = ssd.scores[c.code];
+        if (v < 0) ssdLow.push({ code:c.code, name:c.name, score:v, text:SSD_INSIGHT[c.code].low });
+        else ssdHealthy.push({ code:c.code, name:c.name, score:v });
+      });
+      ssdLow.sort((a, b) => a.score - b.score);
+    }
+    const giftDetail = code => { const g = GIFTS_LIST.find(x => x.code === code); return { code, name:giftName(code), def:g ? g.def : "" }; };
+    const giftsTop3 = gifts ? gifts.scores.top3.map(giftDetail) : [];
+    const giftsNext3 = gifts ? gifts.scores.next3.map(giftDetail) : [];
+    const own = [
+      rd.abilityText && { label:"Yang Bisa Dilakukan dengan Baik (Ability)", text:rd.abilityText },
+      rd.passionText && { label:"Yang Disukai (Passion)", text:rd.passionText },
+      rd.strengthStatement && { label:"Strength Statement", text:rd.strengthStatement },
+      rd.highPoint && { label:"Titik Tertinggi (Experience)", text:rd.highPoint },
+      rd.lowPoint && { label:"Titik Terendah (Experience)", text:rd.lowPoint },
+      rd.holyDiscontentStatement && { label:"Holy Discontent Statement", text:rd.holyDiscontentStatement },
+      rd.visionStatement && { label:"Vision Statement", text:rd.visionStatement },
+      rd.missionStatement && { label:"Mission Statement", text:rd.missionStatement },
+      rd.goal && { label:"Goal Pelayanan (Expansion)", text:rd.goal },
+    ].filter(Boolean);
+    const recoBits = [];
+    if (discProfile) recoBits.push(`gaya kepribadian ${discProfile.name}`);
+    if (giftsTop3.length) recoBits.push(`karunia rohani ${giftsTop3.map(g => g.name).join(", ")}`);
+    const recommendation = recoBits.length
+      ? `Berdasarkan kombinasi ${recoBits.join(" dan ")}, area pelayanan yang berpotensi cocok antara lain: ${(discProfile ? discProfile.ministryFit.join(", ") : "-")}.`
+      : "";
+    const improve = [];
+    if (discProfile) improve.push(...discProfile.watchouts);
+    ssdLow.forEach(c => improve.push(c.text));
+    return { discLetter, discProfile, ssdLow, ssdHealthy, giftsTop3, giftsNext3, own, recommendation, improve };
+  }
+
+  // Lembar PDF/print — narasi lengkap, gaya dokumen putih-hitam (sama pola
+  // dgn printSheetHTML di atas, dipakai bareng #printSheetBody).
+  function hasilReportHTML(n) {
+    const rpp = t => `<p class="rpp">${esc(t)}</p>`;
+    const rpul = arr => arr.length ? `<ul class="rpul">${arr.map(t => `<li>${esc(t)}</li>`).join("")}</ul>` : rpp("-");
+    return `
+      <h1>HASIL ASESMEN — LEAD TO SERVE 1</h1>
+      <div class="rpname"><b>${esc((state.myProfile || {}).name || "")}</b></div>
+      <div class="psmeta"><span>Tahun: <b>${CURRENT_YEAR}</b></span><span>Tanggal Cetak: <b>${fmtDateID(new Date().toISOString())}</b></span></div>
+      ${n.discProfile ? `
+      <div class="rphead">DISC — Kepribadian</div>
+      <div class="rpsub">${esc(n.discProfile.name)}</div>
+      ${rpp(n.discProfile.desc)}
+      <div class="rpsub">Kekuatan</div>${rpul(n.discProfile.strengths)}
+      <div class="rpsub">Perlu Diperhatikan</div>${rpul(n.discProfile.watchouts)}
+      <div class="rpsub">Cocok untuk Pelayanan</div>${rpul(n.discProfile.ministryFit)}` : `<div class="rphead">DISC</div>${rpp("Belum diisi.")}`}
+      ${state.mySsd ? `
+      <div class="rphead">Skala Sikap Disfungsional (SSD)</div>
+      ${n.ssdLow.length ? rpul(n.ssdLow.map(c => `${c.name}: ${c.text}`)) : rpp("Semua kategori relatif sehat — tidak ada pola pikir disfungsional yang menonjol.")}` : `<div class="rphead">Skala Sikap Disfungsional (SSD)</div>${rpp("Belum diisi.")}`}
+      ${state.myGifts ? `
+      <div class="rphead">Karunia Rohani</div>
+      <div class="rpsub">Paling Menonjol</div>${rpul(n.giftsTop3.map(g => `${g.name} — ${g.def}`))}
+      <div class="rpsub">Cukup Menonjol</div>${rpul(n.giftsNext3.map(g => g.name))}` : `<div class="rphead">Karunia Rohani</div>${rpp("Belum diisi.")}`}
+      <div class="rphead">Ringkasan dari Isianmu Sendiri (Serve Road Map)</div>
+      ${n.own.length ? n.own.map(o => `<div class="rpsub">${esc(o.label)}</div>${rpp(o.text)}`).join("") : rpp("Belum ada isian Serve Road Map.")}
+      <div class="rphead">Rekomendasi Pekerjaan/Pelayanan yang Cocok</div>
+      ${n.recommendation ? rpp(n.recommendation) : rpp("Isi DISC & Karunia Rohani dulu untuk melihat rekomendasi di sini.")}
+      <div class="rphead">Yang Perlu Diperbaiki</div>
+      ${rpul(n.improve)}
+    `;
+  }
+
+  // 2026-09-23 (permintaan user, "Hasil asesmen dari semua isian kamu buat
+  // detail yang bisa dibaca dan juga di download"): halaman ini sekarang
+  // menampilkan NARASI (interpretasi DISC/SSD/Karunia Rohani + kutipan isian
+  // Serve Road Map sendiri + rekomendasi + yang perlu diperbaiki) di atas
+  // grafik yg sudah ada — bukan cuma angka/bar spt sebelumnya. Dua tombol
+  // unduh terpisah: PDF lembar ringkas S-E-R-V-E (1 halaman, sama dgn tombol
+  // Cetak) & PDF laporan Hasil Asesmen lengkap (narasi, bisa >1 halaman).
   RENDER.hasil = function () {
     const printBtn = `<button type="button" class="btn btn--ghost" style="margin-top:12px;" id="printSheetBtn">🖨️ Cetak Ringkasan Serve Road Map</button>`;
+    const pdfServeBtn = `<button type="button" class="btn btn--ghost" style="margin-top:8px;" id="pdfServeBtn">⬇️ Unduh PDF — Ringkasan S-E-R-V-E (1 Lembar)</button>`;
+    const pdfHasilBtn = `<button type="button" class="btn btn--primary" style="margin-top:8px;" id="pdfHasilBtn">⬇️ Unduh PDF — Hasil Asesmen Lengkap</button>`;
     if (!state.myDisc && !state.mySsd && !state.myGifts) {
       el("hasilBody").innerHTML = `<div class="card pad" style="text-align:center;padding:40px 20px;">
         <b style="display:block;font-family:var(--font-display);font-size:16px;margin-bottom:6px;">Hasil Asesmen</b>
-        <p class="sub" style="margin:0 0 14px;">Isi DISC, SSD, atau Karunia Rohani dulu untuk melihat hasilnya di sini. Bagian rekomendasi pekerjaan/pelayanan (dari Serve Road Map) segera menyusul.</p>
+        <p class="sub" style="margin:0 0 14px;">Isi DISC, SSD, atau Karunia Rohani dulu untuk melihat hasilnya di sini secara detail.</p>
         <button type="button" class="btn btn--primary" data-goto="disc" style="margin-bottom:8px;">Isi DISC</button>
         <button type="button" class="btn btn--primary" data-goto="ssd" style="margin-bottom:8px;">Isi SSD</button>
         <button type="button" class="btn btn--ghost" data-goto="gifts">Isi Karunia Rohani</button>
       </div>
-      ${printBtn}`;
+      ${printBtn}${pdfServeBtn}`;
       return;
     }
+    const n = buildHasilNarrative();
     const discHTML = !state.myDisc ? `<div class="card pad" style="margin-bottom:12px;"><p class="sub" style="margin:0 0 8px;">DISC belum diisi.</p><button type="button" class="btn btn--ghost" data-goto="disc">Isi DISC</button></div>` : (() => {
       const g1 = state.myDisc.graph1, g2 = state.myDisc.graph2, g3 = state.myDisc.graph3;
       const max12 = Math.max(1, ...DISC_LETTERS.map(k => g1[k]), ...DISC_LETTERS.map(k => g2[k]));
       const max3 = Math.max(1, ...DISC_LETTERS.map(k => Math.abs(g3[k])));
       return `<div class="card pad" style="margin-bottom:12px;">
+        <b style="font-family:var(--font-display);font-size:14px;display:block;margin-bottom:4px;">${esc(n.discProfile.name)}</b>
+        <p class="sub" style="margin:0 0 12px;">${esc(n.discProfile.desc)}</p>
         ${discChartCard("Masking (Topeng)", "Cara Anda tampil & beradaptasi di depan orang lain.", g1, 0, max12, "var(--accent)")}
         ${discChartCard("Stress", "Respons Anda saat tertekan / apa yang cenderung Anda tekan.", g2, 0, max12, "var(--bad)")}
         ${discChartCard("Real (Kepribadian Asli)", "Gaya perilaku dasar Anda yang relatif stabil di segala situasi.", g3, -max3, max3, "var(--good)")}
+        <div class="sub" style="margin-top:10px;"><b>Kekuatan:</b> ${n.discProfile.strengths.map(esc).join(" · ")}</div>
+        <div class="sub" style="margin-top:6px;"><b>Perlu diperhatikan:</b> ${n.discProfile.watchouts.map(esc).join(" · ")}</div>
+        <div class="sub" style="margin-top:6px;"><b>Cocok untuk pelayanan:</b> ${n.discProfile.ministryFit.map(esc).join(" · ")}</div>
       </div>`;
     })();
     const ssdHTML = !state.mySsd ? `<div class="card pad"><p class="sub" style="margin:0 0 8px;">SSD belum diisi.</p><button type="button" class="btn btn--ghost" data-goto="ssd">Isi SSD</button></div>` :
       `<div class="card pad">${SSD_CATEGORIES.map(c => bar(c.name, state.mySsd.scores[c.code], -15, 15, (state.mySsd.scores[c.code] < 0 ? "var(--bad)" : "var(--good)"))).join("")}
-      <p class="sub" style="margin-top:6px;">Skor negatif = area keyakinan diri yang perlu diperhatikan/diperbaiki.</p></div>`;
+      ${n.ssdLow.length
+        ? `<div class="sub" style="margin-top:10px;">${n.ssdLow.map(c => `<div style="margin-bottom:6px;"><b>${esc(c.name)}:</b> ${esc(c.text)}</div>`).join("")}</div>`
+        : `<p class="sub" style="margin-top:8px;">Semua kategori relatif sehat — tidak ada pola pikir disfungsional yang menonjol.</p>`}</div>`;
     // 2026-09-23 ("Karunia Rohani adalah bagian dari Strength. kamu buatkan
     // isiannya"): 17 karunia diurutkan skor tertinggi → terendah (0-15 tiap
     // karunia, 5 soal x skor 0-3), top3/next3 ditandai sesuai lembar asli
@@ -814,20 +968,30 @@
         const sc = state.myGifts.scores;
         const ranked = GIFTS_LIST.map(g => g.code).sort((a, b) => sc.scores[b] - sc.scores[a]);
         return `<div class="card pad">
-          <p class="sub" style="margin:0 0 8px;"><b>Paling Menonjol:</b> ${sc.top3.map(giftName).join(", ")}<br><b>Cukup Menonjol:</b> ${sc.next3.map(giftName).join(", ")}</p>
+          <div class="sub" style="margin:0 0 8px;">${n.giftsTop3.map(g => `<div style="margin-bottom:6px;"><b>${esc(g.name)}</b> — ${esc(g.def)}</div>`).join("")}</div>
+          <div class="sub" style="margin:0 0 8px;"><b>Cukup Menonjol:</b> ${n.giftsNext3.map(g => esc(g.name)).join(", ")}</div>
           ${ranked.map(code => bar(giftName(code), sc.scores[code], 0, 15, sc.top3.includes(code) ? "var(--accent)" : (sc.next3.includes(code) ? "var(--good)" : "var(--line-strong)"))).join("")}
         </div>`;
       })();
+    const ownHTML = n.own.length ? `<div class="card pad">${n.own.map(o => `<div class="field" style="margin-bottom:10px;"><label>${esc(o.label)}</label><p class="sub" style="margin:2px 0 0;white-space:pre-wrap;">${esc(o.text)}</p></div>`).join("")}</div>`
+      : `<div class="card pad"><p class="sub" style="margin:0;">Belum ada isian Serve Road Map — isi lewat menu S-E-R-V-E di beranda.</p></div>`;
+    const recoHTML = `<div class="card pad"><p class="sub" style="margin:0;">${n.recommendation ? esc(n.recommendation) : "Isi DISC & Karunia Rohani dulu untuk melihat rekomendasi di sini."}</p></div>`;
+    const improveHTML = `<div class="card pad">${n.improve.length ? n.improve.map(t => `<p class="sub" style="margin:0 0 8px;">• ${esc(t)}</p>`).join("") : `<p class="sub" style="margin:0;">Isi DISC atau SSD dulu untuk melihat area yang perlu diperbaiki.</p>`}</div>`;
     el("hasilBody").innerHTML = `
-      <div class="divider-note">Hasil asesmen ${CURRENT_YEAR} — kepribadian & pola pikirmu.</div>
-      <h2 class="section">DISC</h2>
+      <div class="divider-note">Hasil asesmen ${CURRENT_YEAR} — kepribadian, keahlian, & area pelayanan yang tepat untukmu.</div>
+      <h2 class="section">DISC — Kepribadian</h2>
       ${discHTML}
       <h2 class="section">Skala Sikap Disfungsional</h2>
       ${ssdHTML}
       <h2 class="section">Karunia Rohani</h2>
       ${giftsHTML}
-      <p class="sub" style="margin-top:10px;">Rekomendasi pekerjaan/pelayanan yang cocok (dari Serve Road Map) segera menyusul di sini.</p>
-      ${printBtn}
+      <h2 class="section">Ringkasan dari Isianmu Sendiri</h2>
+      ${ownHTML}
+      <h2 class="section">Rekomendasi Pekerjaan/Pelayanan yang Cocok</h2>
+      ${recoHTML}
+      <h2 class="section">Yang Perlu Diperbaiki</h2>
+      ${improveHTML}
+      ${printBtn}${pdfServeBtn}${pdfHasilBtn}
     `;
   };
 
@@ -1024,6 +1188,19 @@
     if (T.closest("#printSheetBtn")) {
       el("printSheetBody").innerHTML = printSheetHTML();
       window.print();
+      return;
+    }
+    // 2026-09-23 (permintaan user, "bisa di download dalam bentuk pdf" +
+    // "Hasil asesmen dari semua isian kamu buat detail yang bisa dibaca dan
+    // juga di download"): 2 lembar PDF terpisah, masing2 pakai downloadPdf()
+    // — nama file disertai nama peserta + tahun spy mudah dibedakan kalau
+    // disimpan beberapa tahun berturut-turut.
+    if (T.closest("#pdfServeBtn")) {
+      downloadPdf(printSheetHTML(), `Serve-Road-Map-${safeFileName((state.myProfile || {}).name)}-${CURRENT_YEAR}.pdf`, "landscape");
+      return;
+    }
+    if (T.closest("#pdfHasilBtn")) {
+      downloadPdf(hasilReportHTML(buildHasilNarrative()), `Hasil-Asesmen-${safeFileName((state.myProfile || {}).name)}-${CURRENT_YEAR}.pdf`, "portrait");
       return;
     }
     const appReq = T.closest("[data-appreq]"), rejReq = T.closest("[data-rejreq]");

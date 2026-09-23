@@ -26,6 +26,47 @@ window.LTS = (function () {
   const ROADMAP_SECTIONS = [{"key": "strength", "title": "Strength", "fields": [{"key": "abilityText", "label": "BISA (Ability) - hal yang saya bisa lakukan dengan baik", "type": "textarea"}, {"key": "passionText", "label": "SUKA (Passion) - hal yang saya suka lakukan", "type": "textarea"}, {"key": "abilityPassionText", "label": "BISA & SUKA - perpotongan keduanya", "type": "textarea"}, {"key": "strengthStatement", "label": "Kecenderungan Strength Statement", "type": "template", "template": "Saya bisa dan suka {{blank1}} supaya {{blank2}}"}]}, {"key": "experience", "title": "Experience", "fields": [{"key": "highPoint", "label": "Ceritakan titik tertinggi dalam hidupmu", "type": "textarea"}, {"key": "lowPoint", "label": "Ceritakan titik terendah dalam hidupmu", "type": "textarea"}]}, {"key": "relationship", "title": "Relationship", "fields": [{"key": "mentorWalking", "label": "Berjalan (mentor) - orang yang membimbing saya", "type": "textarea"}, {"key": "buddySitting", "label": "Duduk (buddy) - rekan sejalan saya", "type": "textarea"}, {"key": "menteeStanding", "label": "Berdiri (mentee) - orang yang saya bimbing", "type": "textarea"}, {"key": "adaptation3A", "label": "Setelah memahami konsep 3A (Aware-Accept-Adapt), tuliskan contoh adaptasi yang akan Anda lakukan", "type": "textarea"}]}, {"key": "vision", "title": "Vision", "fields": [{"key": "holyDiscontentAreas", "label": "Pilih area Holy Discontent", "type": "checkboxList", "optionsRef": "holyDiscontentAreas"}, {"key": "holyDiscontentStatement", "label": "Holy Discontent Statement", "type": "template", "template": "Saya paling tidak tahan melihat {{blank1}} dan saya harus melakukan sesuatu untuk mulai mengubahnya"}, {"key": "visionStatement", "label": "Vision Statement", "type": "template", "template": "Saya melihat terjadinya/lahirnya/bangkitnya/munculnya {{blank1}}"}, {"key": "missionStatement", "label": "Mission Statement", "type": "textarea"}, {"key": "coreValue1", "label": "Core Value #1", "type": "text"}, {"key": "coreValue2", "label": "Core Value #2", "type": "text"}, {"key": "coreValue3", "label": "Core Value #3", "type": "text"}, {"key": "coreValue4", "label": "Core Value #4", "type": "text"}, {"key": "coreValue5", "label": "Core Value #5", "type": "text"}]}, {"key": "expansion", "title": "Expansion (Action Plan)", "fields": [{"key": "goal", "label": "1. Goal - goal pelayanan Anda dalam 3-6 bulan ke depan", "type": "textarea"}, {"key": "measurement", "label": "2. Measurement - ukuran tercapainya goal tersebut", "type": "textarea"}, {"key": "when", "label": "3. When - kapan goal tersebut ditargetkan tercapai", "type": "text"}, {"key": "how", "label": "4. How - langkah-langkah konkret/milestones", "type": "textarea"}, {"key": "who", "label": "5. Who - orang yang akan membantu/mengingatkan Anda", "type": "textarea"}]}];
   const HOLY_DISCONTENT_AREAS = ["Art, Media, & Entertainment", "Business/Economy (incl. Social Business & Entrepreneurship)", "Community/Church", "Digital/Technology", "Education (Formal/Informal)", "Family", "Government & Politics", "Health & Medical"];
 
+  // 2026-09-23 (permintaan user, "Hasil asesmen dari semua isian kamu buat
+  // detail yang bisa dibaca"): narasi interpretasi DISC (per huruf dominan)
+  // & SSD (per kategori, saat skor negatif/disfungsional) — dipakai index.html
+  // utk merangkai "Hasil Asesmen" jadi bacaan yg detail, bukan cuma angka/bar.
+  // Konten generik berdasarkan prinsip standar DISC & Skala Sikap Disfungsional
+  // (Beck), BUKAN bagian dari materi sumber "Serve To Lead" — murni tulisan
+  // interpretatif Claude, sama semangatnya dgn catatan pemetaan DISC_GROUPS
+  // di atas (boleh diganti/disempurnakan kapan saja tanpa ubah kode lain).
+  const DISC_PROFILES = {
+    D: { name: "D — Dominance (Dominan)", desc: "Anda cenderung tegas, berorientasi hasil, cepat mengambil keputusan, dan menyukai tantangan besar.",
+      strengths: ["Berani mengambil keputusan sulit", "Berorientasi pada hasil & target", "Tidak takut menghadapi tantangan baru", "Cenderung menjadi inisiator/pemimpin"],
+      watchouts: ["Bisa terkesan terlalu blak-blakan atau tidak sabar", "Perlu belajar mendengarkan sebelum bertindak", "Rawan mengabaikan perasaan orang lain demi hasil"],
+      ministryFit: ["Memimpin tim/departemen pelayanan", "Merintis pelayanan atau ministry baru", "Pengambil keputusan strategis", "Penginjilan yang butuh keberanian"] },
+    I: { name: "I — Influence (Pengaruh)", desc: "Anda cenderung antusias, ekspresif, mudah bergaul, dan pandai memotivasi serta menginspirasi orang lain.",
+      strengths: ["Mudah membangun relasi & jejaring", "Pandai memotivasi & menyemangati orang lain", "Optimis dan membawa suasana positif", "Komunikator yang persuasif"],
+      watchouts: ["Bisa kurang detail/teliti pada hal administratif", "Perlu disiplin menyelesaikan yang sudah dimulai", "Rawan bicara lebih banyak daripada mendengar"],
+      ministryFit: ["Penyambutan tamu/keramahan (usher, greeter)", "Pelayanan pujian & penyembahan", "Membangun komunitas/HOME group", "Penginjilan lewat relasi personal"] },
+    S: { name: "S — Steadiness (Stabil)", desc: "Anda cenderung tenang, sabar, setia, dan suka bekerja stabil dalam tim yang harmonis.",
+      strengths: ["Setia & dapat diandalkan dalam jangka panjang", "Pendengar yang baik & penuh empati", "Menjaga keharmonisan tim", "Sabar mendampingi proses orang lain bertumbuh"],
+      watchouts: ["Bisa sulit beradaptasi dengan perubahan mendadak", "Cenderung menghindari konflik walau perlu diselesaikan", "Perlu didorong untuk mengambil inisiatif"],
+      ministryFit: ["Pemuridan/mentoring jangka panjang", "Konseling & pendampingan pastoral", "Pelayanan Care & Diakonia", "Menjadi HOME Leader/Facilitator yang setia mendampingi"] },
+    C: { name: "C — Conscientiousness (Cermat)", desc: "Anda cenderung teliti, sistematis, berhati-hati, dan berpegang pada standar serta fakta yang akurat.",
+      strengths: ["Teliti dan berorientasi kualitas", "Sistematis dalam merencanakan & mengeksekusi", "Berpikir kritis & berbasis data/fakta", "Bertanggung jawab terhadap detail"],
+      watchouts: ["Bisa terlalu perfeksionis hingga lambat mengambil keputusan", "Rawan terlalu kritis pada diri sendiri/orang lain", "Perlu belajar fleksibel saat rencana berubah"],
+      ministryFit: ["Administrasi & keuangan pelayanan", "Pengajaran yang butuh kedalaman/riset", "Perencanaan & pengorganisasian acara", "Quality control/dokumentasi pelayanan"] },
+  };
+  // Skor NEGATIF di suatu kategori SSD = area keyakinan diri yang perlu
+  // diperhatikan/diperbaiki (lihat SSD_SCALE — skala dibalik: setuju dgn
+  // pernyataan disfungsional = skor negatif). "low" = teks utk skor negatif,
+  // "healthy" = teks generik utk skor 0/positif (relatif sehat di area itu).
+  const SSD_INSIGHT = {
+    A: { low: "Skor di area Pengakuan menunjukkan kecenderungan menilai diri terlalu bergantung pada pengakuan/penerimaan orang lain — perlu belajar menemukan rasa aman dari identitas di dalam Kristus, bukan dari validasi orang lain." },
+    B: { low: "Skor di area Cinta menunjukkan kecenderungan menganggap dicintai/disayangi sebagai syarat mutlak untuk bahagia — perlu belajar bahwa kasih Tuhan tidak bersyarat, dan kehilangan kasih sesama bukan akhir dari segalanya." },
+    C: { low: "Skor di area Keberhasilan menunjukkan kecenderungan menilai diri terlalu bergantung pada pencapaian/prestasi — perlu belajar bahwa nilai diri tidak ditentukan oleh keberhasilan semata." },
+    D: { low: "Skor di area Perfeksionisme menunjukkan kecenderungan menuntut kesempurnaan dari diri sendiri secara berlebihan — perlu belajar menerima diri yang sedang bertumbuh, tidak harus selalu sempurna." },
+    E: { low: "Skor di area Perasaan Berhak menunjukkan kecenderungan merasa berhak diperlakukan istimewa atau dipenuhi keinginannya — perlu belajar rendah hati & bersyukur dengan apa yang ada." },
+    F: { low: "Skor di area Omnipotensi menunjukkan kecenderungan merasa harus mampu mengendalikan/menanggung segala sesuatu sendirian — perlu belajar menyerahkan kendali dan bersandar pada Tuhan & sesama." },
+    G: { low: "Skor di area Otonomi menunjukkan kecenderungan merasa kebahagiaan bergantung sepenuhnya pada kendali penuh atas hidupnya sendiri — perlu belajar bahwa hidup yang berserah bukan berarti kehilangan makna." },
+    healthy: "Skor Anda di area ini relatif sehat — tidak menunjukkan pola pikir disfungsional yang signifikan.",
+  };
+
   // ---- DISC: hitung Graph I (tally Sangat), Graph II (tally Kurang), Graph III (I-II) ----
   // picks = [{no, sangat:"D"/"I"/"S"/"C", kurang:"D"/"I"/"S"/"C"}, ...] (idealnya 28 entri, 1 per grup)
   function computeDiscGraphs(picks) {
@@ -87,6 +128,6 @@ window.LTS = (function () {
     DISC_GROUPS, computeDiscGraphs, discComplete,
     SSD_QUESTIONS, SSD_CATEGORIES, SSD_SCALE, computeSsdScores, ssdComplete, ssdCatName,
     GIFTS_QUESTIONS, GIFTS_LIST, GIFTS_SCALE, computeGiftsScores, giftsComplete, giftName,
-    ROADMAP_SECTIONS, HOLY_DISCONTENT_AREAS,
+    ROADMAP_SECTIONS, HOLY_DISCONTENT_AREAS, DISC_PROFILES, SSD_INSIGHT,
   };
 })();
