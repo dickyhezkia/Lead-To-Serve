@@ -219,22 +219,30 @@
   .printsheet .rpul { font-size: 10px; line-height: 1.55; margin: 0 0 8px 16px; padding: 0; }
   /* Kontainer #printSheetBody normalnya display:none (lihat .printsheet di
      atas) — spy html2pdf.js (html2canvas) bisa "memotret" kontennya, harus
-     dirender nyata dulu (BUKAN display:none).
-     2026-09-23 (bug nyata, user: "pdf bisa didownload tapi kosong", MASIH
-     kosong stlh percobaan pertama diperbaiki jadi `position:fixed`): akar
-     masalah SEBENARNYA — html2canvas TERKENAL bermasalah dgn elemen
-     `position:fixed` (bug lama & luas, library-nya tak sempurna meniru
-     fixed-positioning asli). DIPERPARAH di HP sungguhan: `body` di sini
-     SENDIRI jadi `position:fixed; overflow:hidden; height:100dvh` di layar
-     sempit (lihat @media max-width:480px di atas, pola "app shell" spy
-     halaman utama tak ikut discroll) — #printSheetBody yg jg fixed jadi anak
-     dari body yg fixed+overflow:hidden itu, kombinasi yg persis jadi sumber
-     bug dikenal luas ini. Diperbaiki BENAR kali ini: ganti ke
-     `position:absolute` (html2canvas jauh lebih andal dgn ini) — body-nya
-     SENDIRI jg dibuat sementara `overflow:visible` selagi "memotret" (lihat
-     downloadPdf()/sharePdf(), `document.body.style.overflow`), spy tak ada
-     lagi yg memotong wadah ini dari kombinasi manapun. */
-  .printsheet--capture { display: block !important; position: absolute !important; top: 0 !important; left: 0 !important; z-index: 99999 !important; background: #fff !important; }
+     dirender nyata dulu (BUKAN display:none). `.printsheet--capture` di sini
+     HANYA menangani itu (override display:none bawaan .printsheet) —
+     positioning/overlay-nya kini tanggung jawab `.printsheetoverlay` di bawah. */
+  .printsheet--capture { display: block !important; }
+  /* 2026-09-23: percobaan #1 ("pdf kosong") & #2 ("lihat sudah bisa tapi
+     unduhnya masih kosong") SAMA-SAMA gagal (dikonfirmasi user, 2x, utk 2
+     lembar berbeda — Serve Road Map & Hasil Asesmen — jadi bukan soal
+     konten, tapi mekanisme "potret"-nya sendiri). Ternyata akar masalahnya
+     BUKAN cuma soal position:fixed vs absolute — #printSheetBody SELAMA INI
+     anak langsung dari <body>, DI LUAR .phone/.screen-frame sepenuhnya,
+     sebuah lokasi yg TAK PERNAH dites bisa dirender benar. Satu-satunya yg
+     TERBUKTI benar dari user ("lihat sudah bisa") adalah halaman "Lihat
+     Serve Road Map" (RENDER.serveview) — krn ia dirender NORMAL di dalam
+     .screen-frame/.scroll spt halaman lain, bukan lewat trik posisi
+     apapun. Perbaikan kali ini: pindahkan wadah potret ke DALAM
+     .screen-frame (jadi overlay di atas halaman aktif, BUKAN anak <body>)
+     — persis mekanisme render yg sudah terbukti. Tak ada lagi acakan
+     position:fixed/absolute pada #printSheetBody sendiri, tak ada lagi
+     body.style.overflow — .screen-frame SENDIRI tak pernah position:fixed/
+     overflow:hidden-pada-body (itu cuma properti <body> di layar sempit,
+     yg skrg sudah tak relevan krn wadah ini bukan anak body lagi). */
+  .printsheetoverlay { display: none; }
+  .printsheetoverlay.active { display: block; position: absolute; inset: 0; z-index: 500; background: #fff; overflow: auto; }
+  .printsheetoverlay__scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 </style>
 </head>
 <body>
@@ -278,14 +286,19 @@
         </div>
       </div>
       <nav class="tabbar hidden" id="tabbar"></nav>
+      <!-- 2026-09-23 (bug "pdf masih kosong", percobaan ke-3): wadah potret PDF
+           dipindah ke SINI, di DALAM .screen-frame (dulunya anak <body>, di
+           LUAR .phone sepenuhnya — lihat catatan panjang di CSS
+           .printsheetoverlay). Jadi overlay di atas halaman aktif, dirender
+           lewat mekanisme normal yg sama dgn halaman "Lihat Serve Road Map"
+           yg SUDAH terbukti benar (bukan lewat @media print lagi — tombol
+           Cetak lama sudah dihapus, lihat RENDER.hasil). -->
+      <div class="printsheetoverlay" id="printSheetOverlay">
+        <div class="printsheetoverlay__scroll"><div class="printsheet" id="printSheetBody"></div></div>
+      </div>
     </div>
   </div>
 </div>
-<!-- 2026-09-23 ("hasil yang dapat di print"): SENGAJA di LUAR .phone/
-     .screen-frame (bingkai simulasi HP) — @media print (lihat CSS) memakai
-     visibility hidden/visible utk memunculkan HANYA wadah ini saat dicetak,
-     tak perlu bingkai HP-nya ikut ter-print. -->
-<div class="printsheet" id="printSheetBody"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <!-- 2026-09-23 (permintaan user, "bisa di download dalam bentuk pdf"): html2pdf.js
@@ -1087,20 +1100,20 @@
   // menggambar (paint) elemen yg baru saja innerHTML+class-nya diubah pada
   // saat html2canvas mulai "memotret", hasilnya jg bisa kosong/putih.
   const waitPaint = () => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
-  // 2026-09-23 (bug "pdf masih kosong" berlanjut stlh percobaan pertama):
-  // `body` di layar sempit (≤480px, lihat @media di CSS) SENDIRI jadi
-  // `position:fixed; overflow:hidden; height:100dvh` (pola "app shell") —
-  // #printSheetBody yg anak body bisa terpotong oleh overflow:hidden itu
-  // walau sudah position:absolute. Di-nonaktifkan SEMENTARA selagi
-  // "memotret" (dikembalikan APAPUN hasilnya, sukses/gagal).
-  const bodyOverflowUnlock = () => { const prev = document.body.style.overflow; document.body.style.overflow = "visible"; return () => { document.body.style.overflow = prev; }; };
+  // 2026-09-23 (bug "pdf masih kosong", MASIH terjadi utk 2 lembar berbeda
+  // stlh 2x percobaan sebelumnya — lihat catatan panjang di CSS
+  // .printsheetoverlay utk diagnosa akarnya): wadah potret (#printSheetBody)
+  // skrg overlay DI DALAM .screen-frame (lihat #printSheetOverlay di HTML),
+  // bukan lagi anak <body>. Tinggal tampilkan overlay-nya (.active),
+  // isi+lebarkan holder, tunggu paint, potret, lalu sembunyikan lagi.
   async function downloadPdf(bodyHtml, filename, orientation) {
     if (!window.html2pdf) { toast("Fitur unduh PDF belum siap, coba lagi sebentar."); return; }
+    const overlay = el("printSheetOverlay");
     const holder = el("printSheetBody");
     holder.innerHTML = bodyHtml;
     holder.classList.add("printsheet--capture");
     holder.style.width = orientation === "landscape" ? "1400px" : "900px";
-    const relock = bodyOverflowUnlock();
+    overlay.classList.add("active");
     try {
       toast("Menyiapkan PDF…");
       await waitPaint();
@@ -1115,7 +1128,7 @@
     } catch (err) {
       toast("Gagal membuat PDF: " + (err.message || err));
     } finally {
-      relock();
+      overlay.classList.remove("active");
       holder.classList.remove("printsheet--capture");
       holder.style.width = "";
       holder.innerHTML = "";
@@ -1134,11 +1147,12 @@
   async function sharePdf(bodyHtml, filename, orientation) {
     if (!window.html2pdf) { toast("Fitur PDF belum siap, coba lagi sebentar."); return; }
     if (!(navigator.share && navigator.canShare)) { toast("Perangkat/browser ini tidak mendukung fitur Bagikan — gunakan tombol Unduh PDF, lalu bagikan filenya secara manual."); return; }
+    const overlay = el("printSheetOverlay");
     const holder = el("printSheetBody");
     holder.innerHTML = bodyHtml;
     holder.classList.add("printsheet--capture");
     holder.style.width = orientation === "landscape" ? "1400px" : "900px";
-    const relock = bodyOverflowUnlock();
+    overlay.classList.add("active");
     try {
       toast("Menyiapkan PDF untuk dibagikan…");
       await waitPaint();
@@ -1157,7 +1171,7 @@
       if (err && err.name === "AbortError") return;   // pengguna batal di dialog share — bukan error, diam saja
       toast("Gagal menyiapkan/membagikan PDF: " + (err.message || err));
     } finally {
-      relock();
+      overlay.classList.remove("active");
       holder.classList.remove("printsheet--capture");
       holder.style.width = "";
       holder.innerHTML = "";
