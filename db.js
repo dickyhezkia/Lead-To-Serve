@@ -117,6 +117,15 @@ window.makeDB = function makeDB(sb) {
         decided_by: s.user.id,
       }).eq("id", id));
     },
+    // 2026-09-23 (permintaan user, "bagian nama-nama disetujui tambahkan
+    // tombol hapus"): hapus baris SEPENUHNYA (bukan sekadar ganti status)
+    // — lihat supabase/v_lts_access_requests_delete.sql utk kebijakan RLS-nya
+    // (baru ditambahkan, sebelumnya delete tak diizinkan sama sekali).
+    // Efeknya: myAccessStatus() org itu balik jadi null, asesmen terkunci
+    // lagi baginya sampai ia mengajukan ulang.
+    async deleteAccessRequest(id) {
+      wrap(await sb.from("lts_access_requests").delete().eq("id", id));
+    },
 
     // ---------- DISC (2026-09-22, permintaan user "bangun assesment DISC
     // dengan hasil masking, real, stress") — lihat supabase/v_lts_disc_results.sql.

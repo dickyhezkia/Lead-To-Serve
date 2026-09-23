@@ -439,9 +439,14 @@
     const pending = all.filter(r => r.status === "pending");
     const approved = all.filter(r => r.status === "approved");
     const rejected = all.filter(r => r.status === "rejected");
-    const nameRow = r => `<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line);">
+    // 2026-09-23 (permintaan user, "bagian nama-nama disetujui tambahkan
+    // tombol hapus pada setiap nama"): parameter `delBtn` opsional — cuma
+    // dipakai di daftar Sudah Disetujui, TIDAK di daftar Ditolak (user
+    // sebut khusus bagian "disetujui" saja).
+    const nameRow = (r, delBtn) => `<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line);">
       <span class="avatar" style="width:30px;height:30px;font-size:11px;">${esc(initials((r.profile || {}).name))}</span>
       <span style="flex:1;min-width:0;"><b style="font-size:12.5px;">${esc((r.profile || {}).name || "?")}</b></span>
+      ${delBtn ? `<button type="button" class="btn btn--sm btn--ghost" style="color:var(--bad);border-color:var(--bad);" data-delreq="${esc(r.id)}">Hapus</button>` : ""}
     </div>`;
     el("dashboardBody").innerHTML = `
       <div class="divider-note">Ringkasan status akses asesmen Lead To Serve 1 — seluruh jemaat.</div>
@@ -458,7 +463,7 @@
         <button type="button" class="btn btn--sm btn--primary" data-appreq="${esc(r.id)}">Setujui</button>
       </div>`).join("") : `<div class="empty">Tidak ada permintaan yang menunggu.</div>`}
       <h2 class="section">Sudah Disetujui (${approved.length})</h2>
-      <div class="card pad">${approved.length ? approved.map(nameRow).join("") : `<div class="empty" style="padding:10px;">Belum ada.</div>`}</div>
+      <div class="card pad">${approved.length ? approved.map(r => nameRow(r, true)).join("") : `<div class="empty" style="padding:10px;">Belum ada.</div>`}</div>
       ${rejected.length ? `<h2 class="section">Ditolak (${rejected.length})</h2>
       <div class="card pad">${rejected.map(nameRow).join("")}</div>` : ""}
     `;
@@ -674,6 +679,20 @@
       try {
         await DB.decideAccessRequest(id, !!appReq);
         toast(appReq ? "Permintaan disetujui." : "Permintaan ditolak.");
+        state.accessRequests = await DB.listAllAccessRequests();
+        RENDER.dashboard();
+      } catch (err) { toast("Gagal: " + (err.message || err)); }
+      return;
+    }
+    // 2026-09-23 (permintaan user, "bagian nama-nama disetujui tambahkan
+    // tombol hapus"): hapus baris lts_access_requests sepenuhnya — akses
+    // orang itu tercabut, terkunci lagi sampai mengajukan ulang.
+    const delReq = T.closest("[data-delreq]");
+    if (delReq) {
+      if (!confirm("Hapus persetujuan akses orang ini? Asesmen akan terkunci lagi baginya sampai mengajukan ulang.")) return;
+      try {
+        await DB.deleteAccessRequest(delReq.dataset.delreq);
+        toast("Persetujuan dihapus.");
         state.accessRequests = await DB.listAllAccessRequests();
         RENDER.dashboard();
       } catch (err) { toast("Gagal: " + (err.message || err)); }
