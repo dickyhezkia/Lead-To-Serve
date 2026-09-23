@@ -878,6 +878,11 @@
     const recommendation = recoBits.length
       ? `Berdasarkan kombinasi ${recoBits.join(" dan ")}, area pelayanan yang berpotensi cocok antara lain: ${(discProfile ? discProfile.ministryFit.join(", ") : "-")}.`
       : "";
+    // 2026-09-23 (permintaan user, "kata-kata 'yang perlu diperbaiki' di
+    // kartu Hasil Asesmen dihapus"): dulu ada bagian "Yang Perlu Diperbaiki"
+    // (DISC watchouts + SSD low-area insights) di layar & PDF — SEKARANG
+    // tak ditampilkan sama sekali. `improve` tetap dihitung & dikembalikan
+    // (murah, tak dipakai di UI manapun) siapa tahu dibutuhkan lagi nanti.
     const improve = [];
     if (discProfile) improve.push(...discProfile.watchouts);
     ssdLow.forEach(c => improve.push(c.text));
@@ -911,8 +916,6 @@
       ${n.own.length ? n.own.map(o => `<div class="rpsub">${esc(o.label)}</div>${rpp(o.text)}`).join("") : rpp("Belum ada isian Serve Road Map.")}
       <div class="rphead">Rekomendasi Pekerjaan/Pelayanan yang Cocok</div>
       ${n.recommendation ? rpp(n.recommendation) : rpp("Isi DISC & Karunia Rohani dulu untuk melihat rekomendasi di sini.")}
-      <div class="rphead">Yang Perlu Diperbaiki</div>
-      ${rpul(n.improve)}
     `;
   }
 
@@ -976,7 +979,6 @@
     const ownHTML = n.own.length ? `<div class="card pad">${n.own.map(o => `<div class="field" style="margin-bottom:10px;"><label>${esc(o.label)}</label><p class="sub" style="margin:2px 0 0;white-space:pre-wrap;">${esc(o.text)}</p></div>`).join("")}</div>`
       : `<div class="card pad"><p class="sub" style="margin:0;">Belum ada isian Serve Road Map — isi lewat menu S-E-R-V-E di beranda.</p></div>`;
     const recoHTML = `<div class="card pad"><p class="sub" style="margin:0;">${n.recommendation ? esc(n.recommendation) : "Isi DISC & Karunia Rohani dulu untuk melihat rekomendasi di sini."}</p></div>`;
-    const improveHTML = `<div class="card pad">${n.improve.length ? n.improve.map(t => `<p class="sub" style="margin:0 0 8px;">• ${esc(t)}</p>`).join("") : `<p class="sub" style="margin:0;">Isi DISC atau SSD dulu untuk melihat area yang perlu diperbaiki.</p>`}</div>`;
     el("hasilBody").innerHTML = `
       <div class="divider-note">Hasil asesmen ${CURRENT_YEAR} — kepribadian, keahlian, & area pelayanan yang tepat untukmu.</div>
       <h2 class="section">DISC — Kepribadian</h2>
@@ -989,8 +991,6 @@
       ${ownHTML}
       <h2 class="section">Rekomendasi Pekerjaan/Pelayanan yang Cocok</h2>
       ${recoHTML}
-      <h2 class="section">Yang Perlu Diperbaiki</h2>
-      ${improveHTML}
       ${printBtn}${pdfServeBtn}${pdfHasilBtn}
     `;
   };
