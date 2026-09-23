@@ -371,6 +371,29 @@ window.makeDB = function makeDB(sb) {
       }
     },
 
+    // 2026-09-23 (permintaan user - ide "auto-tandai kelas Lead To Serve 1
+    // di JB3 begitu 5 bagian S-E-R-V-E lengkap", diusulkan Claude & dipilih
+    // user "1,3 jalankan"): generik (classIdx apa pun), dipakai SEKARANG
+    // hanya utk LTS1 (index 3) — baca-ubah-tulis manual, pola PERSIS SAMA
+    // dgn saveRs3Result()/saveLts2Result() di atas. Definisi "lengkap" itu
+    // SENDIRI (serveSectionFilled()/SERVE_SECTIONS) SENGAJA tetap di
+    // index.html, bukan diduplikasi di sini — fungsi ini murni "tulis
+    // classes[idx]=true", pemanggil yg memutuskan KAPAN. Return boolean:
+    // true = baru saja ditandai (belum true sebelumnya, worth di-toast),
+    // false = sudah true dari dulu (tak perlu nulis ulang/toast lagi).
+    async markClassComplete(classIdx) {
+      const s = await this.session();
+      if (!s) throw new Error("Belum login");
+      const { data: prof, error: e1 } = await sb.from("profiles").select("classes").eq("id", s.user.id).maybeSingle();
+      if (e1) throw e1;
+      const NCLASS = 5;
+      let arr = Array.isArray(prof && prof.classes) && prof.classes.length === NCLASS ? [...prof.classes] : Array(NCLASS).fill(false);
+      if (arr[classIdx]) return false;
+      arr[classIdx] = true;
+      wrap(await sb.from("profiles").update({ classes:arr }).eq("id", s.user.id));
+      return true;
+    },
+
     // ---------- Admin saja: hasil SEMUA peserta yg aksesnya sudah disetujui
     // (2026-09-23, permintaan user: "admin dapat melihat setiap hasil test
     // dan asesment dari setiap pengguna yang telah mengikuti discipleship

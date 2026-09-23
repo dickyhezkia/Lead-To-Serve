@@ -896,6 +896,60 @@
   // filter). Filter D/I/S/C tinggi memenuhi kebutuhan lama yg sempat dicatat
   // ("mencari siapa yang D nya tinggi, C nya tinggi") — gratis krn data DISC
   // semua orang sudah ikut termuat di query roster ini.
+  // 2026-09-23 (ide "dashboard analitik utk Admin" — diusulkan Claude,
+  // dipilih user "1,3 jalankan"): ringkasan AGREGAT di atas daftar roster —
+  // Admin sebelumnya cuma bisa lihat hasil satu-satu per orang, tak ada
+  // gambaran keseluruhan (berapa % sudah lulus/lengkap, huruf DISC apa yg
+  // paling umum, dst) yg berguna utk perencanaan pelayanan/penempatan tim.
+  // Semua datanya SUDAH ada di `rows` (dari listParticipantResults(), fetch
+  // yg sama dipakai roster) — murni agregasi client-side, TAK ADA query
+  // baru. `bar()` (helper grafik batang generik, sudah dipakai di Hasil
+  // Asesmen utk skor SSD/Karunia) dipakai ulang di sini spy konsisten.
+  function resultsAnalyticsHTML(rows) {
+    const total = rows.length;
+    if (!total) return "";
+    const domLetter = r => r.disc ? DISC_LETTERS.reduce((a, b) => (r.disc.graph3[b] > r.disc.graph3[a] ? b : a), DISC_LETTERS[0]) : null;
+    const discCounts = { D:0, I:0, S:0, C:0 };
+    rows.forEach(r => { const l = domLetter(r); if (l) discCounts[l]++; });
+    const discFilled = Object.values(discCounts).reduce((a, b) => a + b, 0);
+    const maxDisc = Math.max(1, ...Object.values(discCounts));
+    // "LTS1 lengkap" pakai definisi PERSIS SAMA dgn serveSectionFilled()/
+    // banner "Serve Road Map Lengkap!" (serveGridHTML()) — 1 sumber
+    // kebenaran, cuma dibaca dari r.roadmap.data (data org LAIN) di sini,
+    // bukan state.draft.roadmapData (data diri sendiri).
+    const sectionFilledFor = (rd, key) => {
+      const sec = ROADMAP_SECTIONS.find(x => x.key === key);
+      return !!(sec && sec.fields.some(f => { const v = rd[f.key]; return Array.isArray(v) ? v.length > 0 : !!v; }));
+    };
+    const ltsComplete = rows.filter(r => {
+      const rd = (r.roadmap && r.roadmap.data) || {};
+      return SERVE_SECTIONS.every(s => sectionFilledFor(rd, s.key));
+    }).length;
+    const rs3Pass = rows.filter(r => r.rs3 && r.rs3.passed).length;
+    const lts2Pass = rows.filter(r => r.lts2 && r.lts2.passed).length;
+    const giftFreq = {};
+    rows.forEach(r => { if (r.gifts && r.gifts.scores && r.gifts.scores.top3) r.gifts.scores.top3.forEach(code => { giftFreq[code] = (giftFreq[code] || 0) + 1; }); });
+    const topGifts = Object.entries(giftFreq).sort((a, b) => b[1] - a[1]).slice(0, 5);
+    const maxGift = Math.max(1, ...topGifts.map(g => g[1]));
+    const hdFreq = {};
+    rows.forEach(r => { ((r.roadmap && r.roadmap.data && r.roadmap.data.holyDiscontentAreas) || []).forEach(a => { hdFreq[a] = (hdFreq[a] || 0) + 1; }); });
+    const topHd = Object.entries(hdFreq).sort((a, b) => b[1] - a[1]).slice(0, 5);
+    const maxHd = Math.max(1, ...topHd.map(h => h[1]));
+    return `<div class="card pad" style="margin-bottom:14px;">
+      <b style="font-family:var(--font-display);font-size:14px;display:block;margin-bottom:2px;">📊 Ringkasan ${total} Peserta</b>
+      <p class="sub" style="margin:0 0 10px;">Agregat dari data di bawah — untuk perencanaan pelayanan/penempatan tim.</p>
+      <h2 class="section" style="margin:0 0 6px;">Tingkat Penyelesaian</h2>
+      ${bar("Serve Road Map (LTS1) lengkap", ltsComplete, 0, total, "var(--accent)")}
+      ${bar("Rock Solid 3 — Lulus", rs3Pass, 0, total, "var(--good)")}
+      ${bar("Lead To Serve 2 — Lulus", lts2Pass, 0, total, "var(--good)")}
+      <h2 class="section" style="margin:16px 0 6px;">Distribusi DISC${discFilled < total ? ` — ${discFilled}/${total} sudah isi` : ""}</h2>
+      ${DISC_LETTERS.map(l => bar(l, discCounts[l], 0, maxDisc, `var(--disc-${l.toLowerCase()})`)).join("")}
+      ${topGifts.length ? `<h2 class="section" style="margin:16px 0 6px;">Karunia Rohani Terbanyak (Top 3 gabungan)</h2>
+      ${topGifts.map(([code, count]) => bar(giftName(code), count, 0, maxGift, "var(--accent)")).join("")}` : ""}
+      ${topHd.length ? `<h2 class="section" style="margin:16px 0 6px;">Area Holy Discontent Terbanyak</h2>
+      ${topHd.map(([area, count]) => bar(area, count, 0, maxHd, "var(--warn)")).join("")}` : ""}
+    </div>`;
+  }
   RENDER.results = async function () {
     if (state.participantResults === null) {
       el("resultsBody").innerHTML = `<div class="card pad" style="text-align:center;padding:30px;"><span class="muted">Memuat data peserta…</span></div>`;
@@ -916,6 +970,7 @@
     });
     const chip = (key, label) => `<button type="button" class="btn btn--sm ${filter === key ? "btn--primary" : "btn--ghost"}" data-resultsfilter="${key}">${esc(label)}</button>`;
     el("resultsBody").innerHTML = `
+      ${resultsAnalyticsHTML(rows)}
       <div class="divider-note">Hasil test &amp; asesmen semua peserta Discipleship Journey yang aksesnya sudah disetujui (${rows.length} orang).</div>
       <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;">
         ${chip("all", "Semua")}${chip("D", "D tinggi")}${chip("I", "I tinggi")}${chip("S", "S tinggi")}${chip("C", "C tinggi")}${chip("rs3pass", "RS3 Lulus")}${chip("rs3fail", "RS3 Belum")}${chip("lts2pass", "LTS2 Lulus")}${chip("lts2fail", "LTS2 Belum")}
@@ -2081,8 +2136,21 @@
       const patch = Object.fromEntries(sec.fields.map(f => [f.key, state.draft.roadmapData[f.key]]));
       try {
         await DB.saveRoadmapSection(CURRENT_YEAR, patch);
-        toast(`${sec.title} disimpan.`);
         state.myRoadmap = await DB.myRoadmap(CURRENT_YEAR);
+        // 2026-09-23 (permintaan user - ide "auto-tandai kelas Lead To Serve 1
+        // begitu 5 bagian S-E-R-V-E lengkap", diusulkan Claude, dipilih user
+        // "1,3 jalankan"): dicek SETIAP simpan bagian apa pun (bukan cuma
+        // Expansion — bagian TERAKHIR yg diisi bisa yg mana saja) — kalau
+        // KELIMA bagian sudah terisi (serveSectionFilled(), definisi SAMA
+        // dgn banner "Serve Road Map Lengkap!" di serveGridHTML()), tandai
+        // kelas LTS1 (index 3) selesai di JB3. markClassComplete()
+        // mengembalikan false kalau sudah pernah ditandai — tak toast ulang.
+        let justCompleted = false;
+        if (SERVE_SECTIONS.every(s2 => serveSectionFilled(s2.key))) {
+          try { justCompleted = await DB.markClassComplete(3); }
+          catch (e) { /* non-fatal — jangan blokir alur simpan biasa kalau ini gagal */ }
+        }
+        toast(justCompleted ? "🎉 Serve Road Map lengkap — kelas Lead To Serve 1 ditandai selesai!" : `${sec.title} disimpan.`);
         show("home");
       } catch (err) { toast("Gagal simpan: " + (err.message || err)); }
       return;
