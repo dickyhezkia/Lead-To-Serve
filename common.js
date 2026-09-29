@@ -59,6 +59,49 @@ window.LTS = (function () {
       watchouts: ["Bisa terlalu perfeksionis hingga lambat mengambil keputusan", "Rawan terlalu kritis pada diri sendiri/orang lain", "Perlu belajar fleksibel saat rencana berubah"],
       ministryFit: ["Administrasi & keuangan pelayanan", "Pengajaran yang butuh kedalaman/riset", "Perencanaan & pengorganisasian acara", "Quality control/dokumentasi pelayanan"] },
   };
+  // 2026-09-29 (permintaan user, foto halaman "Interpretation" A-4 & "Stress
+  // Management" dari buku sumber Professional/Leadership): BERBEDA dgn
+  // DISC_PROFILES di atas (tulisan Claude sendiri), isi DISC_INTERP ini adalah
+  // TERJEMAHAN langsung materi sumber — dipakai kartu lipat di bawah grafik
+  // Masking / Stress / Real di Hasil Asesmen (lihat discInsightHTML, index.html).
+  const DISC_INTERP = {
+    D: { title: "Perilaku \"D\" — Aktif / Berorientasi Tugas", aka: "Dikenal juga sbg \"Koleris\" & \"Singa\"",
+      desc: "Dominan, Langsung, Menuntut, Tegas",
+      motivation: "Tantangan & Kendali",
+      desires: ["Bebas dari kendali/diatur", "Otoritas", "Kegiatan yang bervariasi", "Tugas-tugas yang sulit", "Kesempatan untuk maju", "Pilihan, bukan ultimatum"],
+      respondsTo: ["Memberi jawaban langsung", "Fokus pada tugas", "Langsung ke pokok persoalan", "Memberi tekanan/tantangan", "Memberi kebebasan untuk meraih pencapaian pribadi"],
+      needsToLearn: ["Anda membutuhkan orang lain", "Bersantai bukanlah kejahatan", "Sebagian kendali tetap diperlukan", "Setiap orang punya atasan", "Pengendalian diri paling penting", "Fokus menyelesaikan dengan baik itu penting", "Peka terhadap perasaan orang lain itu bijak"],
+      pressure: "Menjadi diktator, mendominasi, menuntut, marah, intens, memaksa, blak-blakan, suka memerintah.",
+      irritation: "Kelemahan, keragu-raguan, kemalasan; kurangnya disiplin, rencana, tujuan, arah, otoritas, kendali, tantangan.",
+      needsTo: "Mundur sejenak, mencari damai, bersantai, berpikir sebelum bereaksi, mengendalikan diri; menjadi sabar, penuh kasih, ramah, setia, baik hati, peka." },
+    I: { title: "Perilaku \"I\" — Aktif / Berorientasi Orang", aka: "Dikenal juga sbg \"Sanguin\" & \"Otter\"",
+      desc: "Menginspirasi, Memengaruhi, Mengesankan, Mendorong",
+      motivation: "Pengakuan & Penerimaan",
+      desires: ["Gengsi/prestise", "Relasi yang bersahabat", "Bebas dari urusan detail", "Kesempatan menolong orang lain", "Kesempatan memotivasi orang lain", "Kesempatan mengungkapkan ide"],
+      respondsTo: ["Adil dan juga bersahabat", "Menyediakan keterlibatan sosial", "Memberi pengakuan atas kemampuan", "Memberi penghargaan atas keberanian mengambil risiko"],
+      needsToLearn: ["Waktu harus dikelola", "Tenggat waktu itu penting", "Optimisme berlebihan bisa berbahaya", "Bertanggung jawab lebih penting daripada populer", "Mendengar lebih baik akan menambah pengaruh"],
+      pressure: "Menjadi hiperaktif, terlalu optimis, kekanak-kanakan, emosional, tidak rasional, konyol, terlalu banyak bicara, egois.",
+      irritation: "Ketidakpedulian, kelambatan, pesimisme, detail, batasan waktu, permusuhan, keraguan, struktur; kurangnya antusiasme.",
+      needsTo: "Mendengar, menghitung biaya, mengendalikan emosi; menjadi rendah hati, kuat, disiplin, tepat waktu, berhati-hati dengan perkataan." },
+    S: { title: "Perilaku \"S\" — Pasif / Berorientasi Orang", aka: "Dikenal juga sbg \"Plegmatis\" & \"Golden Retriever\"",
+      desc: "Tunduk/Mengalah, Mantap, Stabil, Berorientasi Rasa Aman",
+      motivation: "Stabilitas & Dukungan",
+      desires: ["Bidang spesialisasi", "Menjadi bagian dari suatu kelompok", "Pola kerja yang mapan", "Situasi yang aman", "Lingkungan yang konsisten & familiar"],
+      respondsTo: ["Santai dan bersahabat", "Memberi waktu untuk menyesuaikan diri dengan perubahan", "Mengizinkan bekerja sesuai ritmenya sendiri", "Memberi dukungan pribadi"],
+      needsToLearn: ["Perubahan membuka kesempatan", "Persahabatan bukan segalanya", "Disiplin itu baik", "Keberanian & mengambil risiko kadang diperlukan"],
+      pressure: "Menjadi terlalu menurut, tidak percaya diri, penakut, lemah kemauan, menarik diri, ikut larut dalam perasaan, mudah dimanfaatkan.",
+      irritation: "Sikap memaksa, ketidakstabilan, kekakuan, kemarahan, ketidaksetiaan, ketidakpekaan, kesombongan, diskriminasi, ketidakadilan.",
+      needsTo: "Menjadi kuat, berani, menantang, lebih agresif, tegas, berani berkonfrontasi, antusias, terbuka/supel." },
+    C: { title: "Perilaku \"C\" — Pasif / Berorientasi Tugas", aka: "Dikenal juga sbg \"Melankolis\" & \"Beaver\"",
+      desc: "Kompeten, Patuh, Berhati-hati, Penuh Perhitungan",
+      motivation: "Kualitas & Ketepatan",
+      desires: ["Tugas yang jelas batasannya", "Detail", "Risiko yang terbatas", "Tugas yang menuntut ketelitian & perencanaan", "Waktu untuk berpikir"],
+      respondsTo: ["Memberi kepastian/penegasan", "Menjabarkan prosedur kerja secara rinci", "Menyediakan sumber daya untuk mengerjakan tugas dengan benar", "Mendengarkan saran"],
+      needsToLearn: ["Dukungan penuh tidak selalu mungkin", "Penjelasan menyeluruh bukan segalanya", "Tenggat waktu harus dipenuhi", "Lebih optimis akan membawa keberhasilan lebih besar"],
+      pressure: "Menjadi murung, kritis, terlalu banyak merenung, negatif, mudah khawatir.",
+      irritation: "Ketidakcakapan, ketidakteraturan, kebodohan, ketidakjujuran, ketidaktelitian, pemborosan, ketidakkonsistenan, iman yang buta.",
+      needsTo: "Lebih santai, berkomunikasi; menjadi sukacita, positif, toleran, mau berkompromi, terbuka, mempercayai, antusias." },
+  };
   // Skor NEGATIF di suatu kategori SSD = area keyakinan diri yang perlu
   // diperhatikan/diperbaiki (lihat SSD_SCALE — skala dibalik: setuju dgn
   // pernyataan disfungsional = skor negatif). "low" = teks utk skor negatif,
@@ -287,7 +330,7 @@ window.LTS = (function () {
     DISC_GROUPS, computeDiscGraphs, discComplete,
     SSD_QUESTIONS, SSD_CATEGORIES, SSD_SCALE, computeSsdScores, ssdComplete, ssdCatName,
     GIFTS_QUESTIONS, GIFTS_LIST, GIFTS_SCALE, computeGiftsScores, giftsComplete, giftName,
-    ROADMAP_SECTIONS, HOLY_DISCONTENT_AREAS, DISC_PROFILES, SSD_INSIGHT,
+    ROADMAP_SECTIONS, HOLY_DISCONTENT_AREAS, DISC_PROFILES, DISC_INTERP, SSD_INSIGHT,
     RS3_QUESTIONS, RS3_BANDS, computeRs3Result, rs3Complete,
     LTS2_QUESTIONS, LTS2_BANDS, computeLts2Result, lts2Complete,
   };
