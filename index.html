@@ -570,6 +570,18 @@
   }
   const sb = window.supabase.createClient(window.LTS_CONFIG.url, window.LTS_CONFIG.anonKey);
   const DB = window.makeDB(sb);
+  // 2026-10-04: dibuka di dalam lapisan JB3 HOME Tracker (iframe) → token login yg
+  // diperbarui di sini dikirim balik ke JB3 (sesi yg sama via handoff), spy refresh
+  // token lama tak dipakai 2x. Hanya ke induk yg origin-nya JB3.
+  (function () {
+    if (window.parent === window) return;
+    const anc = (location.ancestorOrigins && location.ancestorOrigins[0]) || (document.referrer ? new URL(document.referrer).origin : "");
+    if (!/^https:\/\/jb3-home-tracker[\w.-]*\.dickyhezkia\.workers\.dev$/.test(anc)) return;
+    sb.auth.onAuthStateChange((evt, session) => {
+      if ((evt === "TOKEN_REFRESHED" || evt === "SIGNED_IN") && session)
+        window.parent.postMessage({ type:"dj-session", at:session.access_token, rt:session.refresh_token }, anc);
+    });
+  })();
 
   // 2026-09-22 (kerangka S-E-R-V-E, "isian toolnya nanti saja"): state
   // disederhanakan besar2an — cuma yg dibutuhkan utk login + navigasi.

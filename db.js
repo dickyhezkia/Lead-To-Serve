@@ -69,7 +69,10 @@ window.makeDB = function makeDB(sb) {
       wrap(await sb.auth.signInWithPassword({ email:toEmail(id), password }));
     },
 
-    async logout() { wrap(await sb.auth.signOut()); },
+    // 2026-10-04: scope "local" — keluar HANYA dari app ini di perangkat ini. Default
+    // supabase ("global") mencabut SEMUA sesi akun ini → JB3 HOME Tracker (sesi yg
+    // sama via handoff, kini juga dibuka di dalam JB3) ikut ter-logout.
+    async logout() { wrap(await sb.auth.signOut({ scope:"local" })); },
 
     async changePassword(newPassword) {
       wrap(await sb.auth.updateUser({ password:newPassword }));
