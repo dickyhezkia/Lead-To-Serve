@@ -171,6 +171,18 @@
   .qrow:last-child { border-bottom: none; }
   .qrow .qtext { font-size: 13px; line-height: 1.4; margin-bottom: 8px; }
   .qrow .qno { color: var(--ink-faint); font-weight: 800; margin-right: 4px; }
+  /* 2026-10-04 — pembahasan post-test (postTestReviewHTML) */
+  .rv { margin-top: 10px; border-top: 1px solid var(--line); padding-top: 8px; }
+  .rv > summary, .rv-sub > summary { cursor: pointer; font-size: 12.5px; color: var(--ink-soft); padding: 4px 0; }
+  .rv-sub { margin-top: 8px; }
+  .rv-item { padding: 10px 0; border-bottom: 1px solid var(--line); }
+  .rv-item:last-child { border-bottom: none; }
+  .rv-q { font-size: 13px; line-height: 1.4; margin-bottom: 6px; }
+  .rv-q .qno { color: var(--ink-faint); font-weight: 800; margin-right: 4px; }
+  .rv-line { font-size: 12.5px; line-height: 1.4; padding: 7px 10px; border-radius: 9px; margin-top: 4px; }
+  .rv-line small { display: block; font-size: 10px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; opacity: .8; margin-bottom: 2px; }
+  .rv-wrong { background: color-mix(in srgb, var(--bad) 12%, var(--surface)); color: var(--bad); }
+  .rv-good { background: color-mix(in srgb, var(--good) 14%, var(--surface)); color: var(--good); }
 
   .barrow { margin-bottom: 10px; }
   .barrow .bhead { display: flex; justify-content: space-between; font-size: 11.5px; margin-bottom: 4px; }
@@ -716,6 +728,31 @@
   // Boleh diulang kapan saja selagi unlocked (lihat v_rs3_test_results.sql —
   // tak ada batas 1x/tahun spt instrumen lain), hasil terakhir ditampilkan
   // di atas form kalau ada percobaan sebelumnya.
+  // 2026-10-04 (permintaan user, "peserta yang telah mengisi postest perlu
+  // tahu pilihan apa yang salah dan pilihan yang benarnya apa"): pembahasan
+  // per soal dari percobaan TERAKHIR (res.answers, kolom jsonb yg sudah
+  // tersimpan sejak awal) — default cuma soal yg SALAH, ada <details> utk
+  // soal yg benar. Dipakai di halaman post-test, Hasil Asesmen, & detail
+  // peserta (Admin). Kunci jawaban memang sudah ada di common.js (lihat
+  // catatan di RS3_QUESTIONS), jadi tak ada data baru yg dibuka.
+  function postTestReviewHTML(questions, res, open, who) {
+    if (!res || !res.answers) return "";
+    const ans = res.answers || {};
+    const wrong = questions.filter(q => ans[String(q.no)] !== q.correct);
+    const right = questions.filter(q => ans[String(q.no)] === q.correct);
+    const opt = (q, k) => k && q.options[k] ? `${k}) ${esc(q.options[k])}` : "— (tidak dijawab)";
+    const item = (q, ok) => `<div class="rv-item ${ok ? "rv-ok" : "rv-bad"}">
+        <div class="rv-q"><span class="qno">${q.no}.</span>${esc(q.text)}</div>
+        ${ok ? `<div class="rv-line rv-good">✓ ${opt(q, q.correct)}</div>`
+          : `<div class="rv-line rv-wrong"><small>${who || "Jawabanmu"}</small>✗ ${opt(q, ans[String(q.no)])}</div>
+             <div class="rv-line rv-good"><small>Jawaban benar</small>✓ ${opt(q, q.correct)}</div>`}
+      </div>`;
+    return `<details class="rv" ${open ? "open" : ""}>
+        <summary>Pembahasan jawaban — ${wrong.length ? `<b>${wrong.length} salah</b>` : "<b>semua benar 🎉</b>"}</summary>
+        ${wrong.map(q => item(q, false)).join("")}
+        ${right.length ? `<details class="rv-sub"><summary>Lihat ${right.length} soal yang dijawab benar</summary>${right.map(q => item(q, true)).join("")}</details>` : ""}
+      </details>`;
+  }
   RENDER.rs3 = function () {
     const isAdmin = state.persona === "ADMIN";
     const st = state.rs3AccessStatus;
@@ -741,6 +778,7 @@
     const lastHTML = last ? `<div class="card pad" style="margin-bottom:14px;">
       <b style="display:block;font-family:var(--font-display);font-size:14px;margin-bottom:4px;">Hasil Terakhir</b>
       <p class="sub" style="margin:0;">${last.correct}/${last.total} benar (${last.score_pct}%) — <b>${esc(last.band)}</b>${last.passed ? " ✅ Lulus" : " — belum lulus, boleh coba lagi di bawah"}</p>
+      ${postTestReviewHTML(RS3_QUESTIONS, last, true)}
     </div>` : "";
     const rows = RS3_QUESTIONS.map(q => `<div class="qrow">
       <div class="qtext"><span class="qno">${q.no}.</span>${esc(q.text)}</div>
@@ -783,6 +821,7 @@
     const lastHTML = last ? `<div class="card pad" style="margin-bottom:14px;">
       <b style="display:block;font-family:var(--font-display);font-size:14px;margin-bottom:4px;">Hasil Terakhir</b>
       <p class="sub" style="margin:0;">${last.correct}/${last.total} benar (${last.score_pct}%) — <b>${esc(last.band)}</b>${last.passed ? " ✅ Lulus" : " — belum lulus, boleh coba lagi di bawah"}</p>
+      ${postTestReviewHTML(LTS2_QUESTIONS, last, true)}
     </div>` : "";
     const rows = LTS2_QUESTIONS.map(q => `<div class="qrow">
       <div class="qtext"><span class="qno">${q.no}.</span>${esc(q.text)}</div>
@@ -1702,11 +1741,11 @@
   // mengisikan punya org lain).
   function resultBodyHTML(disc, ssd, gifts, roadmapData, rs3, lts2, viewingSelf) {
     const n = buildHasilNarrative(disc, ssd, gifts, roadmapData);
-    const rs3HTML = rs3 ? `<div class="card pad"><p class="sub" style="margin:0;">${rs3.correct}/${rs3.total} benar (${rs3.score_pct}%) — <b>${esc(rs3.band)}</b>${rs3.passed ? " ✅ Lulus" : " — belum lulus"}</p></div>`
+    const rs3HTML = rs3 ? `<div class="card pad"><p class="sub" style="margin:0;">${rs3.correct}/${rs3.total} benar (${rs3.score_pct}%) — <b>${esc(rs3.band)}</b>${rs3.passed ? " ✅ Lulus" : " — belum lulus"}</p>${postTestReviewHTML(RS3_QUESTIONS, rs3, false, viewingSelf ? "" : "Jawaban peserta")}</div>`
       : `<div class="card pad"><p class="sub" style="margin:0 0 ${viewingSelf ? 8 : 0}px;">Post-test Rock Solid 3 belum diambil${viewingSelf ? "" : " oleh peserta ini"}.</p>${viewingSelf ? `<button type="button" class="btn btn--ghost" data-goto="rs3">Ke Post-Test RS3</button>` : ""}</div>`;
     // 2026-09-23 ("jika limit cukup, buatkan post test utk LTS2") — SAMA
     // PERSIS pola rs3HTML di atas.
-    const lts2HTML = lts2 ? `<div class="card pad"><p class="sub" style="margin:0;">${lts2.correct}/${lts2.total} benar (${lts2.score_pct}%) — <b>${esc(lts2.band)}</b>${lts2.passed ? " ✅ Lulus" : " — belum lulus"}</p></div>`
+    const lts2HTML = lts2 ? `<div class="card pad"><p class="sub" style="margin:0;">${lts2.correct}/${lts2.total} benar (${lts2.score_pct}%) — <b>${esc(lts2.band)}</b>${lts2.passed ? " ✅ Lulus" : " — belum lulus"}</p>${postTestReviewHTML(LTS2_QUESTIONS, lts2, false, viewingSelf ? "" : "Jawaban peserta")}</div>`
       : `<div class="card pad"><p class="sub" style="margin:0 0 ${viewingSelf ? 8 : 0}px;">Post-test Lead To Serve 2 belum diambil${viewingSelf ? "" : " oleh peserta ini"}.</p>${viewingSelf ? `<button type="button" class="btn btn--ghost" data-goto="lts2">Ke Post-Test LTS2</button>` : ""}</div>`;
     const discHTML = !disc ? `<div class="card pad" style="margin-bottom:12px;"><p class="sub" style="margin:0 0 ${viewingSelf ? 8 : 0}px;">DISC belum diisi${viewingSelf ? "" : " oleh peserta ini"}.</p>${viewingSelf ? `<button type="button" class="btn btn--ghost" data-goto="disc">Isi DISC</button>` : ""}</div>` : (() => {
       const g1 = disc.graph1, g2 = disc.graph2, g3 = disc.graph3;
@@ -2150,6 +2189,7 @@
         state.rs3Result = await DB.myRs3Latest();
         toast(result.passed ? `Lulus (${result.bandLabel})! Kelas Rock Solid 3 sudah ditandai selesai.` : `Belum lulus (${result.bandLabel}) — boleh coba lagi.`);
         RENDER.rs3();
+        window.scrollTo({ top:0, behavior:"smooth" });
       } catch (err) { toast("Gagal mengirim: " + (err.message || err)); }
       return;
     }
@@ -2170,6 +2210,7 @@
         state.lts2Result = await DB.myLts2Latest();
         toast(result.passed ? `Lulus (${result.bandLabel})! Kelas Lead To Serve 2 sudah ditandai selesai.` : `Belum lulus (${result.bandLabel}) — boleh coba lagi.`);
         RENDER.lts2();
+        window.scrollTo({ top:0, behavior:"smooth" });
       } catch (err) { toast("Gagal mengirim: " + (err.message || err)); }
       return;
     }
