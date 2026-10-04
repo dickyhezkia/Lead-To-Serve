@@ -544,7 +544,7 @@
      viewport spt sebelumnya (tak ada DOM yg direndernya ke kanvas, tak ada
      breakpoint CSS yg bisa salah kebaca). Lihat buildRoadMapPdf()/
      buildHasilPdf() di bawah. Versi dipatok (bukan @latest) spy stabil. -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="./config.js"></script>
 <script src="./common.js"></script>
 <script src="./db.js"></script>
@@ -1468,7 +1468,7 @@
   RENDER.results = async function () {
     if (state.participantResults === null) {
       el("resultsBody").innerHTML = `<div class="card pad" style="text-align:center;padding:30px;"><span class="muted">Memuat data peserta…</span></div>`;
-      try { state.participantResults = await DB.listParticipantResults(CURRENT_YEAR); }
+      try { const pr = state.participantResultsP || DB.listParticipantResults(CURRENT_YEAR); state.participantResultsP = null; state.participantResults = await pr; }
       catch (err) { el("resultsBody").innerHTML = `<div class="empty">Gagal memuat: ${esc(err.message || err)}</div>`; return; }
     }
     const rows = state.participantResults || [];
@@ -2321,48 +2321,53 @@
   };
 
   /* ---------------- data load & sync ---------------- */
+  // 2026-10-04 (user: "saat login discipleship journey memerlukan waktu lebih
+  // lama drpd login jb3 home tracker"): dulu ~10-15 query dijalankan BERURUTAN
+  // (tiap await menunggu bolak-balik ke Supabase). Sekarang setelah profil,
+  // SEMUA query jalan BERSAMAAN (Promise.all) → waktu muat ≈ 2 bolak-balik.
+  // Data asesmen pribadi (DISC/Roadmap/SSD/Gifts) ikut diambil paralel lalu
+  // dipakai hanya kalau aksesnya approved (RLS memang cuma baris milik sendiri).
   async function loadAll() {
     state.myProfile = await DB.myProfile();
     if (!state.myProfile) return;
     state.meId = state.myProfile.id;
     state.persona = state.myProfile.role === "admin" ? "ADMIN" : "PESERTA";
-    if (state.persona === "ADMIN") state.accessRequests = await DB.listAllAccessRequests();
-    if (state.persona === "ADMIN") { try { state.classProgress = await DB.listClassProgress(); } catch (e) { console.error(e); state.classProgress = []; } }
-    if (state.persona === "ADMIN") { try { state.postTestBest = await DB.listPostTestBest(); } catch (e) { console.error(e); state.postTestBest = {}; } }
-    if (state.persona === "ADMIN") { try { state.rs3Feedback = await DB.listRs3Feedback(); } catch (e) { console.error(e); state.rs3Feedback = []; } }
-    if (state.persona === "ADMIN") { try { state.rs3FbBatches = await DB.listRs3FbBatches(); } catch (e) { console.error(e); state.rs3FbBatches = []; } }
-    else state.accessStatus = await DB.myAccessStatus();
-    // 2026-09-23 ("buatkan link dari kartu carousel Rock solid 3 ... perlu
-    // ijin admin"): alur akses RS3 TERPISAH dari S-E-R-V-E — dimuat SELALU
-    // (bukan cuma saat unlocked spt DISC/SSD/Gifts di bawah), krn kartu RS3
-    // di beranda sendiri butuh tahu status ini utk semua orang.
-    if (state.persona === "ADMIN") state.rs3AccessRequests = await DB.listAllRs3AccessRequests();
-    else state.rs3AccessStatus = await DB.myRs3Status();
-    state.rs3Result = await DB.myRs3Latest();
-    state.draft.rs3Answers = {};
-    // 2026-09-23 ("jika limit cukup, buatkan post test utk LTS2") — SAMA
-    // PERSIS pola RS3 di atas.
-    if (state.persona === "ADMIN") state.lts2AccessRequests = await DB.listAllLts2AccessRequests();
-    else state.lts2AccessStatus = await DB.myLts2Status();
-    state.lts2Result = await DB.myLts2Latest();
-    state.draft.lts2Answers = {};
-    // 2026-09-22 ("bangun assesment DISC..."): baris tahun INI saja (skema
-    // "1 baris/tahun" — lihat supabase/v_lts_disc_results.sql). draft.discPicks
-    // diisi ulang dari data tersimpan spy form DISC lanjut dari isian
-    // terakhir kalau dibuka lagi sebelum disimpan final.
-    if (state.persona === "ADMIN" || state.accessStatus === "approved") {
-      state.myDisc = await DB.myDisc(CURRENT_YEAR);
-      state.draft.discPicks = (state.myDisc && state.myDisc.picks && state.myDisc.picks.length) ? state.myDisc.picks : [];
-      // 2026-09-23 ("kerjakan yang experience"): sama pola dgn DISC di atas.
-      state.myRoadmap = await DB.myRoadmap(CURRENT_YEAR);
-      state.draft.roadmapData = (state.myRoadmap && state.myRoadmap.data) ? { ...state.myRoadmap.data } : {};
-      // 2026-09-23 ("tambahkan tools/isian SSD"): sama pola dgn DISC/Roadmap.
-      state.mySsd = await DB.mySsd(CURRENT_YEAR);
-      state.draft.ssdAnswers = (state.mySsd && state.mySsd.answers) ? { ...state.mySsd.answers } : {};
-      // 2026-09-23 ("Karunia Rohani adalah bagian dari Strength. kamu
-      // buatkan isiannya"): sama pola dgn DISC/SSD di atas.
-      state.myGifts = await DB.myGifts(CURRENT_YEAR);
-      state.draft.giftsAnswers = (state.myGifts && state.myGifts.answers) ? { ...state.myGifts.answers } : {};
+    const isAdm = state.persona === "ADMIN";
+    const soft = (pr, fb) => pr.catch(e => { console.error(e); return fb; });
+    if (isAdm) {
+      // Roster tab "Peserta" mulai dimuat di latar (tak ditunggu) — dipakai RENDER.results.
+      state.participantResults = null;
+      state.participantResultsP = DB.listParticipantResults(CURRENT_YEAR);
+      state.participantResultsP.catch(() => {});
+    }
+    const [acc, rs3Acc, lts2Acc, rs3Res, lts2Res, disc, roadmap, ssd, gifts, classProgress, postTestBest, rs3Feedback, rs3FbBatches] = await Promise.all([
+      isAdm ? DB.listAllAccessRequests() : DB.myAccessStatus(),
+      isAdm ? DB.listAllRs3AccessRequests() : DB.myRs3Status(),
+      isAdm ? DB.listAllLts2AccessRequests() : DB.myLts2Status(),
+      DB.myRs3Latest(),
+      DB.myLts2Latest(),
+      DB.myDisc(CURRENT_YEAR),
+      DB.myRoadmap(CURRENT_YEAR),
+      DB.mySsd(CURRENT_YEAR),
+      DB.myGifts(CURRENT_YEAR),
+      isAdm ? soft(DB.listClassProgress(), []) : null,
+      isAdm ? soft(DB.listPostTestBest(), {}) : null,
+      isAdm ? soft(DB.listRs3Feedback(), []) : null,
+      isAdm ? soft(DB.listRs3FbBatches(), []) : null,
+    ]);
+    if (isAdm) Object.assign(state, { accessRequests:acc, rs3AccessRequests:rs3Acc, lts2AccessRequests:lts2Acc, classProgress, postTestBest, rs3Feedback, rs3FbBatches });
+    else Object.assign(state, { accessStatus:acc, rs3AccessStatus:rs3Acc, lts2AccessStatus:lts2Acc });
+    state.rs3Result = rs3Res; state.draft.rs3Answers = {};
+    state.lts2Result = lts2Res; state.draft.lts2Answers = {};
+    if (isAdm || state.accessStatus === "approved") {
+      state.myDisc = disc;
+      state.draft.discPicks = (disc && disc.picks && disc.picks.length) ? disc.picks : [];
+      state.myRoadmap = roadmap;
+      state.draft.roadmapData = (roadmap && roadmap.data) ? { ...roadmap.data } : {};
+      state.mySsd = ssd;
+      state.draft.ssdAnswers = (ssd && ssd.answers) ? { ...ssd.answers } : {};
+      state.myGifts = gifts;
+      state.draft.giftsAnswers = (gifts && gifts.answers) ? { ...gifts.answers } : {};
     }
   }
 
@@ -2449,7 +2454,7 @@
     }
     if (T.closest("#pfLogout") || T.closest("#rolePill")) {
       await DB.logout().catch(() => {});
-      Object.assign(state, { page:"login", stack:[], persona:null, meId:null, myProfile:null, accessStatus:null, accessRequests:[], myDisc:null, myRoadmap:null, mySsd:null, myGifts:null, rs3AccessStatus:null, rs3AccessRequests:[], rs3Result:null, lts2AccessStatus:null, lts2AccessRequests:[], lts2Result:null, participantResults:null, viewProfileId:null, resultsFilter:"all", dashKey:null, dashOpen:{}, classProgress:null, rs3Feedback:null, rs3FbBatches:null, fbDraft:{}, fbAgain:false, draft:{ discPicks:[], roadmapData:{}, ssdAnswers:{}, giftsAnswers:{}, rs3Answers:{}, lts2Answers:{} } });
+      Object.assign(state, { page:"login", stack:[], persona:null, meId:null, myProfile:null, accessStatus:null, accessRequests:[], myDisc:null, myRoadmap:null, mySsd:null, myGifts:null, rs3AccessStatus:null, rs3AccessRequests:[], rs3Result:null, lts2AccessStatus:null, lts2AccessRequests:[], lts2Result:null, participantResults:null, participantResultsP:null, viewProfileId:null, resultsFilter:"all", dashKey:null, dashOpen:{}, classProgress:null, rs3Feedback:null, rs3FbBatches:null, fbDraft:{}, fbAgain:false, draft:{ discPicks:[], roadmapData:{}, ssdAnswers:{}, giftsAnswers:{}, rs3Answers:{}, lts2Answers:{} } });
       show("login", { replace:true });
       return;
     }
