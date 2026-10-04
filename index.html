@@ -961,8 +961,9 @@
   // 2026-10-04 (user: "rapihkan tampilan setiap nav bar pengguna dari
   // discipleship journey"): ke-5 tab peserta kini 1 pola yg sama — hero
   // berwarna kelas (judul + status pill) → judul bagian (pjSecHTML) → isi →
-  // kartu feedback di paling bawah — KECUALI post-test yg sudah py "Hasil
-  // terakhir": feedback tepat di bawah kartu hasil (user, 2026-10-04).
+  // kartu feedback SELALU posisi ke-2, tepat di bawah hero (user, 2026-10-04:
+  // "semua kartu feedback di semua nav dipindah dibawah kartu discipleship
+  // journey (posisi ke2)").
   const BAND_TONE = { Excellent:"ex", Better:"bt", Good:"gd", Underperform:"up" };
   function pjHeroHTML(k, sub, pill) {
     const c = DASH_JOURNEYS.find(x => x.key === k);
@@ -1020,12 +1021,12 @@
     const c = DASH_JOURNEYS.find(x => x.key === k);
     const done = !!((state.myProfile || {}).classes || [])[c.classIdx];
     return pjHeroHTML(k, done ? "Terima kasih sudah setia mengikuti kelas ini!" : "Status kelas dicatat oleh pemimpin HOME/Admin di JB3 HOME Tracker.", done ? "✓ Kelas selesai" : "Belum ditandai selesai")
+      + pjFbHTML(k)
       + pjSecHTML("Post-test") + `<div class="card pad pj-lock">
         <div class="pj-lock-ic">📝</div>
         <b>Post-Test ${esc(c.title)} segera hadir</b>
         <p class="sub">Post-test untuk kelas ini sedang disiapkan. Nantikan ya!</p>
-      </div>`
-      + pjFbHTML(k);
+      </div>`;
   }
   RENDER.rs1 = () => { el("rs1Body").innerHTML = classIntroHTML("rs1"); };
   RENDER.rs2 = () => { el("rs2Body").innerHTML = classIntroHTML("rs2"); };
@@ -1036,13 +1037,13 @@
     const pill = !unlocked ? (state.accessStatus === "pending" ? "⏳ Menunggu Admin" : "🔒 Terkunci")
       : nInst === 3 && nServe === SERVE_SECTIONS.length ? "✓ Semua lengkap" : `Asesmen ${nInst}/3 · S-E-R-V-E ${nServe}/${SERVE_SECTIONS.length}`;
     el("homeBody").innerHTML = pjHeroHTML("lts1", "Kenali kepribadian, karunia & panggilan pelayananmu — diperbarui setiap tahun.", pill)
+      + pjFbHTML("lts1")
       + (unlocked
         ? pjSecHTML("Asesmen pribadi", `${nInst}/3 selesai`) + discCardHTML() + ssdCardHTML() + giftsCardHTML()
           + pjSecHTML("Serve Road Map", `${nServe}/${SERVE_SECTIONS.length} terisi`)
           + `<div class="divider-note">5 bagian refleksi yang menggabungkan kekuatan, pengalaman, relasi, visi, dan rencana pelayananmu jadi satu peta pribadi.</div>`
           + serveGridHTML()
-        : lockedHomeHTML())
-      + pjFbHTML("lts1");
+        : lockedHomeHTML());
   };
 
   // ---- DISC (2026-09-22, permintaan user "bangun assesment DISC dengan
@@ -1168,20 +1169,19 @@
     const unlocked = state.persona === "ADMIN" || st === "approved";
     const hero = pjHeroHTML("rs3", "Post-test 40 soal pilihan ganda. Skor <b>Good</b> (50%) ke atas = lulus &amp; kelas otomatis ditandai selesai.", pjStatusPill(st, last));
     if (!unlocked) {
-      el("rs3Body").innerHTML = hero + pjSecHTML("Post-test") + pjLockHTML(st, "reqRs3Btn", "post-test") + pjFbHTML("rs3");
+      el("rs3Body").innerHTML = hero + pjFbHTML("rs3") + pjSecHTML("Post-test") + pjLockHTML(st, "reqRs3Btn", "post-test");
       return;
     }
     const answers = state.draft.rs3Answers;
     const doneCount = RS3_QUESTIONS.filter(q => answers[q.no]).length;
     const done = rs3Complete(answers);
     el("rs3Body").innerHTML = hero
+      + pjFbHTML("rs3")
       + pjResultHTML(last, RS3_QUESTIONS)
-      + (last ? pjFbHTML("rs3") : "")
       + pjSecHTML(last ? "Coba lagi" : "Soal post-test", `${doneCount}/${RS3_QUESTIONS.length} dijawab`)
       + `<div class="pj-prog"><i style="width:${Math.round(doneCount / RS3_QUESTIONS.length * 100)}%"></i></div>`
       + `<div class="card pad pj-qs">${pjQuestionsHTML(RS3_QUESTIONS, answers, "rs3ans")}</div>`
-      + `<button class="btn btn--primary" style="margin:14px 0 18px;" id="rs3Save" ${done ? "" : "disabled"}>${done ? "Kirim Jawaban" : `Jawab semua soal (${doneCount}/${RS3_QUESTIONS.length})`}</button>`
-      + (last ? "" : pjFbHTML("rs3"));
+      + `<button class="btn btn--primary" style="margin:14px 0 18px;" id="rs3Save" ${done ? "" : "disabled"}>${done ? "Kirim Jawaban" : `Jawab semua soal (${doneCount}/${RS3_QUESTIONS.length})`}</button>`;
   };
 
   // ---- Lead To Serve 2 post-test (2026-09-23, "jika limit cukup, buatkan
@@ -1191,20 +1191,19 @@
     const unlocked = state.persona === "ADMIN" || st === "approved";
     const hero = pjHeroHTML("lts2", "Post-test 25 soal pilihan ganda. Skor <b>Good</b> (50%) ke atas = lulus &amp; kelas otomatis ditandai selesai.", pjStatusPill(st, last));
     if (!unlocked) {
-      el("lts2Body").innerHTML = hero + pjSecHTML("Post-test") + pjLockHTML(st, "reqLts2Btn", "post-test") + pjFbHTML("lts2");
+      el("lts2Body").innerHTML = hero + pjFbHTML("lts2") + pjSecHTML("Post-test") + pjLockHTML(st, "reqLts2Btn", "post-test");
       return;
     }
     const answers = state.draft.lts2Answers;
     const doneCount = LTS2_QUESTIONS.filter(q => answers[q.no]).length;
     const done = lts2Complete(answers);
     el("lts2Body").innerHTML = hero
+      + pjFbHTML("lts2")
       + pjResultHTML(last, LTS2_QUESTIONS)
-      + (last ? pjFbHTML("lts2") : "")
       + pjSecHTML(last ? "Coba lagi" : "Soal post-test", `${doneCount}/${LTS2_QUESTIONS.length} dijawab`)
       + `<div class="pj-prog"><i style="width:${Math.round(doneCount / LTS2_QUESTIONS.length * 100)}%"></i></div>`
       + `<div class="card pad pj-qs">${pjQuestionsHTML(LTS2_QUESTIONS, answers, "lts2ans")}</div>`
-      + `<button class="btn btn--primary" style="margin:14px 0 18px;" id="lts2Save" ${done ? "" : "disabled"}>${done ? "Kirim Jawaban" : `Jawab semua soal (${doneCount}/${LTS2_QUESTIONS.length})`}</button>`
-      + (last ? "" : pjFbHTML("lts2"));
+      + `<button class="btn btn--primary" style="margin:14px 0 18px;" id="lts2Save" ${done ? "" : "disabled"}>${done ? "Kirim Jawaban" : `Jawab semua soal (${doneCount}/${LTS2_QUESTIONS.length})`}</button>`;
   };
 
   // ---- Dashboard (Admin) ----
