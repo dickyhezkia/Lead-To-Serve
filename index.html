@@ -288,6 +288,7 @@
   .fb-done b { display: block; font-family: var(--font-display); font-size: 18px; margin: 6px 0 4px; }
   .fb-done .fb-quote { margin: 14px 0; }
   .fb-mini { width: 100%; display: flex; align-items: center; gap: 12px; text-align: left; margin-bottom: 12px; padding: 14px; border: none; border-radius: var(--r-md); cursor: pointer; color: #fff; font-family: var(--font-body); background: linear-gradient(140deg, var(--fc, #4472A8), color-mix(in srgb, var(--fc, #4472A8) 62%, #000)); box-shadow: 0 8px 22px color-mix(in srgb, var(--fc, #4472A8) 30%, transparent); }
+  .fb-mini.locked { filter: saturate(.35); opacity: .85; }
   .fb-mini-ic { flex: none; width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; font-size: 21px; background: rgba(255,255,255,.16); }
   .fb-mini b { display: block; font-family: var(--font-display); font-size: 14.5px; font-weight: 600; }
   .fb-mini small { display: block; font-size: 11.5px; opacity: .88; margin-top: 2px; }
@@ -804,19 +805,32 @@
     { k:"pengajar", l:"Penjelasan dari pengajar" },
   ];
   const fbSent = k => { try { return !!localStorage.getItem(FB_CLASSES[k].sentKey); } catch (e) { return false; } };
-  // Kartu kecil di beranda peserta: muncul utk kelas yg sudah lulus/lengkap.
-  function fbHomeCardsHTML(only) {
-    if (state.persona === "ADMIN") return "";
-    const show = [];
-    if (state.rs3Result && state.rs3Result.passed) show.push("rs3");
-    if (state.accessStatus === "approved" && SERVE_SECTIONS.every(x => serveSectionFilled(x.key))) show.push("lts1");
-    if (state.lts2Result && state.lts2Result.passed) show.push("lts2");
-    if (only) show.splice(0, show.length, ...show.filter(k => k === only));
-    return show.map(k => { const c = FB_CLASSES[k], sent = fbSent(k); return `<button type="button" class="fb-mini" style="--fc:${c.color};" data-goto="${c.page}">
+  // Kartu feedback di tab tiap kelas. 2026-10-04 susulan (user: "juga
+  // tambahkan kartu feedback dimasing-masing kelas"): SELALU tampil di tab
+  // kelasnya (dulu cuma muncul kalau sudah lulus/lengkap) — teks menyesuaikan
+  // status: terkunci / sudah kirim / sudah lulus / belum.
+  function fbHomeCardsHTML(k) {
+    if (state.persona === "ADMIN" || !FB_CLASSES[k]) return "";
+    const c = FB_CLASSES[k];
+    const finished = k === "rs3" ? !!(state.rs3Result && state.rs3Result.passed)
+      : k === "lts2" ? !!(state.lts2Result && state.lts2Result.passed)
+      : k === "lts1" ? SERVE_SECTIONS.every(x => serveSectionFilled(x.key))
+      : !!(((state.myProfile || {}).classes || [])[k === "rs1" ? 0 : 1]);
+    let head, sub;
+    if (!c.eligible()) {
+      head = "Feedback " + c.title;
+      sub = (k === "rs1" || k === "rs2") ? "🔒 Dibuka bersamaan dengan post-test kelas ini." : "🔒 Untuk peserta yang aksesnya sudah disetujui Admin.";
+    } else if (fbSent(k)) {
+      head = "Terima kasih atas feedback-mu! 🙏"; sub = "Feedback " + c.title + " sudah terkirim. Ketuk untuk membagikan link ke teman sekelas.";
+    } else if (finished) {
+      head = "Terima kasih sudah " + (c.until === "lulus" ? "lulus " : "menyelesaikan ") + c.title + "!"; sub = "Bantu kami lewat feedback singkat (anonim) →";
+    } else {
+      head = "Feedback Kelas " + c.title; sub = "Sudah mengikuti kelas ini? Bagikan masukanmu (anonim) →";
+    }
+    return `<button type="button" class="fb-mini ${c.eligible() ? "" : "locked"}" style="--fc:${c.color};" data-goto="${c.page}">
       <span class="fb-mini-ic">💌</span>
-      <span style="flex:1;min-width:0;"><b>Terima kasih sudah ${c.until === "lulus" ? "lulus" : "menyelesaikan"} ${esc(c.title)}!</b>
-        <small>${sent ? "Feedback-mu sudah terkirim 🙏 Ketuk untuk membagikan link." : "Bantu kami lewat feedback singkat (anonim) →"}</small></span>
-    </button>`; }).join("");
+      <span style="flex:1;min-width:0;"><b>${esc(head)}</b><small>${esc(sub)}</small></span>
+    </button>`;
   }
   const fbStarsHTML = (k, v) => `<div class="fb-stars" role="radiogroup" aria-label="${esc(k)}">${[1, 2, 3, 4, 5].map(n => `<button type="button" role="radio" aria-checked="${v === n}" aria-label="${n} bintang" data-fbstar="${k}:${n}" class="${v >= n ? "on" : ""}"><svg viewBox="0 0 24 24" width="28" height="28"><path d="M12 2.8l2.8 5.8 6.4.9-4.6 4.5 1.1 6.3L12 17.3l-5.7 3 1.1-6.3-4.6-4.5 6.4-.9z"/></svg></button>`).join("")}</div>`;
   RENDER.feedback = function () {
@@ -930,10 +944,7 @@
         <b style="display:block;font-family:var(--font-display);font-size:16px;margin-bottom:6px;">Post-Test ${esc(c.title)} segera hadir</b>
         <p class="sub" style="margin:0;">Post-test untuk kelas ini sedang disiapkan. Nantikan ya!</p>
       </div>
-      <button type="button" class="fb-mini" style="--fc:${c.color};" data-goto="${f.page}">
-        <span class="fb-mini-ic">💌</span>
-        <span style="flex:1;min-width:0;"><b>Feedback ${esc(c.title)}</b><small>Dibuka bersamaan dengan post-test kelas ini.</small></span>
-      </button>`;
+      ${fbHomeCardsHTML(k)}`;
   }
   RENDER.rs1 = () => { el("rs1Body").innerHTML = classIntroHTML("rs1"); };
   RENDER.rs2 = () => { el("rs2Body").innerHTML = classIntroHTML("rs2"); };
@@ -1082,7 +1093,7 @@
         <b style="display:block;font-family:var(--font-display);font-size:16px;margin-bottom:6px;">Post-Test Terkunci</b>
         <p class="sub" style="margin:0 0 14px;">Ajukan permintaan ke Admin untuk mulai mengerjakan post-test Rock Solid 3.</p>
         <button type="button" class="btn btn--primary" id="reqRs3Btn">Ajukan Akses</button>`;
-      el("rs3Body").innerHTML = `<div class="card pad" style="text-align:center;padding:40px 20px;">${body}</div>`;
+      el("rs3Body").innerHTML = `<div class="card pad" style="text-align:center;padding:40px 20px;margin-bottom:12px;">${body}</div>${fbHomeCardsHTML("rs3")}`;
       return;
     }
     const answers = state.draft.rs3Answers;
@@ -1126,7 +1137,7 @@
         <b style="display:block;font-family:var(--font-display);font-size:16px;margin-bottom:6px;">Post-Test Terkunci</b>
         <p class="sub" style="margin:0 0 14px;">Ajukan permintaan ke Admin untuk mulai mengerjakan post-test Lead To Serve 2.</p>
         <button type="button" class="btn btn--primary" id="reqLts2Btn">Ajukan Akses</button>`;
-      el("lts2Body").innerHTML = `<div class="card pad" style="text-align:center;padding:40px 20px;">${body}</div>`;
+      el("lts2Body").innerHTML = `<div class="card pad" style="text-align:center;padding:40px 20px;margin-bottom:12px;">${body}</div>${fbHomeCardsHTML("lts2")}`;
       return;
     }
     const answers = state.draft.lts2Answers;
