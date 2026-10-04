@@ -269,6 +269,32 @@
   .jd-band--mn { background: var(--surface-2); color: var(--ink-faint); border: 1px solid var(--line); }
   @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .jd-band--ex { background:#24402A; color:#A8D9A0; } :root:not([data-theme="light"]) .jd-band--bt { background:#22344A; color:#A9C7EC; } :root:not([data-theme="light"]) .jd-band--gd { background:#43361A; color:#E8C77E; } :root:not([data-theme="light"]) .jd-band--up { background:#47241F; color:#EDA89D; } }
   :root[data-theme="dark"] .jd-band--ex { background:#24402A; color:#A8D9A0; } :root[data-theme="dark"] .jd-band--bt { background:#22344A; color:#A9C7EC; } :root[data-theme="dark"] .jd-band--gd { background:#43361A; color:#E8C77E; } :root[data-theme="dark"] .jd-band--up { background:#47241F; color:#EDA89D; }
+  .pj-hero .jd-hero-sub { margin-bottom: 4px; }
+  .pj-pill { position: relative; display: inline-block; margin-top: 8px; padding: 5px 12px; border-radius: 999px; font-size: 11.5px; font-weight: 800; background: rgba(255,255,255,.18); border: 1px solid rgba(255,255,255,.32); }
+  .pj-sec { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin: 18px 2px 8px; }
+  .pj-hero + .pj-sec { margin-top: 4px; }
+  .pj-sec span { font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-faint); }
+  .pj-sec small { font-size: 11.5px; font-weight: 700; color: var(--ink-soft); }
+  .pj-lock { text-align: center; padding: 30px 20px; margin-bottom: 12px; }
+  .pj-lock-ic { font-size: 34px; margin-bottom: 8px; }
+  .pj-lock b { display: block; font-family: var(--font-display); font-size: 16px; margin-bottom: 6px; }
+  .pj-lock .sub { margin: 0; }
+  .pj-lock .btn { margin-top: 14px; }
+  .pj-res { margin-bottom: 4px; }
+  .pj-res-top { display: flex; align-items: center; gap: 14px; }
+  .pj-ring { flex: none; width: 72px; height: 72px; border-radius: 50%; display: grid; place-items: center; background: conic-gradient(var(--accent) calc(var(--p) * 1%), var(--surface-2) 0); }
+  .pj-ring b { width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center; background: var(--surface); font-family: var(--font-display); font-size: 17px; }
+  .pj-res-tx { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 3px; }
+  .pj-res-tx b { font-family: var(--font-display); font-size: 16px; }
+  .pj-res-tx small { font-size: 12px; color: var(--ink-faint); }
+  .pj-prog { height: 6px; border-radius: 999px; background: var(--surface-2); overflow: hidden; margin: 0 2px 10px; }
+  .pj-prog i { display: block; height: 100%; background: var(--accent); border-radius: inherit; transition: width .25s; }
+  .pj-qs { padding-top: 4px; padding-bottom: 4px; }
+  .pj-opts { display: flex; flex-direction: column; gap: 6px; }
+  .pj-opt { display: flex; align-items: flex-start; gap: 10px; width: 100%; text-align: left; padding: 9px 12px; border-radius: 11px; border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink); font-family: var(--font-body); font-size: 13px; font-weight: 600; line-height: 1.4; cursor: pointer; }
+  .pj-opt-k { flex: none; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-size: 11px; font-weight: 800; background: var(--surface-2); color: var(--ink-soft); }
+  .pj-opt[aria-pressed="true"] { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, var(--surface)); }
+  .pj-opt[aria-pressed="true"] .pj-opt-k { background: var(--accent); color: var(--paper); }
   .jd-chips { display: flex; flex-wrap: wrap; gap: 6px; padding-top: 12px; }
   .jd-chips span { font-size: 12px; font-weight: 600; padding: 5px 10px; border-radius: 999px; background: var(--surface-2); color: var(--ink-soft); border: 1px solid var(--line); }
   .jd-empty { margin: 12px 0 0; font-size: 12px; color: var(--ink-faint); }
@@ -723,24 +749,7 @@
   // tampilan terkunci + tombol "Ajukan Akses" (atau pesan menunggu/ditolak).
   // Admin TIDAK digerbang (langsung lihat semuanya + kelola Permintaan).
   function lockedHomeHTML() {
-    const st = state.accessStatus;
-    if (st === "pending") return `<div class="card pad" style="text-align:center;padding:40px 20px;">
-      <div style="font-size:34px;margin-bottom:8px;">⏳</div>
-      <b style="display:block;font-family:var(--font-display);font-size:16px;margin-bottom:6px;">Menunggu Persetujuan</b>
-      <p class="sub" style="margin:0;">Permintaan aksesmu sudah terkirim ke Admin — akan terbuka begitu disetujui.</p>
-    </div>`;
-    if (st === "rejected") return `<div class="card pad" style="text-align:center;padding:40px 20px;">
-      <div style="font-size:34px;margin-bottom:8px;">🔒</div>
-      <b style="display:block;font-family:var(--font-display);font-size:16px;margin-bottom:6px;">Permintaan Belum Disetujui</b>
-      <p class="sub" style="margin:0 0 14px;">Hubungi Admin/gembala untuk info lebih lanjut, atau ajukan lagi.</p>
-      <button type="button" class="btn btn--primary" id="reqAccessBtn">Ajukan Lagi</button>
-    </div>`;
-    return `<div class="card pad" style="text-align:center;padding:40px 20px;">
-      <div style="font-size:34px;margin-bottom:8px;">🔒</div>
-      <b style="display:block;font-family:var(--font-display);font-size:16px;margin-bottom:6px;">Asesmen Terkunci</b>
-      <p class="sub" style="margin:0 0 14px;">Ajukan permintaan ke Admin untuk mulai mengisi Serve Road Map.</p>
-      <button type="button" class="btn btn--primary" id="reqAccessBtn">Ajukan Akses</button>
-    </div>`;
+    return pjSecHTML("Serve Road Map") + pjLockHTML(state.accessStatus, "reqAccessBtn", "asesmen");
   }
   // 2026-09-23 (permintaan user, "buatkan link dari kartu carousel Rock
   // solid 3 (seperti LTS1) perlu ijin admin, baru bisa mengikuti test") —
@@ -949,31 +958,90 @@
   // 2026-10-04 — tab RS1/RS2 peserta: belum ada post-test (user: "nanti saya
   // akan buatkan post test RS1, RS2"); tampilkan status kelas dari
   // profiles.classes (ditandai di JB3 HOME Tracker) + feedback (terkunci).
-  function classIntroHTML(k) {
-    const c = DASH_JOURNEYS.find(x => x.key === k), f = FB_CLASSES[k];
-    const done = !!((state.myProfile || {}).classes || [])[c.classIdx];
-    return `<div class="jd-hero" style="--jc:${c.color};">
-        <svg class="jd-hero-deco" viewBox="0 0 120 120" aria-hidden="true"><circle cx="100" cy="18" r="46" fill="#fff" opacity=".08"/><circle cx="18" cy="112" r="34" fill="#fff" opacity=".06"/></svg>
+  // 2026-10-04 (user: "rapihkan tampilan setiap nav bar pengguna dari
+  // discipleship journey"): ke-5 tab peserta kini 1 pola yg sama — hero
+  // berwarna kelas (judul + status pill) → judul bagian (pjSecHTML) → isi →
+  // kartu feedback SELALU di paling bawah.
+  const BAND_TONE = { Excellent:"ex", Better:"bt", Good:"gd", Underperform:"up" };
+  function pjHeroHTML(k, sub, pill) {
+    const c = DASH_JOURNEYS.find(x => x.key === k);
+    return `<div class="jd-hero pj-hero" style="--jc:${c.color};">
+        <svg class="jd-hero-deco" viewBox="0 0 120 120" aria-hidden="true"><circle cx="100" cy="18" r="46" fill="#fff" opacity=".08"/><circle cx="18" cy="112" r="34" fill="#fff" opacity=".06"/><path d="M8 92 C 34 70, 52 98, 78 72 S 112 58, 118 34" fill="none" stroke="#fff" stroke-width="1.6" stroke-dasharray="3 5" opacity=".35"/></svg>
         <div class="jd-hero-top"><span class="jd-hero-ic">${c.icon}</span><div><small>Discipleship Journey · ${esc(c.tab)}</small><b>${esc(c.title)}</b></div></div>
-        <p class="jd-hero-sub">${done ? "✓ Kelas ini sudah ditandai selesai. Terima kasih sudah setia mengikutinya!" : "Kelas ini belum ditandai selesai. Status kelas dicatat oleh pemimpin HOME/Admin di JB3 HOME Tracker."}</p>
-      </div>
-      <div class="card pad" style="text-align:center;padding:30px 20px;margin-bottom:12px;">
-        <div style="font-size:34px;margin-bottom:8px;">📝</div>
-        <b style="display:block;font-family:var(--font-display);font-size:16px;margin-bottom:6px;">Post-Test ${esc(c.title)} segera hadir</b>
-        <p class="sub" style="margin:0;">Post-test untuk kelas ini sedang disiapkan. Nantikan ya!</p>
-      </div>
-      ${fbHomeCardsHTML(k)}`;
+        <p class="jd-hero-sub">${sub}</p>
+        ${pill ? `<span class="pj-pill">${pill}</span>` : ""}
+      </div>`;
+  }
+  const pjSecHTML = (title, right) => `<div class="pj-sec"><span>${esc(title)}</span>${right ? `<small>${right}</small>` : ""}</div>`;
+  const pjFbHTML = k => { const h = fbHomeCardsHTML(k); return h ? pjSecHTML("Feedback kelas") + h : ""; };
+  // Kartu terkunci/menunggu/ditolak — dipakai post-test RS3/LTS2 & LTS1.
+  function pjLockHTML(st, btnId, what) {
+    const [ic, tt, tx, btn] = st === "pending" ? ["⏳", "Menunggu Persetujuan", `Permintaan aksesmu sudah terkirim ke Admin — ${what} akan terbuka begitu disetujui.`, ""]
+      : st === "rejected" ? ["🔒", "Permintaan Belum Disetujui", "Hubungi Admin/gembala untuk info lebih lanjut, atau ajukan lagi.", "Ajukan Lagi"]
+      : ["🔒", what.charAt(0).toUpperCase() + what.slice(1) + " Terkunci", `Ajukan permintaan ke Admin untuk mulai ${what === "asesmen" ? "mengisi Serve Road Map" : "mengerjakan " + what}.`, "Ajukan Akses"];
+    return `<div class="card pad pj-lock">
+      <div class="pj-lock-ic">${ic}</div>
+      <b>${tt}</b>
+      <p class="sub">${tx}</p>
+      ${btn ? `<button type="button" class="btn btn--primary" id="${btnId}">${btn}</button>` : ""}
+    </div>`;
+  }
+  function pjStatusPill(st, res) {
+    if (res && res.passed) return `✓ Lulus · ${esc(res.band)}`;
+    if (res) return `Belum lulus · ${esc(res.band)}`;
+    if (st === "approved" || state.persona === "ADMIN") return "Siap dikerjakan";
+    if (st === "pending") return "⏳ Menunggu Admin";
+    return "🔒 Terkunci";
+  }
+  // Hasil terakhir post-test: lingkaran skor + predikat berwarna + pembahasan.
+  function pjResultHTML(last, questions) {
+    if (!last) return "";
+    const pct = Math.max(0, Math.min(100, Number(last.score_pct) || 0));
+    return `${pjSecHTML("Hasil terakhir")}
+      <div class="card pad pj-res">
+        <div class="pj-res-top">
+          <span class="pj-ring" style="--p:${pct};"><b>${pct}%</b></span>
+          <span class="pj-res-tx">
+            <span class="jd-band jd-band--${BAND_TONE[last.band] || "mn"}">${esc(last.band)}</span>
+            <b>${last.passed ? "Lulus 🎉" : "Belum lulus"}</b>
+            <small>${last.correct} dari ${last.total} soal benar${last.passed ? "" : " · boleh coba lagi di bawah"}</small>
+          </span>
+        </div>
+        ${postTestReviewHTML(questions, last, false)}
+      </div>`;
+  }
+  // Soal pilihan ganda — tombol opsi dgn bulatan huruf (warna kelas).
+  const pjQuestionsHTML = (questions, answers, attr) => questions.map(q => `<div class="qrow pj-q">
+      <div class="qtext"><span class="qno">${q.no}.</span>${esc(q.text)}</div>
+      <div class="pj-opts">${["A", "B", "C", "D"].map(k => `<button type="button" class="pj-opt" aria-pressed="${answers[q.no] === k}" data-${attr}="${q.no}:${k}"><span class="pj-opt-k">${k}</span><span>${esc(q.options[k])}</span></button>`).join("")}</div>
+    </div>`).join("");
+  function classIntroHTML(k) {
+    const c = DASH_JOURNEYS.find(x => x.key === k);
+    const done = !!((state.myProfile || {}).classes || [])[c.classIdx];
+    return pjHeroHTML(k, done ? "Terima kasih sudah setia mengikuti kelas ini!" : "Status kelas dicatat oleh pemimpin HOME/Admin di JB3 HOME Tracker.", done ? "✓ Kelas selesai" : "Belum ditandai selesai")
+      + pjSecHTML("Post-test") + `<div class="card pad pj-lock">
+        <div class="pj-lock-ic">📝</div>
+        <b>Post-Test ${esc(c.title)} segera hadir</b>
+        <p class="sub">Post-test untuk kelas ini sedang disiapkan. Nantikan ya!</p>
+      </div>`
+      + pjFbHTML(k);
   }
   RENDER.rs1 = () => { el("rs1Body").innerHTML = classIntroHTML("rs1"); };
   RENDER.rs2 = () => { el("rs2Body").innerHTML = classIntroHTML("rs2"); };
   RENDER.home = function () {
     const unlocked = state.persona === "ADMIN" || state.accessStatus === "approved";
-    el("homeBody").innerHTML = `
-      ${fbHomeCardsHTML("lts1")}
-      ${unlocked ? discCardHTML() + ssdCardHTML() + giftsCardHTML() : ""}
-      <div class="divider-note">Serve Road Map — 5 bagian refleksi yang menggabungkan kekuatan, pengalaman, relasi, visi, dan rencana pelayananmu jadi satu peta pribadi. Diperbarui setiap tahun.</div>
-      ${unlocked ? serveGridHTML() : lockedHomeHTML()}
-    `;
+    const nInst = [state.myDisc, state.mySsd, state.myGifts].filter(Boolean).length;
+    const nServe = SERVE_SECTIONS.filter(x => serveSectionFilled(x.key)).length;
+    const pill = !unlocked ? (state.accessStatus === "pending" ? "⏳ Menunggu Admin" : "🔒 Terkunci")
+      : nInst === 3 && nServe === SERVE_SECTIONS.length ? "✓ Semua lengkap" : `Asesmen ${nInst}/3 · S-E-R-V-E ${nServe}/${SERVE_SECTIONS.length}`;
+    el("homeBody").innerHTML = pjHeroHTML("lts1", "Kenali kepribadian, karunia & panggilan pelayananmu — diperbarui setiap tahun.", pill)
+      + (unlocked
+        ? pjSecHTML("Asesmen pribadi", `${nInst}/3 selesai`) + discCardHTML() + ssdCardHTML() + giftsCardHTML()
+          + pjSecHTML("Serve Road Map", `${nServe}/${SERVE_SECTIONS.length} terisi`)
+          + `<div class="divider-note">5 bagian refleksi yang menggabungkan kekuatan, pengalaman, relasi, visi, dan rencana pelayananmu jadi satu peta pribadi.</div>`
+          + serveGridHTML()
+        : lockedHomeHTML())
+      + pjFbHTML("lts1");
   };
 
   // ---- DISC (2026-09-22, permintaan user "bangun assesment DISC dengan
@@ -1095,89 +1163,45 @@
       </details>`;
   }
   RENDER.rs3 = function () {
-    const isAdmin = state.persona === "ADMIN";
-    const st = state.rs3AccessStatus;
-    const unlocked = isAdmin || st === "approved";
+    const st = state.rs3AccessStatus, last = state.rs3Result;
+    const unlocked = state.persona === "ADMIN" || st === "approved";
+    const hero = pjHeroHTML("rs3", "Post-test 40 soal pilihan ganda. Skor <b>Good</b> (50%) ke atas = lulus &amp; kelas otomatis ditandai selesai.", pjStatusPill(st, last));
     if (!unlocked) {
-      let body;
-      if (st === "pending") body = `<div style="font-size:34px;margin-bottom:8px;">⏳</div>
-        <b style="display:block;font-family:var(--font-display);font-size:16px;margin-bottom:6px;">Menunggu Persetujuan</b>
-        <p class="sub" style="margin:0;">Permintaan aksesmu sudah terkirim ke Admin — post-test akan terbuka begitu disetujui.</p>`;
-      else if (st === "rejected") body = `<div style="font-size:34px;margin-bottom:8px;">🔒</div>
-        <b style="display:block;font-family:var(--font-display);font-size:16px;margin-bottom:6px;">Permintaan Belum Disetujui</b>
-        <p class="sub" style="margin:0 0 14px;">Hubungi Admin/gembala untuk info lebih lanjut, atau ajukan lagi.</p>
-        <button type="button" class="btn btn--primary" id="reqRs3Btn">Ajukan Lagi</button>`;
-      else body = `<div style="font-size:34px;margin-bottom:8px;">🔒</div>
-        <b style="display:block;font-family:var(--font-display);font-size:16px;margin-bottom:6px;">Post-Test Terkunci</b>
-        <p class="sub" style="margin:0 0 14px;">Ajukan permintaan ke Admin untuk mulai mengerjakan post-test Rock Solid 3.</p>
-        <button type="button" class="btn btn--primary" id="reqRs3Btn">Ajukan Akses</button>`;
-      el("rs3Body").innerHTML = `<div class="card pad" style="text-align:center;padding:40px 20px;margin-bottom:12px;">${body}</div>${fbHomeCardsHTML("rs3")}`;
+      el("rs3Body").innerHTML = hero + pjSecHTML("Post-test") + pjLockHTML(st, "reqRs3Btn", "post-test") + pjFbHTML("rs3");
       return;
     }
     const answers = state.draft.rs3Answers;
-    const last = state.rs3Result;
-    const lastHTML = last ? `<div class="card pad" style="margin-bottom:14px;">
-      <b style="display:block;font-family:var(--font-display);font-size:14px;margin-bottom:4px;">Hasil Terakhir</b>
-      <p class="sub" style="margin:0;">${last.correct}/${last.total} benar (${last.score_pct}%) — <b>${esc(last.band)}</b>${last.passed ? " ✅ Lulus" : " — belum lulus, boleh coba lagi di bawah"}</p>
-      ${postTestReviewHTML(RS3_QUESTIONS, last, true)}
-    </div>` : "";
-    const rows = RS3_QUESTIONS.map(q => `<div class="qrow">
-      <div class="qtext"><span class="qno">${q.no}.</span>${esc(q.text)}</div>
-      <div style="display:flex;flex-direction:column;gap:6px;">${["A", "B", "C", "D"].map(k => `<button type="button" class="btn ${answers[q.no] === k ? "btn--primary" : "btn--ghost"}" style="text-align:left;white-space:normal;height:auto;min-height:auto;padding:10px 12px;font-size:13px;font-weight:600;" data-rs3ans="${q.no}:${k}">${k}) ${esc(q.options[k])}</button>`).join("")}</div>
-    </div>`).join("");
     const doneCount = RS3_QUESTIONS.filter(q => answers[q.no]).length;
     const done = rs3Complete(answers);
-    el("rs3Body").innerHTML = `
-      ${fbHomeCardsHTML("rs3")}
-      ${lastHTML}
-      <div class="divider-note">40 soal pilihan ganda tentang modul Rock Solid 3 (Firm Local Church). Skor <b>Good</b> (50%) ke atas dianggap lulus &amp; otomatis menandai kelas Rock Solid 3 selesai.</div>
-      ${rows}
-      <button class="btn btn--primary" style="margin-top:14px;" id="rs3Save" ${done ? "" : "disabled"}>${done ? "Kirim Jawaban" : `Jawab semua soal (${doneCount}/${RS3_QUESTIONS.length})`}</button>
-    `;
+    el("rs3Body").innerHTML = hero
+      + pjResultHTML(last, RS3_QUESTIONS)
+      + pjSecHTML(last ? "Coba lagi" : "Soal post-test", `${doneCount}/${RS3_QUESTIONS.length} dijawab`)
+      + `<div class="pj-prog"><i style="width:${Math.round(doneCount / RS3_QUESTIONS.length * 100)}%"></i></div>`
+      + `<div class="card pad pj-qs">${pjQuestionsHTML(RS3_QUESTIONS, answers, "rs3ans")}</div>`
+      + `<button class="btn btn--primary" style="margin:14px 0 18px;" id="rs3Save" ${done ? "" : "disabled"}>${done ? "Kirim Jawaban" : `Jawab semua soal (${doneCount}/${RS3_QUESTIONS.length})`}</button>`
+      + pjFbHTML("rs3");
   };
 
   // ---- Lead To Serve 2 post-test (2026-09-23, "jika limit cukup, buatkan
   // post test utk LTS2") — SAMA PERSIS pola RENDER.rs3 di atas. ----
   RENDER.lts2 = function () {
-    const isAdmin = state.persona === "ADMIN";
-    const st = state.lts2AccessStatus;
-    const unlocked = isAdmin || st === "approved";
+    const st = state.lts2AccessStatus, last = state.lts2Result;
+    const unlocked = state.persona === "ADMIN" || st === "approved";
+    const hero = pjHeroHTML("lts2", "Post-test 25 soal pilihan ganda. Skor <b>Good</b> (50%) ke atas = lulus &amp; kelas otomatis ditandai selesai.", pjStatusPill(st, last));
     if (!unlocked) {
-      let body;
-      if (st === "pending") body = `<div style="font-size:34px;margin-bottom:8px;">⏳</div>
-        <b style="display:block;font-family:var(--font-display);font-size:16px;margin-bottom:6px;">Menunggu Persetujuan</b>
-        <p class="sub" style="margin:0;">Permintaan aksesmu sudah terkirim ke Admin — post-test akan terbuka begitu disetujui.</p>`;
-      else if (st === "rejected") body = `<div style="font-size:34px;margin-bottom:8px;">🔒</div>
-        <b style="display:block;font-family:var(--font-display);font-size:16px;margin-bottom:6px;">Permintaan Belum Disetujui</b>
-        <p class="sub" style="margin:0 0 14px;">Hubungi Admin/gembala untuk info lebih lanjut, atau ajukan lagi.</p>
-        <button type="button" class="btn btn--primary" id="reqLts2Btn">Ajukan Lagi</button>`;
-      else body = `<div style="font-size:34px;margin-bottom:8px;">🔒</div>
-        <b style="display:block;font-family:var(--font-display);font-size:16px;margin-bottom:6px;">Post-Test Terkunci</b>
-        <p class="sub" style="margin:0 0 14px;">Ajukan permintaan ke Admin untuk mulai mengerjakan post-test Lead To Serve 2.</p>
-        <button type="button" class="btn btn--primary" id="reqLts2Btn">Ajukan Akses</button>`;
-      el("lts2Body").innerHTML = `<div class="card pad" style="text-align:center;padding:40px 20px;margin-bottom:12px;">${body}</div>${fbHomeCardsHTML("lts2")}`;
+      el("lts2Body").innerHTML = hero + pjSecHTML("Post-test") + pjLockHTML(st, "reqLts2Btn", "post-test") + pjFbHTML("lts2");
       return;
     }
     const answers = state.draft.lts2Answers;
-    const last = state.lts2Result;
-    const lastHTML = last ? `<div class="card pad" style="margin-bottom:14px;">
-      <b style="display:block;font-family:var(--font-display);font-size:14px;margin-bottom:4px;">Hasil Terakhir</b>
-      <p class="sub" style="margin:0;">${last.correct}/${last.total} benar (${last.score_pct}%) — <b>${esc(last.band)}</b>${last.passed ? " ✅ Lulus" : " — belum lulus, boleh coba lagi di bawah"}</p>
-      ${postTestReviewHTML(LTS2_QUESTIONS, last, true)}
-    </div>` : "";
-    const rows = LTS2_QUESTIONS.map(q => `<div class="qrow">
-      <div class="qtext"><span class="qno">${q.no}.</span>${esc(q.text)}</div>
-      <div style="display:flex;flex-direction:column;gap:6px;">${["A", "B", "C", "D"].map(k => `<button type="button" class="btn ${answers[q.no] === k ? "btn--primary" : "btn--ghost"}" style="text-align:left;white-space:normal;height:auto;min-height:auto;padding:10px 12px;font-size:13px;font-weight:600;" data-lts2ans="${q.no}:${k}">${k}) ${esc(q.options[k])}</button>`).join("")}</div>
-    </div>`).join("");
     const doneCount = LTS2_QUESTIONS.filter(q => answers[q.no]).length;
     const done = lts2Complete(answers);
-    el("lts2Body").innerHTML = `
-      ${fbHomeCardsHTML("lts2")}
-      ${lastHTML}
-      <div class="divider-note">25 soal pilihan ganda tentang modul Lead To Serve 2 (Servant Leadership). Skor <b>Good</b> (50%) ke atas dianggap lulus &amp; otomatis menandai kelas Lead To Serve 2 selesai.</div>
-      ${rows}
-      <button class="btn btn--primary" style="margin-top:14px;" id="lts2Save" ${done ? "" : "disabled"}>${done ? "Kirim Jawaban" : `Jawab semua soal (${doneCount}/${LTS2_QUESTIONS.length})`}</button>
-    `;
+    el("lts2Body").innerHTML = hero
+      + pjResultHTML(last, LTS2_QUESTIONS)
+      + pjSecHTML(last ? "Coba lagi" : "Soal post-test", `${doneCount}/${LTS2_QUESTIONS.length} dijawab`)
+      + `<div class="pj-prog"><i style="width:${Math.round(doneCount / LTS2_QUESTIONS.length * 100)}%"></i></div>`
+      + `<div class="card pad pj-qs">${pjQuestionsHTML(LTS2_QUESTIONS, answers, "lts2ans")}</div>`
+      + `<button class="btn btn--primary" style="margin:14px 0 18px;" id="lts2Save" ${done ? "" : "disabled"}>${done ? "Kirim Jawaban" : `Jawab semua soal (${doneCount}/${LTS2_QUESTIONS.length})`}</button>`
+      + pjFbHTML("lts2");
   };
 
   // ---- Dashboard (Admin) ----
@@ -1242,7 +1266,6 @@
     // hasilnya disamping nama"): RS3/LTS2 → daftar bernomor urut abjad, tiap
     // nama + badge predikat (nilai terbaik) + ringkasan jumlah per predikat.
     // Yg ditandai selesai oleh Admin di JB3 tanpa post-test → nama saja.
-    const BAND_TONE = { Excellent:"ex", Better:"bt", Good:"gd", Underperform:"up" };
     const passList = (list, best) => {
       if (!list.length) return `<p class="jd-empty">Belum ada.</p>`;
       const rows = list.slice().sort(byName).map(p => ({ p, r: best[p.id] }));
