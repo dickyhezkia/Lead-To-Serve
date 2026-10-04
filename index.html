@@ -292,6 +292,11 @@
   .fb-item-h span em { font-style: normal; color: var(--line-strong); }
   .fb-item p { margin: 5px 0 0; font-size: 12.5px; line-height: 1.5; color: var(--ink-soft); white-space: pre-wrap; }
   .fb-item small { display: block; margin-top: 4px; font-size: 10.5px; color: var(--ink-faint); }
+  .fb-batchbar { display: flex; align-items: center; gap: 10px; margin: 14px 0 10px; padding: 10px 12px; border-radius: 12px; background: var(--surface-2); }
+  .fb-batchbar span { flex: 1; min-width: 0; font-size: 11px; color: var(--ink-faint); }
+  .fb-batchbar b { display: block; font-size: 13.5px; color: var(--ink); }
+  .fb-batches .jd-card { box-shadow: none; margin-bottom: 8px; }
+  .fb-batches .jd-head { padding: 11px 12px; }
   @media (prefers-reduced-motion: reduce) { .fb-stars svg { transition: none; } }
   .empty { text-align: center; padding: 30px 14px; color: var(--ink-faint); font-size: 13px; }
 
@@ -825,20 +830,42 @@
     if (!w) location.href = wa;
   }
   // Admin, tab RS3: ringkasan feedback (rata2 per pertanyaan + daftar isian).
-  function rs3FeedbackAdminHTML() {
-    const rows = state.rs3Feedback || [];
-    const avg = k => rows.length ? rows.reduce((n, r) => n + (r["rating_" + k] || 0), 0) / rows.length : 0;
-    const body = !rows.length ? `<p class="jd-empty">Belum ada feedback. Bagikan link-nya ke peserta lewat tombol di atas.</p>` : `
-      <div class="fb-avg">${RS3FB_Q.map(q => { const a = avg(q.k); return `<div><span>${esc(q.l)}</span><b>${a.toFixed(1)}<small>/5</small></b><i><em style="width:${(a / 5 * 100).toFixed(0)}%"></em></i></div>`; }).join("")}</div>
+  // 2026-10-04 susulan (user: "isian feedback akan dikelompokan berdasarkan
+  // dalam batch tertentu sehingga ketika kelas berikutnya ada feedback akan
+  // dikelompokan kembali"): dikelompokkan per batch (rs3_fb_batches) — tiap
+  // batch kartu buka-tutup sendiri (batch aktif terbuka). Feedback baru masuk
+  // ke batch aktif lewat trigger server (v_rs3_feedback_batch.sql).
+  function rs3FbGroupHTML(rows) {
+    if (!rows.length) return `<p class="jd-empty">Belum ada feedback di batch ini.</p>`;
+    const avg = k => rows.reduce((n, r) => n + (r["rating_" + k] || 0), 0) / rows.length;
+    return `<div class="fb-avg">${RS3FB_Q.map(q => { const a = avg(q.k); return `<div><span>${esc(q.l)}</span><b>${a.toFixed(1)}<small>/5</small></b><i><em style="width:${(a / 5 * 100).toFixed(0)}%"></em></i></div>`; }).join("")}</div>
       ${rows.map(r => `<div class="fb-item">
         <div class="fb-item-h"><span>${"★".repeat(r.rating_materi)}<em>${"★".repeat(5 - r.rating_materi)}</em> materi · ${r.rating_durasi}/5 waktu · ${r.rating_pengajar}/5 pengajar</span><button type="button" class="jd-del" data-fbdel="${esc(r.id)}">Hapus</button></div>
         ${r.berkesan ? `<p><b>Paling berkesan:</b> ${esc(r.berkesan)}</p>` : ""}
         ${r.saran ? `<p><b>Saran:</b> ${esc(r.saran)}</p>` : ""}
         <small>${esc(new Date(r.created_at).toLocaleDateString("id-ID", { day:"numeric", month:"short", year:"numeric" }))}</small>
       </div>`).join("")}`;
-    return dashSecHTML("rs3:feedback", "Feedback peserta (anonim)", rows.length, false,
-      `<button type="button" class="fb-share sm" data-fbshare="1" style="margin-top:12px;">Bagikan link feedback via WhatsApp</button>
-       <button type="button" class="fb-again" data-goto="rs3feedback">Lihat kartu feedback</button>${body}`, "#4472A8");
+  }
+  function rs3FeedbackAdminHTML() {
+    const rows = state.rs3Feedback || [];
+    const batches = state.rs3FbBatches || [];
+    const active = batches.find(b => b.is_active);
+    const groups = batches.map(b => {
+      const list = rows.filter(r => r.batch_id === b.id);
+      return dashSecHTML("rs3:fb:" + b.id, b.name + (b.is_active ? " · aktif" : ""), list.length, !!b.is_active,
+        `<button type="button" class="fb-again" style="margin:10px 0 0;" data-fbbrename="${esc(b.id)}">✎ Ganti nama batch</button>${rs3FbGroupHTML(list)}`, b.is_active ? "var(--good)" : "var(--ink-faint)");
+    }).join("");
+    const orphan = rows.filter(r => !batches.some(b => b.id === r.batch_id));
+    const body = `
+      <button type="button" class="fb-share sm" data-fbshare="1" style="margin-top:12px;">Bagikan link feedback via WhatsApp</button>
+      <button type="button" class="fb-again" data-goto="rs3feedback">Lihat kartu feedback</button>
+      <div class="fb-batchbar">
+        <span>Feedback baru masuk ke<b>${active ? esc(active.name) : "— belum ada batch aktif —"}</b></span>
+        <button type="button" class="btn btn--sm btn--primary" data-fbbnew="1">+ Batch baru</button>
+      </div>
+      <div class="fb-batches">${groups || `<p class="jd-empty">Belum ada batch.</p>`}
+      ${orphan.length ? dashSecHTML("rs3:fb:none", "Tanpa batch", orphan.length, false, rs3FbGroupHTML(orphan), "var(--ink-faint)") : ""}</div>`;
+    return dashSecHTML("rs3:feedback", "Feedback peserta (anonim)", rows.length, false, body, "#4472A8");
   }
   RENDER.home = function () {
     const unlocked = state.persona === "ADMIN" || state.accessStatus === "approved";
@@ -2059,6 +2086,7 @@
     if (state.persona === "ADMIN") state.accessRequests = await DB.listAllAccessRequests();
     if (state.persona === "ADMIN") { try { state.classProgress = await DB.listClassProgress(); } catch (e) { console.error(e); state.classProgress = []; } }
     if (state.persona === "ADMIN") { try { state.rs3Feedback = await DB.listRs3Feedback(); } catch (e) { console.error(e); state.rs3Feedback = []; } }
+    if (state.persona === "ADMIN") { try { state.rs3FbBatches = await DB.listRs3FbBatches(); } catch (e) { console.error(e); state.rs3FbBatches = []; } }
     else state.accessStatus = await DB.myAccessStatus();
     // 2026-09-23 ("buatkan link dari kartu carousel Rock solid 3 ... perlu
     // ijin admin"): alur akses RS3 TERPISAH dari S-E-R-V-E — dimuat SELALU
@@ -2174,7 +2202,7 @@
     }
     if (T.closest("#pfLogout") || T.closest("#rolePill")) {
       await DB.logout().catch(() => {});
-      Object.assign(state, { page:"login", stack:[], persona:null, meId:null, myProfile:null, accessStatus:null, accessRequests:[], myDisc:null, myRoadmap:null, mySsd:null, myGifts:null, rs3AccessStatus:null, rs3AccessRequests:[], rs3Result:null, lts2AccessStatus:null, lts2AccessRequests:[], lts2Result:null, participantResults:null, viewProfileId:null, resultsFilter:"all", dashKey:null, dashOpen:{}, classProgress:null, rs3Feedback:null, fbDraft:{}, fbAgain:false, draft:{ discPicks:[], roadmapData:{}, ssdAnswers:{}, giftsAnswers:{}, rs3Answers:{}, lts2Answers:{} } });
+      Object.assign(state, { page:"login", stack:[], persona:null, meId:null, myProfile:null, accessStatus:null, accessRequests:[], myDisc:null, myRoadmap:null, mySsd:null, myGifts:null, rs3AccessStatus:null, rs3AccessRequests:[], rs3Result:null, lts2AccessStatus:null, lts2AccessRequests:[], lts2Result:null, participantResults:null, viewProfileId:null, resultsFilter:"all", dashKey:null, dashOpen:{}, classProgress:null, rs3Feedback:null, rs3FbBatches:null, fbDraft:{}, fbAgain:false, draft:{ discPicks:[], roadmapData:{}, ssdAnswers:{}, giftsAnswers:{}, rs3Answers:{}, lts2Answers:{} } });
       show("login", { replace:true });
       return;
     }
@@ -2395,6 +2423,27 @@
     }
     if (T.closest("[data-fbagain]")) { state.fbAgain = true; RENDER.rs3feedback(); return; }
     if (T.closest("[data-fbshare]")) { shareRs3Feedback(); return; }
+    if (T.closest("[data-fbbnew]")) {
+      const n = (state.rs3FbBatches || []).length + 1;
+      const name = (prompt("Nama batch baru (mis. kelas berikutnya). Feedback yang masuk setelah ini akan dikelompokkan ke batch ini:", "Batch " + n) || "").trim();
+      if (!name) return;
+      try {
+        await DB.startRs3FbBatch(name.slice(0, 80));
+        state.rs3FbBatches = await DB.listRs3FbBatches();
+        toast("Batch \"" + name + "\" aktif — feedback baru masuk ke sini.");
+        RENDER.dashboard();
+      } catch (err) { toast("Gagal membuat batch: " + (err.message || err)); }
+      return;
+    }
+    const fbRen = T.closest("[data-fbbrename]");
+    if (fbRen) {
+      const b = (state.rs3FbBatches || []).find(x => x.id === fbRen.dataset.fbbrename); if (!b) return;
+      const name = (prompt("Nama batch:", b.name) || "").trim();
+      if (!name || name === b.name) return;
+      try { await DB.renameRs3FbBatch(b.id, name.slice(0, 80)); b.name = name.slice(0, 80); RENDER.dashboard(); }
+      catch (err) { toast("Gagal mengganti nama: " + (err.message || err)); }
+      return;
+    }
     const fbDel = T.closest("[data-fbdel]");
     if (fbDel) {
       if (!confirm("Hapus feedback ini?")) return;

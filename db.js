@@ -399,6 +399,18 @@ window.makeDB = function makeDB(sb) {
       if (error) throw error;
       return data || [];
     },
+    // Batch feedback RS3 (v_rs3_feedback_batch.sql) — Admin saja. Batch baru:
+    // nonaktifkan yg lama DULU (unique index: cuma 1 baris is_active=true).
+    async listRs3FbBatches() {
+      const { data, error } = await sb.from("rs3_fb_batches").select("*").order("created_at", { ascending:false });
+      if (error) throw error;
+      return data || [];
+    },
+    async startRs3FbBatch(name) {
+      wrap(await sb.from("rs3_fb_batches").update({ is_active:false }).eq("is_active", true));
+      wrap(await sb.from("rs3_fb_batches").insert({ name, is_active:true }));
+    },
+    async renameRs3FbBatch(id, name) { wrap(await sb.from("rs3_fb_batches").update({ name }).eq("id", id)); },
     async deleteRs3Feedback(id) { wrap(await sb.from("rs3_feedback").delete().eq("id", id)); },
     async listClassProgress() {
       const { data, error } = await sb.from("profiles").select("id,name,phone,role,classes");
