@@ -1241,18 +1241,18 @@
     // 2026-10-04 ("pada kelulusan post test, susunan dirapihkan dan tambahkan
     // hasilnya disamping nama"): RS3/LTS2 → daftar bernomor urut abjad, tiap
     // nama + badge predikat (nilai terbaik) + ringkasan jumlah per predikat.
-    // Yg ditandai selesai di JB3 tanpa post-test → badge "Manual".
+    // Yg ditandai selesai oleh Admin di JB3 tanpa post-test → nama saja.
     const BAND_TONE = { Excellent:"ex", Better:"bt", Good:"gd", Underperform:"up" };
     const passList = (list, best) => {
       if (!list.length) return `<p class="jd-empty">Belum ada.</p>`;
       const rows = list.slice().sort(byName).map(p => ({ p, r: best[p.id] }));
       const count = {};
-      rows.forEach(({ r }) => { const k = r ? r.band : "Manual"; count[k] = (count[k] || 0) + 1; });
-      const order = ["Excellent", "Better", "Good", "Underperform", "Manual"].filter(k => count[k]);
-      return `<div class="jd-bandsum">${order.map(k => `<span class="jd-band jd-band--${BAND_TONE[k] || "mn"}">${esc(k)} <b>${count[k]}</b></span>`).join("")}</div>
+      rows.forEach(({ r }) => { if (r) count[r.band] = (count[r.band] || 0) + 1; });
+      const order = ["Excellent", "Better", "Good", "Underperform"].filter(k => count[k]);
+      return `${order.length ? `<div class="jd-bandsum">${order.map(k => `<span class="jd-band jd-band--${BAND_TONE[k] || "mn"}">${esc(k)} <b>${count[k]}</b></span>`).join("")}</div>` : ""}
         <ol class="jd-pass">${rows.map(({ p, r }) => `<li><span class="jd-pass-nm">${esc(p.name)}</span>${r
           ? `<span class="jd-pass-sc">${r.score_pct}%</span><span class="jd-band jd-band--${BAND_TONE[r.band] || "mn"}">${esc(r.band)}</span>`
-          : `<span class="jd-band jd-band--mn" title="Ditandai selesai di JB3 tanpa post-test">Manual</span>`}</li>`).join("")}</ol>`;
+          : ""}</li>`).join("")}</ol>`;
     };
     let nums, secs;
     if (cfg.stateKey) {
