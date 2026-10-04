@@ -206,6 +206,48 @@
   .serve-tile .ic { width: 46px; height: 46px; border-radius: 14px; display: grid; place-items: center; font-family: var(--font-display); font-size: 19px; font-weight: 600; color: #fff; background: linear-gradient(150deg, var(--dot), color-mix(in srgb, var(--dot) 70%, #000)); }
   .serve-tile b { font-family: var(--font-display); font-size: 13.5px; font-weight: 500; color: var(--ink); }
   .serve-tile .sub { font-size: 10px; }
+  /* 2026-10-04 — Dashboard Admin (journeyDashHTML / RENDER.dashboard) */
+  .jd-hero { position: relative; overflow: hidden; border-radius: var(--r-lg); padding: 18px 18px 16px; margin-bottom: 16px; color: #fff; background: linear-gradient(140deg, #4B3F72 0%, #6A4F8E 55%, #93683F 120%); box-shadow: var(--shadow); }
+  .jd-hero-deco { position: absolute; right: 0; top: 0; width: 160px; height: 160px; pointer-events: none; }
+  .jd-hero > small { position: relative; display: block; font-size: 10.5px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; opacity: .75; }
+  .jd-hero > b { position: relative; display: block; font-family: var(--font-display); font-size: 23px; font-weight: 600; margin: 2px 0 12px; }
+  .jd-hero-nums { position: relative; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
+  .jd-hero-nums span { background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.18); border-radius: 12px; padding: 8px 6px; text-align: center; font-size: 10.5px; line-height: 1.2; }
+  .jd-hero-nums span b { display: block; font-family: var(--font-display); font-size: 21px; font-weight: 600; margin-bottom: 1px; }
+  .jd-hero-nums span.hot { background: rgba(255,214,140,.25); border-color: rgba(255,214,140,.6); }
+  .jd-hero-btn { position: relative; width: 100%; display: flex; justify-content: center; gap: 6px; padding: 11px 14px; border: none; border-radius: 12px; background: #fff; color: #4B3F72; font-family: var(--font-body); font-size: 13px; font-weight: 800; cursor: pointer; }
+  .jd-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-md); box-shadow: var(--shadow); margin-bottom: 12px; overflow: hidden; border-top: 4px solid var(--jc); }
+  .jd-head { width: 100%; display: flex; align-items: center; gap: 12px; padding: 14px 14px 10px; background: none; border: none; text-align: left; color: var(--ink); cursor: pointer; font-family: var(--font-body); }
+  .jd-ic { flex: none; width: 44px; height: 44px; border-radius: 13px; display: grid; place-items: center; font-size: 21px; background: linear-gradient(150deg, var(--jc), color-mix(in srgb, var(--jc) 65%, #000)); box-shadow: 0 4px 12px color-mix(in srgb, var(--jc) 35%, transparent); }
+  .jd-tt { flex: 1; min-width: 0; }
+  .jd-tt b { display: block; font-family: var(--font-display); font-size: 16px; font-weight: 600; }
+  .jd-tt small { display: block; font-size: 11px; color: var(--ink-faint); margin-top: 1px; }
+  .jd-pend { flex: none; font-size: 10.5px; font-weight: 800; color: #fff; background: var(--warn); border-radius: 999px; padding: 4px 9px; animation: jdPulse 2s ease-in-out infinite; }
+  @keyframes jdPulse { 0%,100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--warn) 50%, transparent); } 50% { box-shadow: 0 0 0 6px transparent; } }
+  .jd-chev { flex: none; color: var(--ink-faint); transition: transform .2s; }
+  .jd-card.open .jd-chev { transform: rotate(180deg); }
+  .jd-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 0 14px 14px; }
+  .jd-stats span { background: var(--surface-2); border-radius: 10px; padding: 7px 4px; text-align: center; font-size: 10.5px; color: var(--ink-soft); }
+  .jd-stats span b { display: block; font-family: var(--font-display); font-size: 19px; font-weight: 600; }
+  .jd-body { padding: 2px 14px 14px; border-top: 1px dashed var(--line-strong); }
+  .jd-mix { display: flex; height: 8px; border-radius: 999px; overflow: hidden; background: var(--surface-2); margin-top: 14px; }
+  .jd-mix i { display: block; height: 100%; }
+  .jd-legend { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 6px; font-size: 10.5px; color: var(--ink-faint); }
+  .jd-legend i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px; vertical-align: 0; }
+  .jd-sec { margin: 16px 0 4px; font-size: 10.5px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--jc); }
+  :root[data-theme="dark"] .jd-sec { color: var(--ink-soft); }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .jd-sec { color: var(--ink-soft); } }
+  .jd-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-top: 1px solid var(--line); }
+  .jd-sec + .jd-row { border-top: none; }
+  .jd-row .avatar { width: 32px; height: 32px; font-size: 11.5px; }
+  .jd-nm { flex: 1; min-width: 0; }
+  .jd-nm b { display: block; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .jd-nm small { display: block; font-size: 11px; color: var(--ink-faint); }
+  .jd-no { color: var(--bad); border-color: var(--bad); }
+  .jd-del { flex: none; background: none; border: none; color: var(--ink-faint); font-family: var(--font-body); font-size: 11.5px; font-weight: 700; cursor: pointer; padding: 6px 4px; }
+  .jd-del:hover { color: var(--bad); }
+  .jd-empty { margin: 6px 0 0; font-size: 12px; color: var(--ink-faint); }
+  @media (prefers-reduced-motion: reduce) { .jd-pend { animation: none; } .jd-chev { transition: none; } }
   .empty { text-align: center; padding: 30px 14px; color: var(--ink-faint); font-size: 13px; }
 
   /* 2026-09-23 (permintaan user, "hasil yang dapat di print dalam bentuk
@@ -849,112 +891,83 @@
   // sejujurnya baru sebatas status AKSES (blm ada data "sudah isi S-E-R-V-E
   // berapa dari 5" krn tool isiannya sendiri belum dibangun — lihat memory
   // lead-to-serve-1.md, "isian toolnya nanti saja").
-  RENDER.dashboard = function () {
-    const all = state.accessRequests || [];
+  // 2026-10-04 (permintaan user, "pada dashboard Discipleship Journey,
+  // rapihkan tampilannya dengan estetik dan visual yang menarik juga kartu
+  // yang buka tutup di setiap journey nya"): 3 bagian lama (LTS1 / RS3 /
+  // LTS2 — dulu 3 fungsi kembar, judul+3 kotak angka+daftar polos) DISATUKAN
+  // jadi 1 fungsi generik journeyDashHTML(cfg): kartu per journey dgn header
+  // berwarna (ikon gradien + judul + pil angka + chevron), bar komposisi
+  // Disetujui/Menunggu/Ditolak, isi bisa dibuka-tutup (state.dashOpen,
+  // default: terbuka kalau ada yg Menunggu). SEMUA data-attribute tombol
+  // (data-appreq/data-rs3appreq/data-lts2appreq dst) TETAP SAMA — handler
+  // klik lama tak diubah.
+  const DASH_JOURNEYS = [
+    { key:"lts1", title:"Lead To Serve 1", sub:"Serve Road Map · DISC · SSD · Karunia Rohani", icon:"🧭", color:"#4B3F72", stateKey:"accessRequests", attr:"" },
+    { key:"rs3", title:"Rock Solid 3", sub:"Post-test Firm Local Church · 40 soal", icon:"📘", color:"#4472A8", stateKey:"rs3AccessRequests", attr:"rs3" },
+    { key:"lts2", title:"Lead To Serve 2", sub:"Post-test Servant Leadership · 25 soal", icon:"🤝", color:"#93683F", stateKey:"lts2AccessRequests", attr:"lts2" },
+  ];
+  function journeyDashHTML(cfg) {
+    const all = state[cfg.stateKey] || [];
     const pending = all.filter(r => r.status === "pending");
     const approved = all.filter(r => r.status === "approved");
     const rejected = all.filter(r => r.status === "rejected");
-    // 2026-09-23 (permintaan user, "bagian nama-nama disetujui tambahkan
-    // tombol hapus pada setiap nama"): parameter `delBtn` opsional — cuma
-    // dipakai di daftar Sudah Disetujui, TIDAK di daftar Ditolak (user
-    // sebut khusus bagian "disetujui" saja).
-    const nameRow = (r, delBtn) => `<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line);">
-      <span class="avatar" style="width:30px;height:30px;font-size:11px;">${esc(initials((r.profile || {}).name))}</span>
-      <span style="flex:1;min-width:0;"><b style="font-size:12.5px;">${esc((r.profile || {}).name || "?")}</b></span>
-      ${delBtn ? `<button type="button" class="btn btn--sm btn--ghost" style="color:var(--bad);border-color:var(--bad);" data-delreq="${esc(r.id)}">Hapus</button>` : ""}
-    </div>`;
-    el("dashboardBody").innerHTML = `
-      <div class="divider-note">Ringkasan status akses tiap kelas Discipleship Journey — seluruh jemaat.</div>
-      <button type="button" class="btn btn--primary" style="margin-bottom:14px;" data-goto="results">📊 Lihat Semua Hasil Peserta →</button>
-      <h2 class="section">Lead To Serve 1</h2>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px;">
-        <div class="card pad sm" style="text-align:center;"><b style="display:block;font-family:var(--font-display);font-size:22px;color:var(--good);">${approved.length}</b><span class="sub">Disetujui</span></div>
-        <div class="card pad sm" style="text-align:center;"><b style="display:block;font-family:var(--font-display);font-size:22px;color:var(--warn);">${pending.length}</b><span class="sub">Menunggu</span></div>
-        <div class="card pad sm" style="text-align:center;"><b style="display:block;font-family:var(--font-display);font-size:22px;color:var(--bad);">${rejected.length}</b><span class="sub">Ditolak</span></div>
-      </div>
-      <h2 class="section">Menunggu Keputusan</h2>
-      ${pending.length ? pending.map(r => `<div class="card pad" style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+    const total = all.length;
+    state.dashOpen = state.dashOpen || {};
+    const open = state.dashOpen[cfg.key] != null ? state.dashOpen[cfg.key] : pending.length > 0;
+    const pct = n => total ? (n / total * 100).toFixed(1) : 0;
+    const who = r => esc((r.profile || {}).name || "?");
+    const person = (r, extra) => `<div class="jd-row">
         <span class="avatar">${esc(initials((r.profile || {}).name))}</span>
-        <span style="flex:1;min-width:0;"><b style="font-size:13px;">${esc((r.profile || {}).name || "?")}</b><div class="sub">${esc((r.profile || {}).phone || "")}</div></span>
-        <button type="button" class="btn btn--sm btn--ghost" style="color:var(--bad);border-color:var(--bad);" data-rejreq="${esc(r.id)}">Tolak</button>
-        <button type="button" class="btn btn--sm btn--primary" data-appreq="${esc(r.id)}">Setujui</button>
-      </div>`).join("") : `<div class="empty">Tidak ada permintaan yang menunggu.</div>`}
-      <h2 class="section">Sudah Disetujui (${approved.length})</h2>
-      <div class="card pad">${approved.length ? approved.map(r => nameRow(r, true)).join("") : `<div class="empty" style="padding:10px;">Belum ada.</div>`}</div>
-      ${rejected.length ? `<h2 class="section">Ditolak (${rejected.length})</h2>
-      <div class="card pad">${rejected.map(nameRow).join("")}</div>` : ""}
-      ${rs3DashboardHTML()}
-      ${lts2DashboardHTML()}
+        <span class="jd-nm"><b>${who(r)}</b>${extra || ""}</span>`;
+    const body = `
+      <div class="jd-mix" role="img" aria-label="${approved.length} disetujui, ${pending.length} menunggu, ${rejected.length} ditolak">
+        ${total ? `<i style="width:${pct(approved.length)}%;background:var(--good);"></i><i style="width:${pct(pending.length)}%;background:var(--warn);"></i><i style="width:${pct(rejected.length)}%;background:var(--bad);"></i>` : ""}
+      </div>
+      <div class="jd-legend"><span><i style="background:var(--good)"></i>Disetujui ${approved.length}</span><span><i style="background:var(--warn)"></i>Menunggu ${pending.length}</span><span><i style="background:var(--bad)"></i>Ditolak ${rejected.length}</span></div>
+      <div class="jd-sec">Menunggu keputusan</div>
+      ${pending.length ? pending.map(r => `${person(r, `<small>${esc((r.profile || {}).phone || "")}</small>`)}
+          <button type="button" class="btn btn--sm btn--ghost jd-no" data-${cfg.attr}rejreq="${esc(r.id)}">Tolak</button>
+          <button type="button" class="btn btn--sm btn--primary" data-${cfg.attr}appreq="${esc(r.id)}">Setujui</button>
+        </div>`).join("") : `<p class="jd-empty">✓ Tidak ada permintaan yang menunggu.</p>`}
+      <div class="jd-sec">Sudah disetujui · ${approved.length}</div>
+      ${approved.length ? approved.map(r => `${person(r)}
+          <button type="button" class="jd-del" data-${cfg.attr}delreq="${esc(r.id)}" aria-label="Hapus ${who(r)}" title="Hapus">Hapus</button>
+        </div>`).join("") : `<p class="jd-empty">Belum ada.</p>`}
+      ${rejected.length ? `<div class="jd-sec">Ditolak · ${rejected.length}</div>${rejected.map(r => `${person(r)}</div>`).join("")}` : ""}`;
+    return `<section class="jd-card ${open ? "open" : ""}" style="--jc:${cfg.color};">
+      <button type="button" class="jd-head" data-dashtog="${cfg.key}" aria-expanded="${open}">
+        <span class="jd-ic">${cfg.icon}</span>
+        <span class="jd-tt"><b>${esc(cfg.title)}</b><small>${esc(cfg.sub)}</small></span>
+        ${pending.length ? `<span class="jd-pend">${pending.length} menunggu</span>` : ""}
+        <svg class="jd-chev" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+      </button>
+      <div class="jd-stats">
+        <span><b style="color:var(--good)">${approved.length}</b>Disetujui</span>
+        <span><b style="color:var(--warn)">${pending.length}</b>Menunggu</span>
+        <span><b style="color:var(--bad)">${rejected.length}</b>Ditolak</span>
+      </div>
+      ${open ? `<div class="jd-body">${body}</div>` : ""}
+    </section>`;
+  }
+  RENDER.dashboard = function () {
+    const counts = DASH_JOURNEYS.map(c => (state[c.stateKey] || []));
+    const totalPending = counts.reduce((n, a) => n + a.filter(r => r.status === "pending").length, 0);
+    const people = new Set(counts.flat().filter(r => r.status === "approved").map(r => r.profile_id || (r.profile || {}).id || r.id)).size;
+    el("dashboardBody").innerHTML = `
+      <div class="jd-hero">
+        <svg class="jd-hero-deco" viewBox="0 0 120 120" aria-hidden="true"><circle cx="100" cy="18" r="46" fill="#fff" opacity=".07"/><circle cx="18" cy="112" r="34" fill="#fff" opacity=".06"/><path d="M8 92 C 34 70, 52 98, 78 72 S 112 58, 118 34" fill="none" stroke="#fff" stroke-width="1.6" stroke-dasharray="3 5" opacity=".35"/></svg>
+        <small>Discipleship Journey</small>
+        <b>Dashboard Admin</b>
+        <div class="jd-hero-nums">
+          <span><b>${people}</b>peserta aktif</span>
+          <span class="${totalPending ? "hot" : ""}"><b>${totalPending}</b>perlu keputusan</span>
+          <span><b>${DASH_JOURNEYS.length}</b>journey</span>
+        </div>
+        <button type="button" class="jd-hero-btn" data-goto="results">📊 Lihat Semua Hasil Peserta <span aria-hidden="true">→</span></button>
+      </div>
+      ${DASH_JOURNEYS.map(journeyDashHTML).join("")}
     `;
   };
-  // 2026-09-23 (permintaan user, "buatkan link dari kartu carousel Rock
-  // solid 3 (seperti LTS1) perlu ijin admin") — bagian Dashboard KEDUA,
-  // sama persis polanya dgn bagian Lead To Serve 1 di atas (nameRow/pending
-  // list/3 kartu ringkasan) tapi utk rs3_access_requests, data-attribute
-  // BEDA (data-rs3appreq dst) spy tak tabrakan dgn handler LTS punya.
-  function rs3DashboardHTML() {
-    const all = state.rs3AccessRequests || [];
-    const pending = all.filter(r => r.status === "pending");
-    const approved = all.filter(r => r.status === "approved");
-    const rejected = all.filter(r => r.status === "rejected");
-    const nameRow = (r, delBtn) => `<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line);">
-      <span class="avatar" style="width:30px;height:30px;font-size:11px;">${esc(initials((r.profile || {}).name))}</span>
-      <span style="flex:1;min-width:0;"><b style="font-size:12.5px;">${esc((r.profile || {}).name || "?")}</b></span>
-      ${delBtn ? `<button type="button" class="btn btn--sm btn--ghost" style="color:var(--bad);border-color:var(--bad);" data-rs3delreq="${esc(r.id)}">Hapus</button>` : ""}
-    </div>`;
-    return `
-      <h2 class="section" style="margin-top:26px;">Rock Solid 3 — Post-Test</h2>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px;">
-        <div class="card pad sm" style="text-align:center;"><b style="display:block;font-family:var(--font-display);font-size:22px;color:var(--good);">${approved.length}</b><span class="sub">Disetujui</span></div>
-        <div class="card pad sm" style="text-align:center;"><b style="display:block;font-family:var(--font-display);font-size:22px;color:var(--warn);">${pending.length}</b><span class="sub">Menunggu</span></div>
-        <div class="card pad sm" style="text-align:center;"><b style="display:block;font-family:var(--font-display);font-size:22px;color:var(--bad);">${rejected.length}</b><span class="sub">Ditolak</span></div>
-      </div>
-      <h2 class="section">Menunggu Keputusan</h2>
-      ${pending.length ? pending.map(r => `<div class="card pad" style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-        <span class="avatar">${esc(initials((r.profile || {}).name))}</span>
-        <span style="flex:1;min-width:0;"><b style="font-size:13px;">${esc((r.profile || {}).name || "?")}</b><div class="sub">${esc((r.profile || {}).phone || "")}</div></span>
-        <button type="button" class="btn btn--sm btn--ghost" style="color:var(--bad);border-color:var(--bad);" data-rs3rejreq="${esc(r.id)}">Tolak</button>
-        <button type="button" class="btn btn--sm btn--primary" data-rs3appreq="${esc(r.id)}">Setujui</button>
-      </div>`).join("") : `<div class="empty">Tidak ada permintaan yang menunggu.</div>`}
-      <h2 class="section">Sudah Disetujui (${approved.length})</h2>
-      <div class="card pad">${approved.length ? approved.map(r => nameRow(r, true)).join("") : `<div class="empty" style="padding:10px;">Belum ada.</div>`}</div>
-      ${rejected.length ? `<h2 class="section">Ditolak (${rejected.length})</h2>
-      <div class="card pad">${rejected.map(nameRow).join("")}</div>` : ""}
-    `;
-  }
-  // 2026-09-23 (permintaan user, "jika limit cukup, buatkan post test utk
-  // LTS2") — bagian Dashboard KETIGA, SAMA PERSIS pola rs3DashboardHTML()
-  // di atas, data-attribute BEDA (data-lts2appreq dst).
-  function lts2DashboardHTML() {
-    const all = state.lts2AccessRequests || [];
-    const pending = all.filter(r => r.status === "pending");
-    const approved = all.filter(r => r.status === "approved");
-    const rejected = all.filter(r => r.status === "rejected");
-    const nameRow = (r, delBtn) => `<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line);">
-      <span class="avatar" style="width:30px;height:30px;font-size:11px;">${esc(initials((r.profile || {}).name))}</span>
-      <span style="flex:1;min-width:0;"><b style="font-size:12.5px;">${esc((r.profile || {}).name || "?")}</b></span>
-      ${delBtn ? `<button type="button" class="btn btn--sm btn--ghost" style="color:var(--bad);border-color:var(--bad);" data-lts2delreq="${esc(r.id)}">Hapus</button>` : ""}
-    </div>`;
-    return `
-      <h2 class="section" style="margin-top:26px;">Lead To Serve 2 — Post-Test</h2>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px;">
-        <div class="card pad sm" style="text-align:center;"><b style="display:block;font-family:var(--font-display);font-size:22px;color:var(--good);">${approved.length}</b><span class="sub">Disetujui</span></div>
-        <div class="card pad sm" style="text-align:center;"><b style="display:block;font-family:var(--font-display);font-size:22px;color:var(--warn);">${pending.length}</b><span class="sub">Menunggu</span></div>
-        <div class="card pad sm" style="text-align:center;"><b style="display:block;font-family:var(--font-display);font-size:22px;color:var(--bad);">${rejected.length}</b><span class="sub">Ditolak</span></div>
-      </div>
-      <h2 class="section">Menunggu Keputusan</h2>
-      ${pending.length ? pending.map(r => `<div class="card pad" style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-        <span class="avatar">${esc(initials((r.profile || {}).name))}</span>
-        <span style="flex:1;min-width:0;"><b style="font-size:13px;">${esc((r.profile || {}).name || "?")}</b><div class="sub">${esc((r.profile || {}).phone || "")}</div></span>
-        <button type="button" class="btn btn--sm btn--ghost" style="color:var(--bad);border-color:var(--bad);" data-lts2rejreq="${esc(r.id)}">Tolak</button>
-        <button type="button" class="btn btn--sm btn--primary" data-lts2appreq="${esc(r.id)}">Setujui</button>
-      </div>`).join("") : `<div class="empty">Tidak ada permintaan yang menunggu.</div>`}
-      <h2 class="section">Sudah Disetujui (${approved.length})</h2>
-      <div class="card pad">${approved.length ? approved.map(r => nameRow(r, true)).join("") : `<div class="empty" style="padding:10px;">Belum ada.</div>`}</div>
-      ${rejected.length ? `<h2 class="section">Ditolak (${rejected.length})</h2>
-      <div class="card pad">${rejected.map(nameRow).join("")}</div>` : ""}
-    `;
-  }
 
   // 2026-09-23 (permintaan user, "admin dapat melihat setiap hasil test dan
   // asesment dari setiap pengguna yang telah mengikuti discipleship
@@ -2168,6 +2181,13 @@
 
     // ---- Roster hasil peserta (Admin) — 2026-09-23, "admin dapat melihat
     // setiap hasil test dan asesment dari setiap pengguna" ----
+    const dashTog = T.closest("[data-dashtog]");
+    if (dashTog) {
+      const k = dashTog.dataset.dashtog; state.dashOpen = state.dashOpen || {};
+      const cfg = DASH_JOURNEYS.find(c => c.key === k);
+      const cur = state.dashOpen[k] != null ? state.dashOpen[k] : !!(cfg && (state[cfg.stateKey] || []).some(r => r.status === "pending"));
+      state.dashOpen[k] = !cur; RENDER.dashboard(); return;
+    }
     const resFilter = T.closest("[data-resultsfilter]");
     if (resFilter) { state.resultsFilter = resFilter.dataset.resultsfilter; RENDER.results(); return; }
     const viewRes = T.closest("[data-viewresult]");
