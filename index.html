@@ -252,6 +252,47 @@
   @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .tab.jtab[aria-current="page"] { color: var(--ink); } }
   .appbar__gear { flex: none; border: none; background: none; padding: 6px; margin: -6px -2px -6px 0; color: var(--ink-soft); cursor: pointer; border-radius: 8px; display: inline-flex; }
   @media (prefers-reduced-motion: reduce) { .jd-hero-nums span.hot { animation: none; } .jd-chev { transition: none; } }
+  /* 2026-10-04 — Feedback Rock Solid 3 (RENDER.rs3feedback) */
+  .fb-hero { position: relative; overflow: hidden; border-radius: var(--r-lg); padding: 20px 18px 18px; margin-bottom: 14px; color: #fff; background: linear-gradient(150deg, #4472A8 0%, #2F4F7A 60%, #4B3F72 120%); box-shadow: 0 12px 30px rgba(47,79,122,.35); }
+  .fb-hero-deco { position: absolute; right: 0; top: 0; width: 180px; height: 180px; pointer-events: none; }
+  .fb-badge { position: relative; display: inline-block; font-size: 10.5px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; padding: 5px 10px; border-radius: 999px; background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.25); }
+  .fb-hero h3 { position: relative; font-family: var(--font-display); font-size: 25px; font-weight: 600; margin: 12px 0 8px; }
+  .fb-hero p { position: relative; font-size: 13.5px; line-height: 1.6; margin: 0 0 9px; opacity: .95; }
+  .fb-teach { font-weight: 800; letter-spacing: .08em; color: #FFE3A3; }
+  .fb-tag { position: relative; margin-top: 12px; padding-top: 12px; border-top: 1px dashed rgba(255,255,255,.3); font-family: var(--font-display); font-style: italic; font-size: 15px; color: #FFE3A3; }
+  .fb-quote { margin: 0 0 10px; font-family: var(--font-display); font-style: italic; font-size: 16px; color: var(--accent); text-align: center; }
+  .fb-form .fb-q { margin-top: 16px; }
+  .fb-form label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+  .fb-form textarea { width: 100%; font-family: var(--font-body); padding: 10px 12px; border-radius: 12px; border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink); resize: vertical; }
+  .fb-form .btn { margin-top: 18px; }
+  .fb-stars { display: flex; gap: 4px; }
+  .fb-stars button { border: none; background: none; padding: 2px; cursor: pointer; line-height: 0; }
+  .fb-stars svg { fill: var(--surface-2); stroke: var(--line-strong); stroke-width: 1.2; transition: transform .12s; }
+  .fb-stars button.on svg { fill: #F2B640; stroke: #D99A1E; }
+  .fb-stars button:active svg { transform: scale(.88); }
+  .fb-share { width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 14px; border: none; border-radius: 12px; background: #25A35A; color: #fff; font-family: var(--font-body); font-size: 13.5px; font-weight: 800; cursor: pointer; }
+  .fb-share.sm { padding: 10px 12px; font-size: 12.5px; }
+  .fb-again { display: block; margin: 10px auto 0; border: none; background: none; color: var(--ink-faint); font-family: var(--font-body); font-size: 12px; font-weight: 700; text-decoration: underline; cursor: pointer; }
+  .fb-done { text-align: center; padding: 26px 18px; }
+  .fb-done b { display: block; font-family: var(--font-display); font-size: 18px; margin: 6px 0 4px; }
+  .fb-done .fb-quote { margin: 14px 0; }
+  .fb-mini { width: 100%; display: flex; align-items: center; gap: 12px; text-align: left; margin-bottom: 12px; padding: 14px; border: none; border-radius: var(--r-md); cursor: pointer; color: #fff; font-family: var(--font-body); background: linear-gradient(140deg, #4472A8, #2F4F7A); box-shadow: 0 8px 22px rgba(47,79,122,.3); }
+  .fb-mini-ic { flex: none; width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; font-size: 21px; background: rgba(255,255,255,.16); }
+  .fb-mini b { display: block; font-family: var(--font-display); font-size: 14.5px; font-weight: 600; }
+  .fb-mini small { display: block; font-size: 11.5px; opacity: .88; margin-top: 2px; }
+  .fb-avg { display: grid; gap: 10px; padding: 12px 0 6px; }
+  .fb-avg div { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; align-items: baseline; font-size: 12px; color: var(--ink-soft); }
+  .fb-avg b { font-family: var(--font-display); font-size: 18px; color: var(--ink); }
+  .fb-avg b small { font-size: 11px; color: var(--ink-faint); }
+  .fb-avg i { grid-column: 1 / -1; height: 6px; border-radius: 999px; background: var(--surface-2); overflow: hidden; }
+  .fb-avg em { display: block; height: 100%; background: #F2B640; border-radius: 999px; }
+  .fb-item { padding: 10px 0; border-top: 1px solid var(--line); }
+  .fb-item-h { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 11.5px; color: var(--ink-soft); }
+  .fb-item-h span { color: #D99A1E; }
+  .fb-item-h span em { font-style: normal; color: var(--line-strong); }
+  .fb-item p { margin: 5px 0 0; font-size: 12.5px; line-height: 1.5; color: var(--ink-soft); white-space: pre-wrap; }
+  .fb-item small { display: block; margin-top: 4px; font-size: 10.5px; color: var(--ink-faint); }
+  @media (prefers-reduced-motion: reduce) { .fb-stars svg { transition: none; } }
   .empty { text-align: center; padding: 30px 14px; color: var(--ink-faint); font-size: 13px; }
 
   /* 2026-09-23 (permintaan user, "hasil yang dapat di print dalam bentuk
@@ -374,6 +415,7 @@
           <section class="page" data-page="gifts"><div id="giftsBody"></div></section>
           <section class="page" data-page="rs3"><div id="rs3Body"></div></section>
           <section class="page" data-page="lts2"><div id="lts2Body"></div></section>
+          <section class="page" data-page="rs3feedback"><div id="rs3feedbackBody"></div></section>
           <section class="page" data-page="results"><div id="resultsBody"></div></section>
           <section class="page" data-page="resultdetail"><div id="resultdetailBody"></div></section>
           <section class="page" data-page="serveview"><div id="serveviewBody"></div></section>
@@ -470,6 +512,7 @@
     gifts: { h:"Karunia Rohani", back:true },
     rs3: { h:"Rock Solid 3 — Post-Test", back:true },
     lts2: { h:"Lead To Serve 2 — Post-Test", back:true },
+    rs3feedback: { h:"Feedback Rock Solid 3", back:true },
     results: { h:"Hasil Peserta", back:true },
     resultdetail: { h:"Hasil Peserta", back:true },
     serveview: { h:"LTS 1 Road Map", back:true },
@@ -695,9 +738,112 @@
       ${tag}
     </button>`;
   }
+  // 2026-10-04 (permintaan user, "buatkan kartu feedback Rock Solid 3 yang
+  // akan di share untuk semua peserta yang juga berisi ucapan terima kasih
+  // telah mengikuti Kelas Rock Solid 3 sampai lulus. Juga ucapan terima kasih
+  // untuk memiliki hati yang TEACHABLE diakhiri #God has called us to go and
+  // make disciples" — dipilih: kartu di aplikasi + link yg bisa dibagikan via
+  // WhatsApp; rating materi/lama waktu/pengajar 1-5 bintang + isian materi
+  // paling berkesan & saran; ANONIM; + "feedback is breakfast for the
+  // champion"). Halaman "rs3feedback" bisa dibuka lewat link RS3FB_LINK
+  // (#p=rs3feedback — diingat lewat sessionStorage kalau harus login dulu,
+  // lihat claimHandoffSession()/boot()). Tabel rs3_feedback TANPA profile_id
+  // (supabase/v_rs3_feedback.sql); tanda "sudah kirim" cuma di perangkat
+  // (localStorage), bukan di server — supaya benar2 anonim.
+  const RS3FB_LINK = location.origin + "/#p=rs3feedback";
+  const RS3FB_Q = [
+    { k:"materi", l:"Materi secara keseluruhan" },
+    { k:"durasi", l:"Lama waktu materi" },
+    { k:"pengajar", l:"Penjelasan dari pengajar" },
+  ];
+  const RS3FB_SENT_KEY = "dj_rs3fb_sent";
+  const rs3fbSent = () => { try { return !!localStorage.getItem(RS3FB_SENT_KEY); } catch (e) { return false; } };
+  function rs3FeedbackCardHTML() {
+    if (state.persona === "ADMIN" || !(state.rs3Result && state.rs3Result.passed)) return "";
+    const sent = rs3fbSent();
+    return `<button type="button" class="fb-mini" data-goto="rs3feedback">
+      <span class="fb-mini-ic">💌</span>
+      <span style="flex:1;min-width:0;"><b>Terima kasih sudah lulus Rock Solid 3!</b>
+        <small>${sent ? "Feedback-mu sudah terkirim 🙏 Ketuk untuk membagikan link." : "Bantu kami lewat feedback singkat (anonim) →"}</small></span>
+    </button>`;
+  }
+  const fbStarsHTML = (k, v) => `<div class="fb-stars" role="radiogroup" aria-label="${esc(k)}">${[1, 2, 3, 4, 5].map(n => `<button type="button" role="radio" aria-checked="${v === n}" aria-label="${n} bintang" data-fbstar="${k}:${n}" class="${v >= n ? "on" : ""}"><svg viewBox="0 0 24 24" width="28" height="28"><path d="M12 2.8l2.8 5.8 6.4.9-4.6 4.5 1.1 6.3L12 17.3l-5.7 3 1.1-6.3-4.6-4.5 6.4-.9z"/></svg></button>`).join("")}</div>`;
+  RENDER.rs3feedback = function () {
+    state.fbDraft = state.fbDraft || {};
+    const first = (((state.myProfile || {}).name) || "").split(" ")[0];
+    const sent = rs3fbSent();
+    const hero = `<div class="fb-hero">
+      <svg class="fb-hero-deco" viewBox="0 0 140 140" aria-hidden="true"><circle cx="118" cy="22" r="54" fill="#fff" opacity=".08"/><circle cx="14" cy="128" r="40" fill="#fff" opacity=".06"/>${[[22, 30], [104, 92], [64, 16], [126, 64]].map(([x, y]) => `<path d="M${x} ${y - 5}l1.4 3.6 3.6 1.4-3.6 1.4L${x} ${y + 5}l-1.4-3.6-3.6-1.4 3.6-1.4z" fill="#FFE3A3" opacity=".75"/>`).join("")}</svg>
+      <span class="fb-badge">📘 Rock Solid 3 · Firm Local Church</span>
+      <h3>Terima kasih${first ? ", " + esc(first) : ""}! 🎉</h3>
+      <p>Terima kasih telah mengikuti <b>Kelas Rock Solid 3</b> dengan setia sampai <b>lulus</b>. Setiap pertemuan, setiap materi, dan setiap langkah yang kamu ambil sangat berarti.</p>
+      <p>Terima kasih juga karena kamu memiliki hati yang <span class="fb-teach">TEACHABLE</span> — hati yang mau terus diajar, dibentuk, dan bertumbuh di dalam Tuhan dan gereja lokal-Nya.</p>
+      <div class="fb-tag">#God has called us to go and make disciples</div>
+    </div>`;
+    const share = `<button type="button" class="fb-share" data-fbshare="1"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.4-.7-2.9-1.1-4.7-4-4.9-4.2-.1-.2-1.2-1.6-1.2-3s.7-2.2 1-2.5c.3-.3.6-.3.8-.3h.6c.2 0 .4 0 .6.5l.9 2.1c.1.2.1.4 0 .6l-.4.6-.4.5c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.3 2.4 1.5.3.1.5.1.6-.1l.9-1c.2-.3.4-.2.6-.1l2 1c.3.1.5.2.5.3.1.2.1.7-.1 1.3Z"/></svg>Bagikan link via WhatsApp</button>`;
+    // 2026-10-04 susulan (user: "buat hanya yang sudah disetujui saat mengisi
+    // post test yang dapat memberikan feedback"): server menegakkan hal yg
+    // sama di RLS rfb_insert (v_rs3_feedback.sql); ini cuma tampilan.
+    if (state.persona !== "ADMIN" && state.rs3AccessStatus !== "approved") {
+      el("rs3feedbackBody").innerHTML = `${hero}
+        <div class="card pad fb-done">
+          <div style="font-size:38px;">🔒</div>
+          <b>Feedback khusus peserta Rock Solid 3</b>
+          <p class="sub">Form ini hanya untuk peserta yang aksesnya ke post-test Rock Solid 3 sudah disetujui Admin. Kalau kamu peserta kelas ini, ajukan akses lewat kartu Rock Solid 3 di beranda.</p>
+          <button type="button" class="fb-again" data-goto="rs3">Ke Post-Test Rock Solid 3</button>
+        </div>`;
+      return;
+    }
+    if (sent && !state.fbAgain) {
+      el("rs3feedbackBody").innerHTML = `${hero}
+        <div class="card pad fb-done">
+          <div style="font-size:38px;">🙏</div>
+          <b>Feedback-mu sudah kami terima</b>
+          <p class="sub">Terima kasih! Masukanmu akan dipakai untuk membuat kelas Rock Solid 3 berikutnya makin baik.</p>
+          <p class="fb-quote">“Feedback is breakfast for the champion.”</p>
+          ${share}
+          <button type="button" class="fb-again" data-fbagain="1">Kirim feedback lagi</button>
+        </div>`;
+      return;
+    }
+    el("rs3feedbackBody").innerHTML = `${hero}
+      <div class="card pad fb-form">
+        <p class="fb-quote">“Feedback is breakfast for the champion.”</p>
+        <p class="sub" style="margin:0 0 4px;">Beri nilai 1–5 bintang. <b>Feedback ini anonim</b> — namamu tidak disimpan.</p>
+        ${RS3FB_Q.map(q => `<div class="fb-q"><label>${esc(q.l)}</label>${fbStarsHTML(q.k, state.fbDraft[q.k] || 0)}</div>`).join("")}
+        <div class="fb-q"><label for="fbBerkesan">Materi apa yang paling berkesan buatmu?</label><textarea id="fbBerkesan" rows="3" maxlength="2000" placeholder="Ceritakan materi/momen yang paling menyentuh atau mengubahkan…"></textarea></div>
+        <div class="fb-q"><label for="fbSaran">Saran untuk kelas berikutnya</label><textarea id="fbSaran" rows="3" maxlength="2000" placeholder="Apa yang bisa kami tingkatkan?"></textarea></div>
+        <button type="button" class="btn btn--primary" id="fbSend">Kirim Feedback</button>
+      </div>
+      <div style="margin-top:12px;">${share}</div>`;
+  };
+  async function shareRs3Feedback() {
+    const text = "Terima kasih sudah mengikuti Kelas Rock Solid 3 sampai lulus! 🎉\nYuk isi feedback singkat (anonim) — feedback is breakfast for the champion 🙏\n\n" + RS3FB_LINK + "\n\n#God has called us to go and make disciples";
+    if (navigator.share) { try { await navigator.share({ text }); return; } catch (e) { if (e && e.name === "AbortError") return; } }
+    const wa = "https://wa.me/?text=" + encodeURIComponent(text);
+    const w = window.open(wa, "_blank");
+    if (!w) location.href = wa;
+  }
+  // Admin, tab RS3: ringkasan feedback (rata2 per pertanyaan + daftar isian).
+  function rs3FeedbackAdminHTML() {
+    const rows = state.rs3Feedback || [];
+    const avg = k => rows.length ? rows.reduce((n, r) => n + (r["rating_" + k] || 0), 0) / rows.length : 0;
+    const body = !rows.length ? `<p class="jd-empty">Belum ada feedback. Bagikan link-nya ke peserta lewat tombol di atas.</p>` : `
+      <div class="fb-avg">${RS3FB_Q.map(q => { const a = avg(q.k); return `<div><span>${esc(q.l)}</span><b>${a.toFixed(1)}<small>/5</small></b><i><em style="width:${(a / 5 * 100).toFixed(0)}%"></em></i></div>`; }).join("")}</div>
+      ${rows.map(r => `<div class="fb-item">
+        <div class="fb-item-h"><span>${"★".repeat(r.rating_materi)}<em>${"★".repeat(5 - r.rating_materi)}</em> materi · ${r.rating_durasi}/5 waktu · ${r.rating_pengajar}/5 pengajar</span><button type="button" class="jd-del" data-fbdel="${esc(r.id)}">Hapus</button></div>
+        ${r.berkesan ? `<p><b>Paling berkesan:</b> ${esc(r.berkesan)}</p>` : ""}
+        ${r.saran ? `<p><b>Saran:</b> ${esc(r.saran)}</p>` : ""}
+        <small>${esc(new Date(r.created_at).toLocaleDateString("id-ID", { day:"numeric", month:"short", year:"numeric" }))}</small>
+      </div>`).join("")}`;
+    return dashSecHTML("rs3:feedback", "Feedback peserta (anonim)", rows.length, false,
+      `<button type="button" class="fb-share sm" data-fbshare="1" style="margin-top:12px;">Bagikan link feedback via WhatsApp</button>
+       <button type="button" class="fb-again" data-goto="rs3feedback">Lihat kartu feedback</button>${body}`, "#4472A8");
+  }
   RENDER.home = function () {
     const unlocked = state.persona === "ADMIN" || state.accessStatus === "approved";
     el("homeBody").innerHTML = `
+      ${rs3FeedbackCardHTML()}
       ${rs3CardHTML()}
       ${lts2CardHTML()}
       ${unlocked ? discCardHTML() + ssdCardHTML() + giftsCardHTML() : ""}
@@ -976,7 +1122,8 @@
         + dashSecHTML(cfg.key + ":approved", "Akses disetujui", approved.length, false,
           approved.length ? approved.map(r => row(nm(r), "", `<button type="button" class="jd-del" data-${cfg.attr}delreq="${esc(r.id)}" title="Hapus">Hapus</button>`)).join("") : `<p class="jd-empty">Belum ada.</p>`, "var(--good)")
         + (rejected.length ? dashSecHTML(cfg.key + ":rejected", "Ditolak", rejected.length, false, rejected.map(r => row(nm(r))).join(""), "var(--bad)") : "")
-        + dashSecHTML(cfg.key + ":done", "Sudah selesai kelas", done.length, false, chips(done));
+        + dashSecHTML(cfg.key + ":done", "Sudah selesai kelas", done.length, false, chips(done))
+        + (cfg.key === "rs3" ? rs3FeedbackAdminHTML() : "");
     } else {
       nums = [[done.length, "sudah selesai", ""], [notYet.length, "belum", ""], [pctDone + "%", "tingkat selesai", ""]];
       secs = dashSecHTML(cfg.key + ":done", "Sudah selesai kelas", done.length, true, chips(done), "var(--good)")
@@ -1911,6 +2058,7 @@
     state.persona = state.myProfile.role === "admin" ? "ADMIN" : "PESERTA";
     if (state.persona === "ADMIN") state.accessRequests = await DB.listAllAccessRequests();
     if (state.persona === "ADMIN") { try { state.classProgress = await DB.listClassProgress(); } catch (e) { console.error(e); state.classProgress = []; } }
+    if (state.persona === "ADMIN") { try { state.rs3Feedback = await DB.listRs3Feedback(); } catch (e) { console.error(e); state.rs3Feedback = []; } }
     else state.accessStatus = await DB.myAccessStatus();
     // 2026-09-23 ("buatkan link dari kartu carousel Rock solid 3 ... perlu
     // ijin admin"): alur akses RS3 TERPISAH dari S-E-R-V-E — dimuat SELALU
@@ -1959,6 +2107,15 @@
   // deep-link LANGSUNG ke halaman "dashboard" — bukan cuma beranda spt
   // sebelumnya). Dikembalikan sbg { ok, page } spy boot() tahu ke mana.
   async function claimHandoffSession() {
+    // 2026-10-04: link yg dibagikan (mis. RS3FB_LINK "#p=rs3feedback") —
+    // halaman tujuan diingat di sessionStorage spy tetap terbuka SETELAH
+    // pengguna login dulu (boot() dipanggil ulang sesudah login).
+    const pm = /^#p=([a-z0-9]+)$/i.exec(location.hash);
+    if (pm) {
+      try { sessionStorage.setItem("dj_pending_page", pm[1]); } catch (e) {}
+      history.replaceState(null, "", location.pathname + location.search);
+      return { ok:false, page:null };
+    }
     const m = /^#at=([^&]+)&rt=([^&]+)(?:&p=([^&]+))?/.exec(location.hash);
     if (!m) return { ok:false, page:null };
     try {
@@ -1988,7 +2145,10 @@
     try {
       await loadAll();
       if (!state.myProfile) { Object.assign(state, { persona:null, myProfile:null }); show("login", { replace:true }); return; }
-      show((handoff.page && META[handoff.page]) ? handoff.page : "home", { replace:true });
+      let pend = null;
+      try { pend = sessionStorage.getItem("dj_pending_page"); sessionStorage.removeItem("dj_pending_page"); } catch (e) {}
+      const target = handoff.page || pend;
+      show((target && META[target]) ? target : "home", { replace:true });
     } catch (e) {
       console.error(e);
       Object.assign(state, { persona:null, myProfile:null, meId:null });
@@ -2014,7 +2174,7 @@
     }
     if (T.closest("#pfLogout") || T.closest("#rolePill")) {
       await DB.logout().catch(() => {});
-      Object.assign(state, { page:"login", stack:[], persona:null, meId:null, myProfile:null, accessStatus:null, accessRequests:[], myDisc:null, myRoadmap:null, mySsd:null, myGifts:null, rs3AccessStatus:null, rs3AccessRequests:[], rs3Result:null, lts2AccessStatus:null, lts2AccessRequests:[], lts2Result:null, participantResults:null, viewProfileId:null, resultsFilter:"all", dashKey:null, dashOpen:{}, classProgress:null, draft:{ discPicks:[], roadmapData:{}, ssdAnswers:{}, giftsAnswers:{}, rs3Answers:{}, lts2Answers:{} } });
+      Object.assign(state, { page:"login", stack:[], persona:null, meId:null, myProfile:null, accessStatus:null, accessRequests:[], myDisc:null, myRoadmap:null, mySsd:null, myGifts:null, rs3AccessStatus:null, rs3AccessRequests:[], rs3Result:null, lts2AccessStatus:null, lts2AccessRequests:[], lts2Result:null, participantResults:null, viewProfileId:null, resultsFilter:"all", dashKey:null, dashOpen:{}, classProgress:null, rs3Feedback:null, fbDraft:{}, fbAgain:false, draft:{ discPicks:[], roadmapData:{}, ssdAnswers:{}, giftsAnswers:{}, rs3Answers:{}, lts2Answers:{} } });
       show("login", { replace:true });
       return;
     }
@@ -2210,6 +2370,38 @@
 
     // ---- Roster hasil peserta (Admin) — 2026-09-23, "admin dapat melihat
     // setiap hasil test dan asesment dari setiap pengguna" ----
+    // ---- Feedback Rock Solid 3 (2026-10-04) ----
+    const fbStar = T.closest("[data-fbstar]");
+    if (fbStar) {
+      // update DOM langsung (bukan render ulang) spy isian teks tak hilang
+      const [k, n] = fbStar.dataset.fbstar.split(":"); const v = +n;
+      state.fbDraft = state.fbDraft || {}; state.fbDraft[k] = v;
+      fbStar.parentElement.querySelectorAll("[data-fbstar]").forEach((b, i) => { b.classList.toggle("on", i < v); b.setAttribute("aria-checked", String(i + 1 === v)); });
+      return;
+    }
+    if (T.closest("#fbSend")) {
+      const d = state.fbDraft || {};
+      if (!RS3FB_Q.every(q => d[q.k] >= 1)) { toast("Beri bintang untuk ketiga penilaian dulu ya."); return; }
+      const btn = el("fbSend"); btn.disabled = true;
+      try {
+        await DB.submitRs3Feedback({ materi:d.materi, durasi:d.durasi, pengajar:d.pengajar, berkesan:el("fbBerkesan").value.trim(), saran:el("fbSaran").value.trim() });
+        try { localStorage.setItem(RS3FB_SENT_KEY, new Date().toISOString()); } catch (e) {}
+        state.fbDraft = {}; state.fbAgain = false;
+        toast("Terima kasih! Feedback-mu terkirim 🙏");
+        RENDER.rs3feedback();
+        { const sc = document.querySelector(".scroll"); if (sc) sc.scrollTo({ top:0, behavior:"smooth" }); }
+      } catch (err) { btn.disabled = false; toast("Gagal mengirim: " + (err.message || err)); }
+      return;
+    }
+    if (T.closest("[data-fbagain]")) { state.fbAgain = true; RENDER.rs3feedback(); return; }
+    if (T.closest("[data-fbshare]")) { shareRs3Feedback(); return; }
+    const fbDel = T.closest("[data-fbdel]");
+    if (fbDel) {
+      if (!confirm("Hapus feedback ini?")) return;
+      try { await DB.deleteRs3Feedback(fbDel.dataset.fbdel); state.rs3Feedback = (state.rs3Feedback || []).filter(r => r.id !== fbDel.dataset.fbdel); RENDER.dashboard(); }
+      catch (err) { toast("Gagal menghapus: " + (err.message || err)); }
+      return;
+    }
     const dashTog = T.closest("[data-dashtog]");
     if (dashTog) {
       const k = dashTog.dataset.dashtog; state.dashOpen = state.dashOpen || {};

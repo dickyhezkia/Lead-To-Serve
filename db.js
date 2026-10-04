@@ -385,6 +385,21 @@ window.makeDB = function makeDB(sb) {
     // menampilkan dashboard masing-masing"): progres kelas SEMUA akun dari
     // profiles.classes (boolean[5]: RS1,RS2,RS3,LTS1,LTS2 — sumber yg sama
     // dgn bintang kelas di JB3 HOME Tracker). Murni baca.
+    // 2026-10-04 — Feedback Rock Solid 3 (ANONIM, lihat v_rs3_feedback.sql):
+    // insert TANPA .select() (peserta tak boleh baca balik barisnya), baca &
+    // hapus Admin saja.
+    async submitRs3Feedback(f) {
+      wrap(await sb.from("rs3_feedback").insert({
+        rating_materi:f.materi, rating_durasi:f.durasi, rating_pengajar:f.pengajar,
+        berkesan:f.berkesan || null, saran:f.saran || null,
+      }));
+    },
+    async listRs3Feedback() {
+      const { data, error } = await sb.from("rs3_feedback").select("*").order("created_at", { ascending:false });
+      if (error) throw error;
+      return data || [];
+    },
+    async deleteRs3Feedback(id) { wrap(await sb.from("rs3_feedback").delete().eq("id", id)); },
     async listClassProgress() {
       const { data, error } = await sb.from("profiles").select("id,name,phone,role,classes");
       if (error) throw error;
