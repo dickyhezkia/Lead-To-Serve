@@ -961,7 +961,8 @@
   // 2026-10-04 (user: "rapihkan tampilan setiap nav bar pengguna dari
   // discipleship journey"): ke-5 tab peserta kini 1 pola yg sama — hero
   // berwarna kelas (judul + status pill) → judul bagian (pjSecHTML) → isi →
-  // kartu feedback SELALU di paling bawah.
+  // kartu feedback di paling bawah — KECUALI post-test yg sudah py "Hasil
+  // terakhir": feedback tepat di bawah kartu hasil (user, 2026-10-04).
   const BAND_TONE = { Excellent:"ex", Better:"bt", Good:"gd", Underperform:"up" };
   function pjHeroHTML(k, sub, pill) {
     const c = DASH_JOURNEYS.find(x => x.key === k);
@@ -1175,11 +1176,12 @@
     const done = rs3Complete(answers);
     el("rs3Body").innerHTML = hero
       + pjResultHTML(last, RS3_QUESTIONS)
+      + (last ? pjFbHTML("rs3") : "")
       + pjSecHTML(last ? "Coba lagi" : "Soal post-test", `${doneCount}/${RS3_QUESTIONS.length} dijawab`)
       + `<div class="pj-prog"><i style="width:${Math.round(doneCount / RS3_QUESTIONS.length * 100)}%"></i></div>`
       + `<div class="card pad pj-qs">${pjQuestionsHTML(RS3_QUESTIONS, answers, "rs3ans")}</div>`
       + `<button class="btn btn--primary" style="margin:14px 0 18px;" id="rs3Save" ${done ? "" : "disabled"}>${done ? "Kirim Jawaban" : `Jawab semua soal (${doneCount}/${RS3_QUESTIONS.length})`}</button>`
-      + pjFbHTML("rs3");
+      + (last ? "" : pjFbHTML("rs3"));
   };
 
   // ---- Lead To Serve 2 post-test (2026-09-23, "jika limit cukup, buatkan
@@ -1197,11 +1199,12 @@
     const done = lts2Complete(answers);
     el("lts2Body").innerHTML = hero
       + pjResultHTML(last, LTS2_QUESTIONS)
+      + (last ? pjFbHTML("lts2") : "")
       + pjSecHTML(last ? "Coba lagi" : "Soal post-test", `${doneCount}/${LTS2_QUESTIONS.length} dijawab`)
       + `<div class="pj-prog"><i style="width:${Math.round(doneCount / LTS2_QUESTIONS.length * 100)}%"></i></div>`
       + `<div class="card pad pj-qs">${pjQuestionsHTML(LTS2_QUESTIONS, answers, "lts2ans")}</div>`
       + `<button class="btn btn--primary" style="margin:14px 0 18px;" id="lts2Save" ${done ? "" : "disabled"}>${done ? "Kirim Jawaban" : `Jawab semua soal (${doneCount}/${LTS2_QUESTIONS.length})`}</button>`
-      + pjFbHTML("lts2");
+      + (last ? "" : pjFbHTML("lts2"));
   };
 
   // ---- Dashboard (Admin) ----
