@@ -381,6 +381,16 @@ window.makeDB = function makeDB(sb) {
     // classes[idx]=true", pemanggil yg memutuskan KAPAN. Return boolean:
     // true = baru saja ditandai (belum true sebelumnya, worth di-toast),
     // false = sudah true dari dulu (tak perlu nulis ulang/toast lagi).
+    // 2026-10-04 (permintaan user, nav Admin "RS1, RS2, RS3, LTS1, LTS2 yang
+    // menampilkan dashboard masing-masing"): progres kelas SEMUA akun dari
+    // profiles.classes (boolean[5]: RS1,RS2,RS3,LTS1,LTS2 — sumber yg sama
+    // dgn bintang kelas di JB3 HOME Tracker). Murni baca.
+    async listClassProgress() {
+      const { data, error } = await sb.from("profiles").select("id,name,phone,role,classes");
+      if (error) throw error;
+      return (data || []).filter(r => String(r.role || "").toLowerCase() !== "barista")
+        .map(r => ({ id:r.id, name:r.name || "?", phone:r.phone || "", classes:Array.isArray(r.classes) ? r.classes : [] }));
+    },
     async markClassComplete(classIdx) {
       const s = await this.session();
       if (!s) throw new Error("Belum login");

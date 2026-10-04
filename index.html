@@ -206,39 +206,34 @@
   .serve-tile .ic { width: 46px; height: 46px; border-radius: 14px; display: grid; place-items: center; font-family: var(--font-display); font-size: 19px; font-weight: 600; color: #fff; background: linear-gradient(150deg, var(--dot), color-mix(in srgb, var(--dot) 70%, #000)); }
   .serve-tile b { font-family: var(--font-display); font-size: 13.5px; font-weight: 500; color: var(--ink); }
   .serve-tile .sub { font-size: 10px; }
-  /* 2026-10-04 — Dashboard Admin (journeyDashHTML / RENDER.dashboard) */
-  .jd-hero { position: relative; overflow: hidden; border-radius: var(--r-lg); padding: 18px 18px 16px; margin-bottom: 16px; color: #fff; background: linear-gradient(140deg, #4B3F72 0%, #6A4F8E 55%, #93683F 120%); box-shadow: var(--shadow); }
+  /* 2026-10-04 — Dashboard Admin per journey (RENDER.dashboard / dashSecHTML) */
+  .jd-hero { position: relative; overflow: hidden; border-radius: var(--r-lg); padding: 18px 18px 16px; margin-bottom: 16px; color: #fff; background: linear-gradient(140deg, var(--jc) 0%, color-mix(in srgb, var(--jc) 60%, #000) 100%); box-shadow: 0 10px 28px color-mix(in srgb, var(--jc) 35%, transparent); }
   .jd-hero-deco { position: absolute; right: 0; top: 0; width: 160px; height: 160px; pointer-events: none; }
-  .jd-hero > small { position: relative; display: block; font-size: 10.5px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; opacity: .75; }
-  .jd-hero > b { position: relative; display: block; font-family: var(--font-display); font-size: 23px; font-weight: 600; margin: 2px 0 12px; }
+  .jd-hero-top { position: relative; display: flex; align-items: center; gap: 12px; }
+  .jd-hero-ic { flex: none; width: 46px; height: 46px; border-radius: 14px; display: grid; place-items: center; font-size: 23px; background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.25); }
+  .jd-hero-top small { display: block; font-size: 10.5px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; opacity: .78; }
+  .jd-hero-top b { display: block; font-family: var(--font-display); font-size: 23px; font-weight: 600; line-height: 1.15; }
+  .jd-hero-sub { position: relative; margin: 8px 0 12px; font-size: 12px; opacity: .85; }
   .jd-hero-nums { position: relative; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
-  .jd-hero-nums span { background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.18); border-radius: 12px; padding: 8px 6px; text-align: center; font-size: 10.5px; line-height: 1.2; }
+  .jd-hero-nums span { background: rgba(255,255,255,.13); border: 1px solid rgba(255,255,255,.2); border-radius: 12px; padding: 8px 4px; text-align: center; font-size: 10.5px; line-height: 1.2; }
   .jd-hero-nums span b { display: block; font-family: var(--font-display); font-size: 21px; font-weight: 600; margin-bottom: 1px; }
-  .jd-hero-nums span.hot { background: rgba(255,214,140,.25); border-color: rgba(255,214,140,.6); }
-  .jd-hero-btn { position: relative; width: 100%; display: flex; justify-content: center; gap: 6px; padding: 11px 14px; border: none; border-radius: 12px; background: #fff; color: #4B3F72; font-family: var(--font-body); font-size: 13px; font-weight: 800; cursor: pointer; }
-  .jd-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-md); box-shadow: var(--shadow); margin-bottom: 12px; overflow: hidden; border-top: 4px solid var(--jc); }
-  .jd-head { width: 100%; display: flex; align-items: center; gap: 12px; padding: 14px 14px 10px; background: none; border: none; text-align: left; color: var(--ink); cursor: pointer; font-family: var(--font-body); }
-  .jd-ic { flex: none; width: 44px; height: 44px; border-radius: 13px; display: grid; place-items: center; font-size: 21px; background: linear-gradient(150deg, var(--jc), color-mix(in srgb, var(--jc) 65%, #000)); box-shadow: 0 4px 12px color-mix(in srgb, var(--jc) 35%, transparent); }
+  .jd-hero-nums span.hot { background: rgba(255,214,140,.28); border-color: rgba(255,214,140,.7); animation: jdPulse 2s ease-in-out infinite; }
+  @keyframes jdPulse { 0%,100% { box-shadow: 0 0 0 0 rgba(255,214,140,.55); } 50% { box-shadow: 0 0 0 6px rgba(255,214,140,0); } }
+  .jd-prog { position: relative; height: 7px; border-radius: 999px; background: rgba(255,255,255,.2); overflow: hidden; }
+  .jd-prog i { display: block; height: 100%; border-radius: 999px; background: #fff; }
+  .jd-prog-l { position: relative; margin-top: 5px; font-size: 11px; opacity: .85; }
+  .jd-hero-btn { position: relative; width: 100%; display: flex; justify-content: center; gap: 6px; margin-top: 14px; padding: 11px 14px; border: none; border-radius: 12px; background: #fff; color: var(--jc); font-family: var(--font-body); font-size: 13px; font-weight: 800; cursor: pointer; }
+  .jd-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-md); box-shadow: var(--shadow); margin-bottom: 10px; overflow: hidden; }
+  .jd-head { width: 100%; display: flex; align-items: center; gap: 10px; padding: 14px; background: none; border: none; text-align: left; color: var(--ink); cursor: pointer; font-family: var(--font-body); }
+  .jd-dot { flex: none; width: 10px; height: 10px; border-radius: 50%; }
   .jd-tt { flex: 1; min-width: 0; }
-  .jd-tt b { display: block; font-family: var(--font-display); font-size: 16px; font-weight: 600; }
-  .jd-tt small { display: block; font-size: 11px; color: var(--ink-faint); margin-top: 1px; }
-  .jd-pend { flex: none; font-size: 10.5px; font-weight: 800; color: #fff; background: var(--warn); border-radius: 999px; padding: 4px 9px; animation: jdPulse 2s ease-in-out infinite; }
-  @keyframes jdPulse { 0%,100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--warn) 50%, transparent); } 50% { box-shadow: 0 0 0 6px transparent; } }
+  .jd-tt b { display: block; font-size: 14px; font-weight: 700; }
+  .jd-count { flex: none; font-family: var(--font-display); font-size: 18px; font-weight: 600; color: var(--ink); }
   .jd-chev { flex: none; color: var(--ink-faint); transition: transform .2s; }
   .jd-card.open .jd-chev { transform: rotate(180deg); }
-  .jd-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 0 14px 14px; }
-  .jd-stats span { background: var(--surface-2); border-radius: 10px; padding: 7px 4px; text-align: center; font-size: 10.5px; color: var(--ink-soft); }
-  .jd-stats span b { display: block; font-family: var(--font-display); font-size: 19px; font-weight: 600; }
-  .jd-body { padding: 2px 14px 14px; border-top: 1px dashed var(--line-strong); }
-  .jd-mix { display: flex; height: 8px; border-radius: 999px; overflow: hidden; background: var(--surface-2); margin-top: 14px; }
-  .jd-mix i { display: block; height: 100%; }
-  .jd-legend { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 6px; font-size: 10.5px; color: var(--ink-faint); }
-  .jd-legend i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px; vertical-align: 0; }
-  .jd-sec { margin: 16px 0 4px; font-size: 10.5px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--jc); }
-  :root[data-theme="dark"] .jd-sec { color: var(--ink-soft); }
-  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .jd-sec { color: var(--ink-soft); } }
-  .jd-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-top: 1px solid var(--line); }
-  .jd-sec + .jd-row { border-top: none; }
+  .jd-body { padding: 0 14px 12px; border-top: 1px dashed var(--line-strong); }
+  .jd-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-top: 1px solid var(--line); }
+  .jd-body > .jd-row:first-child { border-top: none; }
   .jd-row .avatar { width: 32px; height: 32px; font-size: 11.5px; }
   .jd-nm { flex: 1; min-width: 0; }
   .jd-nm b { display: block; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -246,8 +241,17 @@
   .jd-no { color: var(--bad); border-color: var(--bad); }
   .jd-del { flex: none; background: none; border: none; color: var(--ink-faint); font-family: var(--font-body); font-size: 11.5px; font-weight: 700; cursor: pointer; padding: 6px 4px; }
   .jd-del:hover { color: var(--bad); }
-  .jd-empty { margin: 6px 0 0; font-size: 12px; color: var(--ink-faint); }
-  @media (prefers-reduced-motion: reduce) { .jd-pend { animation: none; } .jd-chev { transition: none; } }
+  .jd-chips { display: flex; flex-wrap: wrap; gap: 6px; padding-top: 12px; }
+  .jd-chips span { font-size: 12px; font-weight: 600; padding: 5px 10px; border-radius: 999px; background: var(--surface-2); color: var(--ink-soft); border: 1px solid var(--line); }
+  .jd-empty { margin: 12px 0 0; font-size: 12px; color: var(--ink-faint); }
+  .jd-note { margin: 4px 4px 12px; font-size: 11.5px; line-height: 1.5; color: var(--ink-faint); }
+  .tab.jtab .ico { font-size: 10px; font-weight: 800; color: var(--ink-faint); }
+  .tab.jtab[aria-current="page"] { color: var(--jc); }
+  .tab.jtab[aria-current="page"] .ico { background: var(--jc); color: #fff; }
+  :root[data-theme="dark"] .tab.jtab[aria-current="page"] { color: var(--ink); }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .tab.jtab[aria-current="page"] { color: var(--ink); } }
+  .appbar__gear { flex: none; border: none; background: none; padding: 6px; margin: -6px -2px -6px 0; color: var(--ink-soft); cursor: pointer; border-radius: 8px; display: inline-flex; }
+  @media (prefers-reduced-motion: reduce) { .jd-hero-nums span.hot { animation: none; } .jd-chev { transition: none; } }
   .empty { text-align: center; padding: 30px 14px; color: var(--ink-faint); font-size: 13px; }
 
   /* 2026-09-23 (permintaan user, "hasil yang dapat di print dalam bentuk
@@ -350,6 +354,9 @@
         </button>
         <img class="appbar__logo" src="./logo-mark.png" alt="JB3 Church">
         <div class="appbar__title" id="appbarTitle">Discipleship Journey</div>
+        <button class="appbar__gear" id="gearBtn" hidden aria-label="Profil & pengaturan" title="Profil & pengaturan">
+          <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
         <button class="rolepill" id="rolePill">Keluar</button>
       </header>
       <div class="identitybar hidden" id="identityBar"></div>
@@ -441,7 +448,9 @@
   // menyeluruh + daftar pending yg perlu diputuskan, lihat RENDER.dashboard).
   const TABS = {
     PESERTA: [{ p:"home", l:"Serve Road Map" }, { p:"profile", l:"Profil" }],
-    ADMIN: [{ p:"home", l:"Serve Road Map" }, { p:"dashboard", l:"Dashboard" }, { p:"profile", l:"Profil" }],
+    // 2026-10-04: Admin = 5 tab journey (lihat DASH_JOURNEYS), semuanya halaman
+    // "dashboard" dgn state.dashKey berbeda; Profil pindah ke ikon ⚙ app bar.
+    ADMIN: [],
   };
   // 2026-09-22: S.E.R.V.E — akronim dari 5 bagian Serve Road Map (Strength/
   // Experience/Relationship/Vision/Expansion), lihat sumber/roadmap-fields.json
@@ -471,12 +480,18 @@
     vision: { h:"Vision", back:true },
     expansion: { h:"Expansion", back:true },
     hasil: { h:"Hasil Asesmen", back:true },
-    dashboard: { h:"Dashboard", tab:"dashboard" },
+    dashboard: { h:"Dashboard Admin", tab:"dashboard" },
     profile: { h:"Profil Saya", tab:"profile" },
   };
 
   function show(page, opts) {
     opts = opts || {};
+    // 2026-10-04: Admin tak punya beranda Serve Road Map lagi — "home" (mis.
+    // dari goBack/simpan) & "dashboard" tanpa pilihan tab → dashboard journey.
+    if (state.persona === "ADMIN" && (page === "home" || page === "dashboard")) {
+      page = "dashboard";
+      if (!state.dashKey) state.dashKey = adminLandingKey();
+    }
     const prev = state.page;
     if (!opts.replace && prev !== page && !NOCHROME.includes(prev) && !NOCHROME.includes(page)) state.stack.push(prev);
     state.page = page;
@@ -493,12 +508,19 @@
     el("tabbar").classList.toggle("hidden", !chromeOn);
     if (!chromeOn) return;
     const meta = META[state.page] || {};
-    el("appbar").setAttribute("data-back", meta.back ? "true" : "false");
+    const isAdm = state.persona === "ADMIN";
+    el("appbar").setAttribute("data-back", (meta.back || (isAdm && state.page === "profile")) ? "true" : "false");
+    el("gearBtn").hidden = !isAdm || state.page === "profile";
     el("appbarTitle").textContent = meta.h || "Discipleship Journey";
     const idb = el("identityBar");
     idb.innerHTML = `<span class="ib-ava">${esc(initials(state.myProfile && state.myProfile.name))}</span>
       <span class="ib-main"><span class="ib-name">${esc((state.myProfile || {}).name || "")}</span>
       <span class="identity-badge">${state.persona === "ADMIN" ? "Admin" : "Peserta"}</span></span>`;
+    if (isAdm) {
+      el("tabbar").innerHTML = DASH_JOURNEYS.map(c => `<button class="tab jtab" style="--jc:${c.color};" data-dashtab="${c.key}" ${state.page === "dashboard" && dashCfg().key === c.key ? 'aria-current="page"' : ""} aria-label="${esc(c.title)}">
+        <span class="ico">${c.icon}</span><span class="lbl">${c.tab}</span></button>`).join("");
+      return;
+    }
     const tabs = TABS[state.persona] || TABS.PESERTA;
     el("tabbar").innerHTML = tabs.map(t => `<button class="tab" data-goto="${t.p}" ${meta.tab === t.p ? 'aria-current="page"' : ""}>
       <span class="ico"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/></svg></span>
@@ -893,79 +915,85 @@
   // lead-to-serve-1.md, "isian toolnya nanti saja").
   // 2026-10-04 (permintaan user, "pada dashboard Discipleship Journey,
   // rapihkan tampilannya dengan estetik dan visual yang menarik juga kartu
-  // yang buka tutup di setiap journey nya"): 3 bagian lama (LTS1 / RS3 /
-  // LTS2 — dulu 3 fungsi kembar, judul+3 kotak angka+daftar polos) DISATUKAN
-  // jadi 1 fungsi generik journeyDashHTML(cfg): kartu per journey dgn header
-  // berwarna (ikon gradien + judul + pil angka + chevron), bar komposisi
-  // Disetujui/Menunggu/Ditolak, isi bisa dibuka-tutup (state.dashOpen,
-  // default: terbuka kalau ada yg Menunggu). SEMUA data-attribute tombol
-  // (data-appreq/data-rs3appreq/data-lts2appreq dst) TETAP SAMA — handler
-  // klik lama tak diubah.
+  // yang buka tutup", lalu susulan "admin tidak perlu ada nav serve road map.
+  // nav profil pindahkan di bar atas dalam icon setting" + "buatkan nav bar:
+  // RS1, RS2, RS3, LTS1, LTS2 yang menampilkan dashboard masing-masing"):
+  // Admin kini cuma punya 1 halaman "dashboard" dgn 5 tab bawah
+  // (data-dashtab → state.dashKey). Tiap journey: hero berwarna + bagian2
+  // yg bisa dibuka-tutup (dashSecHTML, state.dashOpen). RS1/RS2 belum punya
+  // alur digital → isinya progres kelas dari profiles.classes (ditandai di
+  // JB3 HOME Tracker). RS3/LTS1/LTS2: permintaan akses + kelas selesai.
+  // Semua data-attribute tombol Setujui/Tolak/Hapus TETAP SAMA spt dulu.
   const DASH_JOURNEYS = [
-    { key:"lts1", title:"Lead To Serve 1", sub:"Serve Road Map · DISC · SSD · Karunia Rohani", icon:"🧭", color:"#4B3F72", stateKey:"accessRequests", attr:"" },
-    { key:"rs3", title:"Rock Solid 3", sub:"Post-test Firm Local Church · 40 soal", icon:"📘", color:"#4472A8", stateKey:"rs3AccessRequests", attr:"rs3" },
-    { key:"lts2", title:"Lead To Serve 2", sub:"Post-test Servant Leadership · 25 soal", icon:"🤝", color:"#93683F", stateKey:"lts2AccessRequests", attr:"lts2" },
+    { key:"rs1", tab:"RS1", title:"Rock Solid 1", sub:"Kelas dasar pemuridan · ditandai di JB3 HOME Tracker", icon:"🪨", color:"#5F7F5A", classIdx:0 },
+    { key:"rs2", tab:"RS2", title:"Rock Solid 2", sub:"Kelas lanjutan pemuridan · ditandai di JB3 HOME Tracker", icon:"🌱", color:"#B4822F", classIdx:1 },
+    { key:"rs3", tab:"RS3", title:"Rock Solid 3", sub:"Post-test Firm Local Church · 40 soal", icon:"📘", color:"#4472A8", classIdx:2, stateKey:"rs3AccessRequests", attr:"rs3" },
+    { key:"lts1", tab:"LTS1", title:"Lead To Serve 1", sub:"Serve Road Map · DISC · SSD · Karunia Rohani", icon:"🧭", color:"#4B3F72", classIdx:3, stateKey:"accessRequests", attr:"" },
+    { key:"lts2", tab:"LTS2", title:"Lead To Serve 2", sub:"Post-test Servant Leadership · 25 soal", icon:"🤝", color:"#93683F", classIdx:4, stateKey:"lts2AccessRequests", attr:"lts2" },
   ];
-  function journeyDashHTML(cfg) {
-    const all = state[cfg.stateKey] || [];
-    const pending = all.filter(r => r.status === "pending");
-    const approved = all.filter(r => r.status === "approved");
-    const rejected = all.filter(r => r.status === "rejected");
-    const total = all.length;
+  const dashCfg = () => DASH_JOURNEYS.find(c => c.key === state.dashKey) || DASH_JOURNEYS[0];
+  // Halaman awal Admin: journey pertama yg punya permintaan Menunggu, kalau tak ada → RS1.
+  function adminLandingKey() {
+    const j = DASH_JOURNEYS.find(c => c.stateKey && (state[c.stateKey] || []).some(r => r.status === "pending"));
+    return j ? j.key : DASH_JOURNEYS[0].key;
+  }
+  function dashSecHTML(id, title, count, defOpen, body, tone) {
     state.dashOpen = state.dashOpen || {};
-    const open = state.dashOpen[cfg.key] != null ? state.dashOpen[cfg.key] : pending.length > 0;
-    const pct = n => total ? (n / total * 100).toFixed(1) : 0;
-    const who = r => esc((r.profile || {}).name || "?");
-    const person = (r, extra) => `<div class="jd-row">
-        <span class="avatar">${esc(initials((r.profile || {}).name))}</span>
-        <span class="jd-nm"><b>${who(r)}</b>${extra || ""}</span>`;
-    const body = `
-      <div class="jd-mix" role="img" aria-label="${approved.length} disetujui, ${pending.length} menunggu, ${rejected.length} ditolak">
-        ${total ? `<i style="width:${pct(approved.length)}%;background:var(--good);"></i><i style="width:${pct(pending.length)}%;background:var(--warn);"></i><i style="width:${pct(rejected.length)}%;background:var(--bad);"></i>` : ""}
-      </div>
-      <div class="jd-legend"><span><i style="background:var(--good)"></i>Disetujui ${approved.length}</span><span><i style="background:var(--warn)"></i>Menunggu ${pending.length}</span><span><i style="background:var(--bad)"></i>Ditolak ${rejected.length}</span></div>
-      <div class="jd-sec">Menunggu keputusan</div>
-      ${pending.length ? pending.map(r => `${person(r, `<small>${esc((r.profile || {}).phone || "")}</small>`)}
-          <button type="button" class="btn btn--sm btn--ghost jd-no" data-${cfg.attr}rejreq="${esc(r.id)}">Tolak</button>
-          <button type="button" class="btn btn--sm btn--primary" data-${cfg.attr}appreq="${esc(r.id)}">Setujui</button>
-        </div>`).join("") : `<p class="jd-empty">✓ Tidak ada permintaan yang menunggu.</p>`}
-      <div class="jd-sec">Sudah disetujui · ${approved.length}</div>
-      ${approved.length ? approved.map(r => `${person(r)}
-          <button type="button" class="jd-del" data-${cfg.attr}delreq="${esc(r.id)}" aria-label="Hapus ${who(r)}" title="Hapus">Hapus</button>
-        </div>`).join("") : `<p class="jd-empty">Belum ada.</p>`}
-      ${rejected.length ? `<div class="jd-sec">Ditolak · ${rejected.length}</div>${rejected.map(r => `${person(r)}</div>`).join("")}` : ""}`;
-    return `<section class="jd-card ${open ? "open" : ""}" style="--jc:${cfg.color};">
-      <button type="button" class="jd-head" data-dashtog="${cfg.key}" aria-expanded="${open}">
-        <span class="jd-ic">${cfg.icon}</span>
-        <span class="jd-tt"><b>${esc(cfg.title)}</b><small>${esc(cfg.sub)}</small></span>
-        ${pending.length ? `<span class="jd-pend">${pending.length} menunggu</span>` : ""}
+    const open = state.dashOpen[id] != null ? state.dashOpen[id] : defOpen;
+    return `<section class="jd-card ${open ? "open" : ""}">
+      <button type="button" class="jd-head" data-dashtog="${id}" data-def="${defOpen ? 1 : 0}" aria-expanded="${open}">
+        <span class="jd-dot" style="background:${tone || "var(--jc)"}"></span>
+        <span class="jd-tt"><b>${esc(title)}</b></span>
+        <span class="jd-count" style="${tone ? `color:${tone};` : ""}">${count}</span>
         <svg class="jd-chev" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
       </button>
-      <div class="jd-stats">
-        <span><b style="color:var(--good)">${approved.length}</b>Disetujui</span>
-        <span><b style="color:var(--warn)">${pending.length}</b>Menunggu</span>
-        <span><b style="color:var(--bad)">${rejected.length}</b>Ditolak</span>
-      </div>
       ${open ? `<div class="jd-body">${body}</div>` : ""}
     </section>`;
   }
   RENDER.dashboard = function () {
-    const counts = DASH_JOURNEYS.map(c => (state[c.stateKey] || []));
-    const totalPending = counts.reduce((n, a) => n + a.filter(r => r.status === "pending").length, 0);
-    const people = new Set(counts.flat().filter(r => r.status === "approved").map(r => r.profile_id || (r.profile || {}).id || r.id)).size;
+    const cfg = dashCfg();
+    const people = state.classProgress || [];
+    const done = people.filter(p => p.classes[cfg.classIdx]);
+    const notYet = people.filter(p => !p.classes[cfg.classIdx]);
+    const pctDone = people.length ? Math.round(done.length / people.length * 100) : 0;
+    const byName = (a, b) => String(a.name || (a.profile || {}).name || "").localeCompare(String(b.name || (b.profile || {}).name || ""));
+    const row = (name, extra, actions) => `<div class="jd-row"><span class="avatar">${esc(initials(name))}</span>
+        <span class="jd-nm"><b>${esc(name || "?")}</b>${extra ? `<small>${esc(extra)}</small>` : ""}</span>${actions || ""}</div>`;
+    const chips = list => list.length ? `<div class="jd-chips">${list.slice().sort(byName).map(p => `<span>${esc(p.name)}</span>`).join("")}</div>` : `<p class="jd-empty">Belum ada.</p>`;
+    let nums, secs;
+    if (cfg.stateKey) {
+      const all = state[cfg.stateKey] || [];
+      const pending = all.filter(r => r.status === "pending");
+      const approved = all.filter(r => r.status === "approved").sort(byName);
+      const rejected = all.filter(r => r.status === "rejected").sort(byName);
+      const nm = r => (r.profile || {}).name || "?";
+      nums = [[pending.length, "menunggu", pending.length ? "hot" : ""], [approved.length, "akses disetujui", ""], [done.length, "selesai kelas", ""]];
+      secs = dashSecHTML(cfg.key + ":pending", "Menunggu keputusan", pending.length, pending.length > 0,
+          pending.length ? pending.map(r => row(nm(r), (r.profile || {}).phone || "",
+            `<button type="button" class="btn btn--sm btn--ghost jd-no" data-${cfg.attr}rejreq="${esc(r.id)}">Tolak</button>
+             <button type="button" class="btn btn--sm btn--primary" data-${cfg.attr}appreq="${esc(r.id)}">Setujui</button>`)).join("")
+            : `<p class="jd-empty">✓ Tidak ada permintaan yang menunggu.</p>`, "var(--warn)")
+        + dashSecHTML(cfg.key + ":approved", "Akses disetujui", approved.length, false,
+          approved.length ? approved.map(r => row(nm(r), "", `<button type="button" class="jd-del" data-${cfg.attr}delreq="${esc(r.id)}" title="Hapus">Hapus</button>`)).join("") : `<p class="jd-empty">Belum ada.</p>`, "var(--good)")
+        + (rejected.length ? dashSecHTML(cfg.key + ":rejected", "Ditolak", rejected.length, false, rejected.map(r => row(nm(r))).join(""), "var(--bad)") : "")
+        + dashSecHTML(cfg.key + ":done", "Sudah selesai kelas", done.length, false, chips(done));
+    } else {
+      nums = [[done.length, "sudah selesai", ""], [notYet.length, "belum", ""], [pctDone + "%", "tingkat selesai", ""]];
+      secs = dashSecHTML(cfg.key + ":done", "Sudah selesai kelas", done.length, true, chips(done), "var(--good)")
+        + dashSecHTML(cfg.key + ":notyet", "Belum selesai", notYet.length, false, chips(notYet), "var(--ink-faint)")
+        + `<p class="jd-note">Kelas ${esc(cfg.title)} belum punya alur digital di Discipleship Journey — status selesai ditandai lewat JB3 HOME Tracker (detail anggota / profil pengguna).</p>`;
+    }
     el("dashboardBody").innerHTML = `
-      <div class="jd-hero">
-        <svg class="jd-hero-deco" viewBox="0 0 120 120" aria-hidden="true"><circle cx="100" cy="18" r="46" fill="#fff" opacity=".07"/><circle cx="18" cy="112" r="34" fill="#fff" opacity=".06"/><path d="M8 92 C 34 70, 52 98, 78 72 S 112 58, 118 34" fill="none" stroke="#fff" stroke-width="1.6" stroke-dasharray="3 5" opacity=".35"/></svg>
-        <small>Discipleship Journey</small>
-        <b>Dashboard Admin</b>
-        <div class="jd-hero-nums">
-          <span><b>${people}</b>peserta aktif</span>
-          <span class="${totalPending ? "hot" : ""}"><b>${totalPending}</b>perlu keputusan</span>
-          <span><b>${DASH_JOURNEYS.length}</b>journey</span>
-        </div>
-        <button type="button" class="jd-hero-btn" data-goto="results">📊 Lihat Semua Hasil Peserta <span aria-hidden="true">→</span></button>
+      <div class="jd-hero" style="--jc:${cfg.color};">
+        <svg class="jd-hero-deco" viewBox="0 0 120 120" aria-hidden="true"><circle cx="100" cy="18" r="46" fill="#fff" opacity=".08"/><circle cx="18" cy="112" r="34" fill="#fff" opacity=".06"/><path d="M8 92 C 34 70, 52 98, 78 72 S 112 58, 118 34" fill="none" stroke="#fff" stroke-width="1.6" stroke-dasharray="3 5" opacity=".35"/></svg>
+        <div class="jd-hero-top"><span class="jd-hero-ic">${cfg.icon}</span><div><small>Discipleship Journey · ${esc(cfg.tab)}</small><b>${esc(cfg.title)}</b></div></div>
+        <p class="jd-hero-sub">${esc(cfg.sub)}</p>
+        <div class="jd-hero-nums">${nums.map(([n, l, c]) => `<span class="${c}"><b>${n}</b>${l}</span>`).join("")}</div>
+        <div class="jd-prog" role="img" aria-label="${done.length} dari ${people.length} akun selesai kelas"><i style="width:${pctDone}%"></i></div>
+        <div class="jd-prog-l">${done.length} dari ${people.length} akun sudah menyelesaikan kelas ini · ${pctDone}%</div>
+        ${cfg.stateKey ? `<button type="button" class="jd-hero-btn" data-goto="results">📊 Lihat Semua Hasil Peserta <span aria-hidden="true">→</span></button>` : ""}
       </div>
-      ${DASH_JOURNEYS.map(journeyDashHTML).join("")}
+      <div style="--jc:${cfg.color};">${secs}</div>
     `;
   };
 
@@ -1882,6 +1910,7 @@
     state.meId = state.myProfile.id;
     state.persona = state.myProfile.role === "admin" ? "ADMIN" : "PESERTA";
     if (state.persona === "ADMIN") state.accessRequests = await DB.listAllAccessRequests();
+    if (state.persona === "ADMIN") { try { state.classProgress = await DB.listClassProgress(); } catch (e) { console.error(e); state.classProgress = []; } }
     else state.accessStatus = await DB.myAccessStatus();
     // 2026-09-23 ("buatkan link dari kartu carousel Rock solid 3 ... perlu
     // ijin admin"): alur akses RS3 TERPISAH dari S-E-R-V-E — dimuat SELALU
@@ -1985,7 +2014,7 @@
     }
     if (T.closest("#pfLogout") || T.closest("#rolePill")) {
       await DB.logout().catch(() => {});
-      Object.assign(state, { page:"login", stack:[], persona:null, meId:null, myProfile:null, accessStatus:null, accessRequests:[], myDisc:null, myRoadmap:null, mySsd:null, myGifts:null, rs3AccessStatus:null, rs3AccessRequests:[], rs3Result:null, lts2AccessStatus:null, lts2AccessRequests:[], lts2Result:null, participantResults:null, viewProfileId:null, resultsFilter:"all", draft:{ discPicks:[], roadmapData:{}, ssdAnswers:{}, giftsAnswers:{}, rs3Answers:{}, lts2Answers:{} } });
+      Object.assign(state, { page:"login", stack:[], persona:null, meId:null, myProfile:null, accessStatus:null, accessRequests:[], myDisc:null, myRoadmap:null, mySsd:null, myGifts:null, rs3AccessStatus:null, rs3AccessRequests:[], rs3Result:null, lts2AccessStatus:null, lts2AccessRequests:[], lts2Result:null, participantResults:null, viewProfileId:null, resultsFilter:"all", dashKey:null, dashOpen:{}, classProgress:null, draft:{ discPicks:[], roadmapData:{}, ssdAnswers:{}, giftsAnswers:{}, rs3Answers:{}, lts2Answers:{} } });
       show("login", { replace:true });
       return;
     }
@@ -2184,10 +2213,18 @@
     const dashTog = T.closest("[data-dashtog]");
     if (dashTog) {
       const k = dashTog.dataset.dashtog; state.dashOpen = state.dashOpen || {};
-      const cfg = DASH_JOURNEYS.find(c => c.key === k);
-      const cur = state.dashOpen[k] != null ? state.dashOpen[k] : !!(cfg && (state[cfg.stateKey] || []).some(r => r.status === "pending"));
+      const cur = state.dashOpen[k] != null ? state.dashOpen[k] : dashTog.dataset.def === "1";
       state.dashOpen[k] = !cur; RENDER.dashboard(); return;
     }
+    const dashTab = T.closest("[data-dashtab]");
+    if (dashTab) {
+      state.dashKey = dashTab.dataset.dashtab;
+      if (state.page !== "dashboard") { state.stack = []; show("dashboard", { replace:true }); }
+      else { renderChrome(); RENDER.dashboard(); }
+      document.querySelector(".scroll") && document.querySelector(".scroll").scrollTo({ top:0 });
+      return;
+    }
+    if (T.closest("#gearBtn")) { show("profile"); return; }
     const resFilter = T.closest("[data-resultsfilter]");
     if (resFilter) { state.resultsFilter = resFilter.dataset.resultsfilter; RENDER.results(); return; }
     const viewRes = T.closest("[data-viewresult]");
@@ -2209,7 +2246,7 @@
         state.rs3Result = await DB.myRs3Latest();
         toast(result.passed ? `Lulus (${result.bandLabel})! Kelas Rock Solid 3 sudah ditandai selesai.` : `Belum lulus (${result.bandLabel}) — boleh coba lagi.`);
         RENDER.rs3();
-        window.scrollTo({ top:0, behavior:"smooth" });
+        { const sc = document.querySelector(".scroll"); if (sc) sc.scrollTo({ top:0, behavior:"smooth" }); }
       } catch (err) { toast("Gagal mengirim: " + (err.message || err)); }
       return;
     }
@@ -2230,7 +2267,7 @@
         state.lts2Result = await DB.myLts2Latest();
         toast(result.passed ? `Lulus (${result.bandLabel})! Kelas Lead To Serve 2 sudah ditandai selesai.` : `Belum lulus (${result.bandLabel}) — boleh coba lagi.`);
         RENDER.lts2();
-        window.scrollTo({ top:0, behavior:"smooth" });
+        { const sc = document.querySelector(".scroll"); if (sc) sc.scrollTo({ top:0, behavior:"smooth" }); }
       } catch (err) { toast("Gagal mengirim: " + (err.message || err)); }
       return;
     }
