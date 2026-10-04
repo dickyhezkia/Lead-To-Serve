@@ -251,6 +251,25 @@
   .jd-body > .jd-row:first-child { border-top: none; }
   .jd-row .avatar, .jd-pass .avatar { width: 32px; height: 32px; font-size: 11.5px; border-radius: 50%; background: color-mix(in srgb, var(--jc) 14%, var(--surface)); color: var(--jc); border-color: color-mix(in srgb, var(--jc) 25%, transparent); }
   .jd-pass .avatar { width: 28px; height: 28px; font-size: 10.5px; }
+  .pd-act { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; margin-bottom: 4px; }
+  .pd-act-b { display: grid; grid-template-columns: auto 1fr auto; grid-template-rows: auto auto; column-gap: 8px; align-items: center; text-align: left; padding: 10px 12px; border-radius: var(--r-md); border: 1px solid color-mix(in srgb, var(--jc) 35%, var(--line)); background: color-mix(in srgb, var(--jc) 10%, var(--surface)); color: var(--ink); font-family: var(--font-body); cursor: pointer; }
+  .pd-act-b > span { grid-row: span 2; font-size: 20px; }
+  .pd-act-b b { font-size: 13px; }
+  .pd-act-b small { grid-column: 2; font-size: 11.5px; font-weight: 700; color: var(--warn); }
+  .pd-act-b i { grid-row: 1 / span 2; grid-column: 3; font-style: normal; color: var(--jc); font-weight: 800; }
+  .pf { padding: 4px 12px 4px 16px; }
+  .pf-step { position: relative; width: 100%; display: flex; align-items: center; gap: 10px; padding: 10px 0; border: none; background: none; text-align: left; color: var(--ink); font-family: var(--font-body); cursor: pointer; }
+  .pf-step + .pf-step { border-top: 1px dashed var(--line-strong); }
+  .pf-ic { flex: none; width: 34px; height: 34px; border-radius: 11px; display: grid; place-items: center; font-size: 17px; background: color-mix(in srgb, var(--jc) 15%, var(--surface)); }
+  .pf-tx { flex: 1; min-width: 0; }
+  .pf-tx b { display: block; font-size: 13px; margin-bottom: 5px; }
+  .pf-bar { display: block; height: 6px; border-radius: 999px; background: var(--surface-2); overflow: hidden; }
+  .pf-bar i { display: block; height: 100%; border-radius: inherit; background: var(--jc); }
+  .pf-n { flex: none; min-width: 44px; text-align: right; line-height: 1.1; }
+  .pf-n b { display: block; font-family: var(--font-display); font-size: 17px; color: var(--jc); }
+  .pf-n small { font-size: 10.5px; color: var(--ink-faint); font-weight: 700; }
+  .rs-search { display: flex; align-items: center; gap: 8px; padding: 0 12px; margin-bottom: 8px; border: 1px solid var(--line-strong); border-radius: 12px; background: var(--surface); color: var(--ink-faint); }
+  .rs-search input { flex: 1; min-width: 0; border: none; outline: none; background: none; padding: 11px 0; font-family: var(--font-body); font-size: 14px; color: var(--ink); }
   .rs-filters { display: flex; gap: 6px; overflow-x: auto; margin: 0 -2px 14px; padding: 2px 2px 6px; scrollbar-width: none; }
   .rs-filters::-webkit-scrollbar { display: none; }
   .rs-filters .btn { flex: none; border-radius: 999px; }
@@ -320,7 +339,7 @@
   .jd-chips span { font-size: 12px; font-weight: 600; padding: 5px 10px; border-radius: 999px; background: var(--surface-2); color: var(--ink-soft); border: 1px solid var(--line); }
   .jd-empty { margin: 12px 0 0; font-size: 12px; color: var(--ink-faint); }
   .jd-note { margin: 4px 4px 12px; font-size: 11.5px; line-height: 1.5; color: var(--ink-faint); }
-  .tab.jtab .ico { font-size: 21px; line-height: 1; width: 48px; height: 34px; color: var(--ink-faint); }
+  .tab.jtab .ico { font-size: 20px; line-height: 1; width: 42px; height: 34px; color: var(--ink-faint); }
   .tab.jtab .lbl { font-size: 10.5px; }
   .tab.jtab[aria-current="page"] { color: var(--jc); }
   .tab.jtab[aria-current="page"] .ico { background: var(--jc); color: #fff; }
@@ -607,7 +626,7 @@
     feedback: { h:"Feedback", back:true },
     rs3feedback: { h:"Feedback", back:true }, fbrs1: { h:"Feedback", back:true }, fbrs2: { h:"Feedback", back:true },
     fblts1: { h:"Feedback", back:true }, fblts2: { h:"Feedback", back:true },
-    results: { h:"Hasil Peserta", back:true },
+    results: { h:"Dashboard Peserta", tab:"results" },
     resultdetail: { h:"Hasil Peserta", back:true },
     serveview: { h:"LTS 1 Road Map", back:true },
     hasilview: { h:"Hasil Asesmen Lengkap", back:true },
@@ -626,9 +645,14 @@
     // 2026-10-04: Admin tak punya beranda Serve Road Map lagi — "home" (mis.
     // dari goBack/simpan) & "dashboard" tanpa pilihan tab → dashboard journey.
     if (FB_PAGE[page]) { state.fbKey = FB_PAGE[page]; page = "feedback"; }
+    // 2026-10-04: tab "Peserta" (halaman results) = dashboard lintas kelas;
+    // landing Admin: kelas yg py permintaan Menunggu, kalau tak ada → Peserta.
     if (state.persona === "ADMIN" && (page === "home" || page === "dashboard")) {
-      page = "dashboard";
-      if (!state.dashKey) state.dashKey = adminLandingKey();
+      if (!state.dashKey) {
+        const k = adminLandingKey();
+        state.dashKey = k || DASH_JOURNEYS[0].key;
+        page = k ? "dashboard" : "results";
+      } else page = "dashboard";
     }
     const prev = state.page;
     if (!opts.replace && prev !== page && !NOCHROME.includes(prev) && !NOCHROME.includes(page)) state.stack.push(prev);
@@ -655,7 +679,8 @@
       <span class="ib-main"><span class="ib-name">${esc((state.myProfile || {}).name || "")}</span>
       <span class="identity-badge">${state.persona === "ADMIN" ? "Admin" : "Peserta"}</span></span>`;
     if (isAdm) {
-      el("tabbar").innerHTML = DASH_JOURNEYS.map(c => `<button class="tab jtab" style="--jc:${c.color};" data-dashtab="${c.key}" ${state.page === "dashboard" && dashCfg().key === c.key ? 'aria-current="page"' : ""} aria-label="${esc(c.title)}">
+      el("tabbar").innerHTML = `<button class="tab jtab" style="--jc:var(--accent);" data-goto="results" data-tabnav="1" ${state.page === "results" ? 'aria-current="page"' : ""} aria-label="Dashboard Peserta">
+        <span class="ico">📊</span><span class="lbl">Peserta</span></button>` + DASH_JOURNEYS.map(c => `<button class="tab jtab" style="--jc:${c.color};" data-dashtab="${c.key}" ${state.page === "dashboard" && dashCfg().key === c.key ? 'aria-current="page"' : ""} aria-label="${esc(c.title)}">
         <span class="ico">${c.icon}</span><span class="lbl">${c.tab}</span></button>`).join("");
       return;
     }
@@ -1261,7 +1286,7 @@
   // Halaman awal Admin: journey pertama yg punya permintaan Menunggu, kalau tak ada → RS1.
   function adminLandingKey() {
     const j = DASH_JOURNEYS.find(c => c.stateKey && (state[c.stateKey] || []).some(r => r.status === "pending"));
-    return j ? j.key : DASH_JOURNEYS[0].key;
+    return j ? j.key : null;
   }
   function dashSecHTML(id, title, count, defOpen, body, tone, icon) {
     state.dashOpen = state.dashOpen || {};
@@ -1335,7 +1360,6 @@
         <div class="jd-hero-nums">${nums.map(([n, l, c]) => `<span class="${c}"><b>${n}</b>${l}</span>`).join("")}</div>
         <div class="jd-prog" role="img" aria-label="${done.length} dari ${people.length} akun selesai kelas"><i style="width:${pctDone}%"></i></div>
         <div class="jd-prog-l">${done.length} dari ${people.length} akun sudah menyelesaikan kelas ini · ${pctDone}%</div>
-        ${cfg.stateKey ? `<button type="button" class="jd-hero-btn" data-goto="results">📊 Lihat Semua Hasil Peserta <span aria-hidden="true">→</span></button>` : ""}
       </div>
       <div style="--jc:${cfg.color};">${secs}</div>
     `;
@@ -1405,6 +1429,42 @@
       ${topHd.map(([area, count]) => bar(area, count, 0, maxHd, "var(--warn)")).join("")}` : ""}
     </div>`;
   }
+  // 2026-10-04 (user: kartu "lihat semua hasil peserta" dikeluarkan dari
+  // kelas jadi dashboard sendiri → tab ke-6 "Peserta" paling kiri): hero +
+  // alur RS1→LTS2 (dari profiles.classes) + "Perlu tindakan" (permintaan
+  // Menunggu semua kelas) + ringkasan analitik + daftar A-Z dgn cari & filter.
+  const rsDomLetter = r => r.disc ? DISC_LETTERS.reduce((a, b) => (r.disc.graph3[b] > r.disc.graph3[a] ? b : a), DISC_LETTERS[0]) : null;
+  function resultsListHTML() {
+    const rows = state.participantResults || [];
+    const filter = state.resultsFilter || "all";
+    const q = String(state.resultsQuery || "").trim().toLowerCase();
+    const filtered = rows.filter(r => {
+      if (q && !String(r.name || "").toLowerCase().includes(q)) return false;
+      if (filter === "all") return true;
+      if (["D", "I", "S", "C"].includes(filter)) return rsDomLetter(r) === filter;
+      if (filter === "rs3pass") return r.rs3 && r.rs3.passed;
+      if (filter === "rs3fail") return r.rs3 && !r.rs3.passed;
+      if (filter === "lts2pass") return r.lts2 && r.lts2.passed;
+      if (filter === "lts2fail") return r.lts2 && !r.lts2.passed;
+      return true;
+    });
+    if (!filtered.length) return `<div class="empty">Tidak ada peserta yang cocok${q ? ` dengan "${esc(state.resultsQuery)}"` : " dengan filter ini"}.</div>`;
+    let lastL = "";
+    return `<div class="jd-card rs-list">` + filtered.slice().sort((a, b) => String(a.name || "").localeCompare(String(b.name || ""), "id", { sensitivity:"base" })).map(r => {
+      const dl = rsDomLetter(r);
+      const L = (String(r.name || "?").trim().charAt(0) || "?").toUpperCase();
+      const head = L !== lastL ? `<div class="rs-letter">${esc(L)}</div>` : "";
+      lastL = L;
+      const tags = [dl ? [`DISC ${dl}`, "disc"] : null, r.gifts ? ["Karunia", "ok"] : null, r.ssd ? ["SSD", "ok"] : null, r.roadmap ? ["S-E-R-V-E", "ok"] : null,
+        r.rs3 ? [`RS3 ${r.rs3.passed ? "Lulus" : "Belum"}`, r.rs3.passed ? "pass" : "fail"] : null,
+        r.lts2 ? [`LTS2 ${r.lts2.passed ? "Lulus" : "Belum"}`, r.lts2.passed ? "pass" : "fail"] : null].filter(Boolean);
+      return `${head}<button type="button" class="rs-row" data-viewresult="${esc(r.profileId)}">
+        <span class="avatar">${esc(initials(r.name))}</span>
+        <span class="rs-main"><b>${esc(r.name)}</b><span class="rs-tags">${tags.length ? tags.map(([t, c]) => `<i class="rs-tag rs-tag--${c}">${esc(t)}</i>`).join("") : `<i class="rs-tag">Belum ada hasil</i>`}</span></span>
+        <svg class="rs-chev" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+      </button>`;
+    }).join("") + `</div>`;
+  }
   RENDER.results = async function () {
     if (state.participantResults === null) {
       el("resultsBody").innerHTML = `<div class="card pad" style="text-align:center;padding:30px;"><span class="muted">Memuat data peserta…</span></div>`;
@@ -1412,43 +1472,45 @@
       catch (err) { el("resultsBody").innerHTML = `<div class="empty">Gagal memuat: ${esc(err.message || err)}</div>`; return; }
     }
     const rows = state.participantResults || [];
-    const domLetter = r => r.disc ? DISC_LETTERS.reduce((a, b) => (r.disc.graph3[b] > r.disc.graph3[a] ? b : a), DISC_LETTERS[0]) : null;
+    const people = state.classProgress || [];
     const filter = state.resultsFilter || "all";
-    const filtered = rows.filter(r => {
-      if (filter === "all") return true;
-      if (["D", "I", "S", "C"].includes(filter)) return domLetter(r) === filter;
-      if (filter === "rs3pass") return r.rs3 && r.rs3.passed;
-      if (filter === "rs3fail") return r.rs3 && !r.rs3.passed;
-      if (filter === "lts2pass") return r.lts2 && r.lts2.passed;
-      if (filter === "lts2fail") return r.lts2 && !r.lts2.passed;
-      return true;
-    });
+    const allDone = people.filter(p => DASH_JOURNEYS.every(c => p.classes[c.classIdx])).length;
+    const pend = DASH_JOURNEYS.filter(c => c.stateKey).map(c => ({ c, n: (state[c.stateKey] || []).filter(r => r.status === "pending").length })).filter(x => x.n);
+    const pendTotal = pend.reduce((a, x) => a + x.n, 0);
+    const steps = DASH_JOURNEYS.map(c => {
+      const n = people.filter(p => p.classes[c.classIdx]).length;
+      const pct = people.length ? Math.round(n / people.length * 100) : 0;
+      return `<button type="button" class="pf-step" style="--jc:${c.color};" data-dashtab="${c.key}">
+        <span class="pf-ic">${c.icon}</span>
+        <span class="pf-tx"><b>${esc(c.title)}</b><span class="pf-bar"><i style="width:${pct}%"></i></span></span>
+        <span class="pf-n"><b>${n}</b><small>${pct}%</small></span>
+      </button>`;
+    }).join("");
     const chip = (key, label) => `<button type="button" class="btn btn--sm ${filter === key ? "btn--primary" : "btn--ghost"}" data-resultsfilter="${key}">${esc(label)}</button>`;
     el("resultsBody").innerHTML = `
-      ${resultsAnalyticsHTML(rows)}
-      <div class="divider-note">Hasil test &amp; asesmen semua peserta Discipleship Journey yang aksesnya sudah disetujui (${rows.length} orang).</div>
+      <div class="jd-hero pd-hero" style="--jc:#3E4A5C;">
+        <svg class="jd-hero-deco" viewBox="0 0 120 120" aria-hidden="true"><circle cx="100" cy="18" r="46" fill="#fff" opacity=".08"/><circle cx="18" cy="112" r="34" fill="#fff" opacity=".06"/><path d="M8 92 C 34 70, 52 98, 78 72 S 112 58, 118 34" fill="none" stroke="#fff" stroke-width="1.6" stroke-dasharray="3 5" opacity=".35"/></svg>
+        <div class="jd-hero-top"><span class="jd-hero-ic">📊</span><div><small>Discipleship Journey</small><b>Dashboard Peserta</b></div></div>
+        <p class="jd-hero-sub">Gambaran seluruh perjalanan pemuridan — RS1 sampai LTS2.</p>
+        <div class="jd-hero-nums">
+          <span><b>${people.length}</b>total akun</span>
+          <span class="${pendTotal ? "hot" : ""}"><b>${pendTotal}</b>menunggu</span>
+          <span><b>${allDone}</b>lulus semua</span>
+        </div>
+      </div>
+      ${pend.length ? `<div class="pj-sec"><span>Perlu tindakan</span></div>
+        <div class="pd-act">${pend.map(({ c, n }) => `<button type="button" class="pd-act-b" style="--jc:${c.color};" data-dashtab="${c.key}"><span>${c.icon}</span><b>${esc(c.tab)}</b><small>${n} menunggu</small><i aria-hidden="true">→</i></button>`).join("")}</div>` : ""}
+      <div class="pj-sec"><span>Alur perjalanan</span><small>ketuk untuk buka kelas</small></div>
+      <div class="jd-card pf">${steps}</div>
+      <div class="pj-sec"><span>Ringkasan asesmen</span></div>
+      ${resultsAnalyticsHTML(rows) || `<p class="jd-empty" style="margin:0 2px 12px;">Belum ada data asesmen.</p>`}
+      <div class="pj-sec"><span>Semua peserta</span><small>${rows.length} orang · A–Z</small></div>
+      <div class="rs-search"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input type="search" id="rsSearch" placeholder="Cari nama peserta…" value="${esc(state.resultsQuery || "")}" autocomplete="off"></div>
       <div class="rs-filters">
         ${chip("all", "Semua")}${chip("D", "D tinggi")}${chip("I", "I tinggi")}${chip("S", "S tinggi")}${chip("C", "C tinggi")}${chip("rs3pass", "RS3 Lulus")}${chip("rs3fail", "RS3 Belum")}${chip("lts2pass", "LTS2 Lulus")}${chip("lts2fail", "LTS2 Belum")}
       </div>
-      ${filtered.length ? (() => {
-        // 2026-10-04 (user: "buat juga setiap nama menjadi urutan alphabet"):
-        // urut abjad + pembatas huruf awal (A, B, C…), tag jadi chip berwarna.
-        let lastL = "";
-        return `<div class="jd-card rs-list">` + filtered.slice().sort((a, b) => String(a.name || "").localeCompare(String(b.name || ""), "id")).map(r => {
-          const dl = domLetter(r);
-          const L = (String(r.name || "?").trim().charAt(0) || "?").toUpperCase();
-          const head = L !== lastL ? `<div class="rs-letter">${esc(L)}</div>` : "";
-          lastL = L;
-          const tags = [dl ? [`DISC ${dl}`, "disc"] : null, r.gifts ? ["Karunia", "ok"] : null, r.ssd ? ["SSD", "ok"] : null, r.roadmap ? ["S-E-R-V-E", "ok"] : null,
-            r.rs3 ? [`RS3 ${r.rs3.passed ? "Lulus" : "Belum"}`, r.rs3.passed ? "pass" : "fail"] : null,
-            r.lts2 ? [`LTS2 ${r.lts2.passed ? "Lulus" : "Belum"}`, r.lts2.passed ? "pass" : "fail"] : null].filter(Boolean);
-          return `${head}<button type="button" class="rs-row" data-viewresult="${esc(r.profileId)}">
-            <span class="avatar">${esc(initials(r.name))}</span>
-            <span class="rs-main"><b>${esc(r.name)}</b><span class="rs-tags">${tags.length ? tags.map(([t, c]) => `<i class="rs-tag rs-tag--${c}">${esc(t)}</i>`).join("") : `<i class="rs-tag">Belum ada hasil</i>`}</span></span>
-            <svg class="rs-chev" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
-          </button>`;
-        }).join("") + `</div>`;
-      })() : `<div class="empty">Tidak ada peserta yang cocok dengan filter ini.</div>`}
+      <div id="rsList">${resultsListHTML()}</div>
+      <p class="jd-note">Daftar berisi peserta yang aksesnya sudah disetujui di kelas mana pun.</p>
     `;
   };
   RENDER.resultdetail = function () {
@@ -2655,7 +2717,12 @@
     }
     if (T.closest("#gearBtn")) { show("profile"); return; }
     const resFilter = T.closest("[data-resultsfilter]");
-    if (resFilter) { state.resultsFilter = resFilter.dataset.resultsfilter; RENDER.results(); return; }
+    if (resFilter) {
+      state.resultsFilter = resFilter.dataset.resultsfilter;
+      document.querySelectorAll("[data-resultsfilter]").forEach(b => { const on = b.dataset.resultsfilter === state.resultsFilter; b.classList.toggle("btn--primary", on); b.classList.toggle("btn--ghost", !on); });
+      const l = el("rsList"); if (l) l.innerHTML = resultsListHTML();
+      return;
+    }
     const viewRes = T.closest("[data-viewresult]");
     if (viewRes) { state.viewProfileId = viewRes.dataset.viewresult; show("resultdetail"); return; }
 
@@ -2748,6 +2815,7 @@
   document.addEventListener("input", e => {
     const rm = e.target.closest("[data-rmfield]");
     if (rm) state.draft.roadmapData[rm.dataset.rmfield] = rm.value;
+    if (e.target.id === "rsSearch") { state.resultsQuery = e.target.value; const l = el("rsList"); if (l) l.innerHTML = resultsListHTML(); }
   });
 
   boot();
