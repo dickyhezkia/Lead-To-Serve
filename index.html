@@ -568,20 +568,24 @@
     document.getElementById("app").innerHTML = '<div class="empty">Gagal memuat. Cek config.js / koneksi internet.</div>';
     return;
   }
-  const sb = window.supabase.createClient(window.LTS_CONFIG.url, window.LTS_CONFIG.anonKey);
+  // 2026-10-04 (bug user: setelah DJ dibuka di dalam JB3, "kembali ke jb3 harus login
+  // ulang"): DJ memakai sesi YANG SAMA dgn JB3 (handoff #at/#rt). Sesi lama yg tersimpan
+  // di sini (refresh token yg sudah diputar JB3) ikut dipulihkan & di-refresh saat
+  // klien dibuat → Supabase menganggapnya pemakaian ulang token → SELURUH sesi akun
+  // dicabut, JB3 ikut logout. Fix: (1) ada handoff → buang sesi tersimpan dulu;
+  // (2) di dalam JB3 (iframe) sesi cuma di memori & TIDAK auto-refresh — JB3 satu-
+  // satunya yg memperbarui token, lalu mengirim token barunya ke sini (jb3-session).
+  const DJ_EMBED = window.parent !== window;
+  if (/^#at=/.test(location.hash)) { try { Object.keys(localStorage).filter(k => k.startsWith("sb-")).forEach(k => localStorage.removeItem(k)); } catch (e) {} }
+  const sb = window.supabase.createClient(window.LTS_CONFIG.url, window.LTS_CONFIG.anonKey,
+    DJ_EMBED ? { auth:{ persistSession:false, autoRefreshToken:false, detectSessionInUrl:false } } : undefined);
   const DB = window.makeDB(sb);
-  // 2026-10-04: dibuka di dalam lapisan JB3 HOME Tracker (iframe) → token login yg
-  // diperbarui di sini dikirim balik ke JB3 (sesi yg sama via handoff), spy refresh
-  // token lama tak dipakai 2x. Hanya ke induk yg origin-nya JB3.
-  (function () {
-    if (window.parent === window) return;
-    const anc = (location.ancestorOrigins && location.ancestorOrigins[0]) || (document.referrer ? new URL(document.referrer).origin : "");
-    if (!/^https:\/\/jb3-home-tracker[\w.-]*\.dickyhezkia\.workers\.dev$/.test(anc)) return;
-    sb.auth.onAuthStateChange((evt, session) => {
-      if ((evt === "TOKEN_REFRESHED" || evt === "SIGNED_IN") && session)
-        window.parent.postMessage({ type:"dj-session", at:session.access_token, rt:session.refresh_token }, anc);
-    });
-  })();
+  // 2026-10-04: di dalam lapisan JB3 HOME Tracker → terima token baru dari JB3
+  // (JB3 yg memperbarui token; DJ_EMBED mematikan auto-refresh di sini).
+  if (DJ_EMBED) window.addEventListener("message", e => {
+    if (!/^https:\/\/jb3-home-tracker[\w.-]*\.dickyhezkia\.workers\.dev$/.test(e.origin) || !e.data || e.data.type !== "jb3-session") return;
+    if (e.data.at && e.data.rt) sb.auth.setSession({ access_token:e.data.at, refresh_token:e.data.rt }).catch(() => {});
+  });
 
   // 2026-09-22 (kerangka S-E-R-V-E, "isian toolnya nanti saja"): state
   // disederhanakan besar2an — cuma yg dibutuhkan utk login + navigasi.
