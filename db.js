@@ -420,6 +420,22 @@ window.makeDB = function makeDB(sb) {
       return (data || []).filter(r => String(r.role || "").toLowerCase() !== "barista")
         .map(r => ({ id:r.id, name:r.name || "?", phone:r.phone || "", classes:Array.isArray(r.classes) ? r.classes : [] }));
     },
+    // 2026-10-04: nilai post-test terbaik per peserta (RS3/LTS2) utk daftar
+    // "Sudah selesai kelas" di dashboard Admin → { rs3:{pid:row}, lts2:{pid:row} }.
+    async listPostTestBest() {
+      const pick = rows => {
+        const m = {};
+        (rows || []).forEach(r => { const o = m[r.profile_id]; if (!o || (r.score_pct || 0) > (o.score_pct || 0)) m[r.profile_id] = r; });
+        return m;
+      };
+      const [a, b] = await Promise.all([
+        sb.from("rs3_test_results").select("profile_id,score_pct,band,passed,correct,total,created_at"),
+        sb.from("lts2_test_results").select("profile_id,score_pct,band,passed,correct,total,created_at"),
+      ]);
+      if (a.error) throw a.error;
+      if (b.error) throw b.error;
+      return { rs3: pick(a.data), lts2: pick(b.data) };
+    },
     async markClassComplete(classIdx) {
       const s = await this.session();
       if (!s) throw new Error("Belum login");

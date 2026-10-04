@@ -253,6 +253,22 @@
   .jd-no { color: var(--bad); border-color: var(--bad); }
   .jd-del { flex: none; background: none; border: none; color: var(--ink-faint); font-family: var(--font-body); font-size: 11.5px; font-weight: 700; cursor: pointer; padding: 6px 4px; }
   .jd-del:hover { color: var(--bad); }
+  .jd-bandsum { display: flex; flex-wrap: wrap; gap: 6px; padding: 12px 0 8px; }
+  .jd-pass { list-style: none; margin: 0; padding: 0; counter-reset: jdp; }
+  .jd-pass li { counter-increment: jdp; display: flex; align-items: center; gap: 8px; padding: 8px 0; border-top: 1px solid var(--line); font-size: 13px; }
+  .jd-pass li::before { content: counter(jdp); flex: none; width: 22px; font-size: 11px; font-weight: 700; color: var(--ink-faint); text-align: right; }
+  .jd-pass-nm { flex: 1; min-width: 0; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .jd-pass-sc { flex: none; font-size: 11.5px; color: var(--ink-faint); font-variant-numeric: tabular-nums; }
+  .jd-band { flex: none; display: inline-block; min-width: 74px; text-align: center; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 999px; }
+  .jd-bandsum .jd-band { min-width: 0; }
+  .jd-band b { margin-left: 2px; }
+  .jd-band--ex { background: #E3F1E0; color: #2F6B2A; }
+  .jd-band--bt { background: #E2ECF7; color: #2C5A8F; }
+  .jd-band--gd { background: #FBF0D9; color: #8A6216; }
+  .jd-band--up { background: #F8E1DE; color: #9B3A2E; }
+  .jd-band--mn { background: var(--surface-2); color: var(--ink-faint); border: 1px solid var(--line); }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .jd-band--ex { background:#24402A; color:#A8D9A0; } :root:not([data-theme="light"]) .jd-band--bt { background:#22344A; color:#A9C7EC; } :root:not([data-theme="light"]) .jd-band--gd { background:#43361A; color:#E8C77E; } :root:not([data-theme="light"]) .jd-band--up { background:#47241F; color:#EDA89D; } }
+  :root[data-theme="dark"] .jd-band--ex { background:#24402A; color:#A8D9A0; } :root[data-theme="dark"] .jd-band--bt { background:#22344A; color:#A9C7EC; } :root[data-theme="dark"] .jd-band--gd { background:#43361A; color:#E8C77E; } :root[data-theme="dark"] .jd-band--up { background:#47241F; color:#EDA89D; }
   .jd-chips { display: flex; flex-wrap: wrap; gap: 6px; padding-top: 12px; }
   .jd-chips span { font-size: 12px; font-weight: 600; padding: 5px 10px; border-radius: 999px; background: var(--surface-2); color: var(--ink-soft); border: 1px solid var(--line); }
   .jd-empty { margin: 12px 0 0; font-size: 12px; color: var(--ink-faint); }
@@ -1222,6 +1238,22 @@
     const row = (name, extra, actions) => `<div class="jd-row"><span class="avatar">${esc(initials(name))}</span>
         <span class="jd-nm"><b>${esc(name || "?")}</b>${extra ? `<small>${esc(extra)}</small>` : ""}</span>${actions || ""}</div>`;
     const chips = list => list.length ? `<div class="jd-chips">${list.slice().sort(byName).map(p => `<span>${esc(p.name)}</span>`).join("")}</div>` : `<p class="jd-empty">Belum ada.</p>`;
+    // 2026-10-04 ("pada kelulusan post test, susunan dirapihkan dan tambahkan
+    // hasilnya disamping nama"): RS3/LTS2 → daftar bernomor urut abjad, tiap
+    // nama + badge predikat (nilai terbaik) + ringkasan jumlah per predikat.
+    // Yg ditandai selesai di JB3 tanpa post-test → badge "Manual".
+    const BAND_TONE = { Excellent:"ex", Better:"bt", Good:"gd", Underperform:"up" };
+    const passList = (list, best) => {
+      if (!list.length) return `<p class="jd-empty">Belum ada.</p>`;
+      const rows = list.slice().sort(byName).map(p => ({ p, r: best[p.id] }));
+      const count = {};
+      rows.forEach(({ r }) => { const k = r ? r.band : "Manual"; count[k] = (count[k] || 0) + 1; });
+      const order = ["Excellent", "Better", "Good", "Underperform", "Manual"].filter(k => count[k]);
+      return `<div class="jd-bandsum">${order.map(k => `<span class="jd-band jd-band--${BAND_TONE[k] || "mn"}">${esc(k)} <b>${count[k]}</b></span>`).join("")}</div>
+        <ol class="jd-pass">${rows.map(({ p, r }) => `<li><span class="jd-pass-nm">${esc(p.name)}</span>${r
+          ? `<span class="jd-pass-sc">${r.score_pct}%</span><span class="jd-band jd-band--${BAND_TONE[r.band] || "mn"}">${esc(r.band)}</span>`
+          : `<span class="jd-band jd-band--mn" title="Ditandai selesai di JB3 tanpa post-test">Manual</span>`}</li>`).join("")}</ol>`;
+    };
     let nums, secs;
     if (cfg.stateKey) {
       const all = state[cfg.stateKey] || [];
@@ -1238,7 +1270,7 @@
         + dashSecHTML(cfg.key + ":approved", "Akses disetujui", approved.length, false,
           approved.length ? approved.map(r => row(nm(r), "", `<button type="button" class="jd-del" data-${cfg.attr}delreq="${esc(r.id)}" title="Hapus">Hapus</button>`)).join("") : `<p class="jd-empty">Belum ada.</p>`, "var(--good)")
         + (rejected.length ? dashSecHTML(cfg.key + ":rejected", "Ditolak", rejected.length, false, rejected.map(r => row(nm(r))).join(""), "var(--bad)") : "")
-        + dashSecHTML(cfg.key + ":done", "Sudah selesai kelas", done.length, false, chips(done))
+        + dashSecHTML(cfg.key + ":done", "Sudah selesai kelas", done.length, false, (state.postTestBest || {})[cfg.key] ? passList(done, state.postTestBest[cfg.key]) : chips(done))
         + fbAdminHTML(cfg.key);
     } else {
       nums = [[done.length, "sudah selesai", ""], [notYet.length, "belum", ""], [pctDone + "%", "tingkat selesai", ""]];
@@ -2175,6 +2207,7 @@
     state.persona = state.myProfile.role === "admin" ? "ADMIN" : "PESERTA";
     if (state.persona === "ADMIN") state.accessRequests = await DB.listAllAccessRequests();
     if (state.persona === "ADMIN") { try { state.classProgress = await DB.listClassProgress(); } catch (e) { console.error(e); state.classProgress = []; } }
+    if (state.persona === "ADMIN") { try { state.postTestBest = await DB.listPostTestBest(); } catch (e) { console.error(e); state.postTestBest = {}; } }
     if (state.persona === "ADMIN") { try { state.rs3Feedback = await DB.listRs3Feedback(); } catch (e) { console.error(e); state.rs3Feedback = []; } }
     if (state.persona === "ADMIN") { try { state.rs3FbBatches = await DB.listRs3FbBatches(); } catch (e) { console.error(e); state.rs3FbBatches = []; } }
     else state.accessStatus = await DB.myAccessStatus();
