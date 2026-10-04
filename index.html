@@ -110,7 +110,7 @@
 
   #app { flex: 1; min-height: 0; display: flex; flex-direction: column; }
   .scroll { flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; }
-  .scroll.has-tabbar { padding-bottom: calc(82px + env(safe-area-inset-bottom, 0px)); }
+  .scroll.has-tabbar { padding-bottom: calc(92px + env(safe-area-inset-bottom, 0px)); }
   .page { padding: 18px 18px 28px; display: none; }
   .page.active { display: block; animation: fade .28s ease; }
   @keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
@@ -273,7 +273,8 @@
   .jd-chips span { font-size: 12px; font-weight: 600; padding: 5px 10px; border-radius: 999px; background: var(--surface-2); color: var(--ink-soft); border: 1px solid var(--line); }
   .jd-empty { margin: 12px 0 0; font-size: 12px; color: var(--ink-faint); }
   .jd-note { margin: 4px 4px 12px; font-size: 11.5px; line-height: 1.5; color: var(--ink-faint); }
-  .tab.jtab .ico { font-size: 10px; font-weight: 800; color: var(--ink-faint); }
+  .tab.jtab .ico { font-size: 21px; line-height: 1; width: 48px; height: 34px; color: var(--ink-faint); }
+  .tab.jtab .lbl { font-size: 10.5px; }
   .tab.jtab[aria-current="page"] { color: var(--jc); }
   .tab.jtab[aria-current="page"] .ico { background: var(--jc); color: #fff; }
   :root[data-theme="dark"] .tab.jtab[aria-current="page"] { color: var(--ink); }
@@ -1237,7 +1238,6 @@
     const byName = (a, b) => String(a.name || (a.profile || {}).name || "").localeCompare(String(b.name || (b.profile || {}).name || ""));
     const row = (name, extra, actions) => `<div class="jd-row"><span class="avatar">${esc(initials(name))}</span>
         <span class="jd-nm"><b>${esc(name || "?")}</b>${extra ? `<small>${esc(extra)}</small>` : ""}</span>${actions || ""}</div>`;
-    const chips = list => list.length ? `<div class="jd-chips">${list.slice().sort(byName).map(p => `<span>${esc(p.name)}</span>`).join("")}</div>` : `<p class="jd-empty">Belum ada.</p>`;
     // 2026-10-04 ("pada kelulusan post test, susunan dirapihkan dan tambahkan
     // hasilnya disamping nama"): RS3/LTS2 → daftar bernomor urut abjad, tiap
     // nama + badge predikat (nilai terbaik) + ringkasan jumlah per predikat.
@@ -1254,6 +1254,8 @@
           ? `<span class="jd-pass-sc">${r.score_pct}%</span><span class="jd-band jd-band--${BAND_TONE[r.band] || "mn"}">${esc(r.band)}</span>`
           : ""}</li>`).join("")}</ol>`;
     };
+    // 2026-10-04: semua kelas pakai daftar bernomor urut abjad (dulu "pil" acak).
+    const chips = list => passList(list, {});
     let nums, secs;
     if (cfg.stateKey) {
       const all = state[cfg.stateKey] || [];
@@ -1270,7 +1272,7 @@
         + dashSecHTML(cfg.key + ":approved", "Akses disetujui", approved.length, false,
           approved.length ? approved.map(r => row(nm(r), "", `<button type="button" class="jd-del" data-${cfg.attr}delreq="${esc(r.id)}" title="Hapus">Hapus</button>`)).join("") : `<p class="jd-empty">Belum ada.</p>`, "var(--good)")
         + (rejected.length ? dashSecHTML(cfg.key + ":rejected", "Ditolak", rejected.length, false, rejected.map(r => row(nm(r))).join(""), "var(--bad)") : "")
-        + dashSecHTML(cfg.key + ":done", "Sudah selesai kelas", done.length, false, (state.postTestBest || {})[cfg.key] ? passList(done, state.postTestBest[cfg.key]) : chips(done))
+        + dashSecHTML(cfg.key + ":done", "Sudah selesai kelas", done.length, false, passList(done, (state.postTestBest || {})[cfg.key] || {}))
         + fbAdminHTML(cfg.key);
     } else {
       nums = [[done.length, "sudah selesai", ""], [notYet.length, "belum", ""], [pctDone + "%", "tingkat selesai", ""]];
