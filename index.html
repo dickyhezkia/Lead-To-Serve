@@ -253,7 +253,7 @@
   .appbar__gear { flex: none; border: none; background: none; padding: 6px; margin: -6px -2px -6px 0; color: var(--ink-soft); cursor: pointer; border-radius: 8px; display: inline-flex; }
   @media (prefers-reduced-motion: reduce) { .jd-hero-nums span.hot { animation: none; } .jd-chev { transition: none; } }
   /* 2026-10-04 — Feedback Rock Solid 3 (RENDER.rs3feedback) */
-  .fb-hero { position: relative; overflow: hidden; border-radius: var(--r-lg); padding: 20px 18px 18px; margin-bottom: 14px; color: #fff; background: linear-gradient(150deg, #4472A8 0%, #2F4F7A 60%, #4B3F72 120%); box-shadow: 0 12px 30px rgba(47,79,122,.35); }
+  .fb-hero { position: relative; overflow: hidden; border-radius: var(--r-lg); padding: 20px 18px 18px; margin-bottom: 14px; color: #fff; background: linear-gradient(150deg, var(--fc, #4472A8) 0%, color-mix(in srgb, var(--fc, #4472A8) 62%, #000) 100%); box-shadow: 0 12px 30px color-mix(in srgb, var(--fc, #4472A8) 35%, transparent); }
   .fb-hero-deco { position: absolute; right: 0; top: 0; width: 180px; height: 180px; pointer-events: none; }
   .fb-badge { position: relative; display: inline-block; font-size: 10.5px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; padding: 5px 10px; border-radius: 999px; background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.25); }
   .fb-hero h3 { position: relative; font-family: var(--font-display); font-size: 25px; font-weight: 600; margin: 12px 0 8px; }
@@ -276,7 +276,7 @@
   .fb-done { text-align: center; padding: 26px 18px; }
   .fb-done b { display: block; font-family: var(--font-display); font-size: 18px; margin: 6px 0 4px; }
   .fb-done .fb-quote { margin: 14px 0; }
-  .fb-mini { width: 100%; display: flex; align-items: center; gap: 12px; text-align: left; margin-bottom: 12px; padding: 14px; border: none; border-radius: var(--r-md); cursor: pointer; color: #fff; font-family: var(--font-body); background: linear-gradient(140deg, #4472A8, #2F4F7A); box-shadow: 0 8px 22px rgba(47,79,122,.3); }
+  .fb-mini { width: 100%; display: flex; align-items: center; gap: 12px; text-align: left; margin-bottom: 12px; padding: 14px; border: none; border-radius: var(--r-md); cursor: pointer; color: #fff; font-family: var(--font-body); background: linear-gradient(140deg, var(--fc, #4472A8), color-mix(in srgb, var(--fc, #4472A8) 62%, #000)); box-shadow: 0 8px 22px color-mix(in srgb, var(--fc, #4472A8) 30%, transparent); }
   .fb-mini-ic { flex: none; width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; font-size: 21px; background: rgba(255,255,255,.16); }
   .fb-mini b { display: block; font-family: var(--font-display); font-size: 14.5px; font-weight: 600; }
   .fb-mini small { display: block; font-size: 11.5px; opacity: .88; margin-top: 2px; }
@@ -418,9 +418,11 @@
           <section class="page" data-page="disc"><div id="discBody"></div></section>
           <section class="page" data-page="ssd"><div id="ssdBody"></div></section>
           <section class="page" data-page="gifts"><div id="giftsBody"></div></section>
+          <section class="page" data-page="rs1"><div id="rs1Body"></div></section>
+          <section class="page" data-page="rs2"><div id="rs2Body"></div></section>
           <section class="page" data-page="rs3"><div id="rs3Body"></div></section>
           <section class="page" data-page="lts2"><div id="lts2Body"></div></section>
-          <section class="page" data-page="rs3feedback"><div id="rs3feedbackBody"></div></section>
+          <section class="page" data-page="feedback"><div id="feedbackBody"></div></section>
           <section class="page" data-page="results"><div id="resultsBody"></div></section>
           <section class="page" data-page="resultdetail"><div id="resultdetailBody"></div></section>
           <section class="page" data-page="serveview"><div id="serveviewBody"></div></section>
@@ -494,7 +496,11 @@
   // "Dashboard" (dulu "Permintaan" — cuma daftar pending; SEKARANG ringkasan
   // menyeluruh + daftar pending yg perlu diputuskan, lihat RENDER.dashboard).
   const TABS = {
-    PESERTA: [{ p:"home", l:"Serve Road Map" }, { p:"profile", l:"Profil" }],
+    // 2026-10-04 (permintaan user, "perbaiki juga nav bar di setiap pengguna:
+    // RS1, RS2, RS3, LTS1, LTS2"): peserta kini 5 tab journey (ikon & warna
+    // sama dgn Admin, lihat DASH_JOURNEYS) → halaman rs1/rs2 (baru), rs3,
+    // home (= LTS1: Serve Road Map + DISC/SSD/Karunia), lts2. Profil ke ⚙.
+    PESERTA: [{ k:"rs1", p:"rs1" }, { k:"rs2", p:"rs2" }, { k:"rs3", p:"rs3" }, { k:"lts1", p:"home" }, { k:"lts2", p:"lts2" }],
     // 2026-10-04: Admin = 5 tab journey (lihat DASH_JOURNEYS), semuanya halaman
     // "dashboard" dgn state.dashKey berbeda; Profil pindah ke ikon ⚙ app bar.
     ADMIN: [],
@@ -511,13 +517,19 @@
     { key:"expansion", letter:"E", title:"Expansion", desc:"Rencana aksi 3-6 bulan", dot:"#93683F" },
   ];
   const META = {
-    home: { h:"Discipleship Journey", tab:"home" },
+    home: { h:"Lead To Serve 1", tab:"home" },
+    rs1: { h:"Rock Solid 1", tab:"rs1" },
+    rs2: { h:"Rock Solid 2", tab:"rs2" },
     disc: { h:"DISC", back:true },
     ssd: { h:"Skala Sikap Disfungsional", back:true },
     gifts: { h:"Karunia Rohani", back:true },
-    rs3: { h:"Rock Solid 3 — Post-Test", back:true },
-    lts2: { h:"Lead To Serve 2 — Post-Test", back:true },
-    rs3feedback: { h:"Feedback Rock Solid 3", back:true },
+    rs3: { h:"Rock Solid 3", tab:"rs3" },
+    lts2: { h:"Lead To Serve 2", tab:"lts2" },
+    // 2026-10-04: halaman feedback per kelas — alias link (#p=...) dipetakan
+    // show() ke halaman "feedback" + state.fbKey (lihat FB_CLASSES).
+    feedback: { h:"Feedback", back:true },
+    rs3feedback: { h:"Feedback", back:true }, fbrs1: { h:"Feedback", back:true }, fbrs2: { h:"Feedback", back:true },
+    fblts1: { h:"Feedback", back:true }, fblts2: { h:"Feedback", back:true },
     results: { h:"Hasil Peserta", back:true },
     resultdetail: { h:"Hasil Peserta", back:true },
     serveview: { h:"LTS 1 Road Map", back:true },
@@ -536,6 +548,7 @@
     opts = opts || {};
     // 2026-10-04: Admin tak punya beranda Serve Road Map lagi — "home" (mis.
     // dari goBack/simpan) & "dashboard" tanpa pilihan tab → dashboard journey.
+    if (FB_PAGE[page]) { state.fbKey = FB_PAGE[page]; page = "feedback"; }
     if (state.persona === "ADMIN" && (page === "home" || page === "dashboard")) {
       page = "dashboard";
       if (!state.dashKey) state.dashKey = adminLandingKey();
@@ -557,8 +570,8 @@
     if (!chromeOn) return;
     const meta = META[state.page] || {};
     const isAdm = state.persona === "ADMIN";
-    el("appbar").setAttribute("data-back", (meta.back || (isAdm && state.page === "profile")) ? "true" : "false");
-    el("gearBtn").hidden = !isAdm || state.page === "profile";
+    el("appbar").setAttribute("data-back", (meta.back || state.page === "profile") ? "true" : "false");
+    el("gearBtn").hidden = state.page === "profile";
     el("appbarTitle").textContent = meta.h || "Discipleship Journey";
     const idb = el("identityBar");
     idb.innerHTML = `<span class="ib-ava">${esc(initials(state.myProfile && state.myProfile.name))}</span>
@@ -569,10 +582,9 @@
         <span class="ico">${c.icon}</span><span class="lbl">${c.tab}</span></button>`).join("");
       return;
     }
-    const tabs = TABS[state.persona] || TABS.PESERTA;
-    el("tabbar").innerHTML = tabs.map(t => `<button class="tab" data-goto="${t.p}" ${meta.tab === t.p ? 'aria-current="page"' : ""}>
-      <span class="ico"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/></svg></span>
-      <span class="lbl">${t.l}</span></button>`).join("");
+    el("tabbar").innerHTML = TABS.PESERTA.map(t => { const c = DASH_JOURNEYS.find(x => x.key === t.k);
+      return `<button class="tab jtab" style="--jc:${c.color};" data-goto="${t.p}" data-tabnav="1" ${meta.tab === t.p ? 'aria-current="page"' : ""} aria-label="${esc(c.title)}">
+      <span class="ico">${c.icon}</span><span class="lbl">${c.tab}</span></button>`; }).join("");
   }
 
   /* ---------------- RENDER ---------------- */
@@ -747,98 +759,119 @@
   // akan di share untuk semua peserta yang juga berisi ucapan terima kasih
   // telah mengikuti Kelas Rock Solid 3 sampai lulus. Juga ucapan terima kasih
   // untuk memiliki hati yang TEACHABLE diakhiri #God has called us to go and
-  // make disciples" — dipilih: kartu di aplikasi + link yg bisa dibagikan via
-  // WhatsApp; rating materi/lama waktu/pengajar 1-5 bintang + isian materi
-  // paling berkesan & saran; ANONIM; + "feedback is breakfast for the
-  // champion"). Halaman "rs3feedback" bisa dibuka lewat link RS3FB_LINK
-  // (#p=rs3feedback — diingat lewat sessionStorage kalau harus login dulu,
-  // lihat claimHandoffSession()/boot()). Tabel rs3_feedback TANPA profile_id
-  // (supabase/v_rs3_feedback.sql); tanda "sudah kirim" cuma di perangkat
-  // (localStorage), bukan di server — supaya benar2 anonim.
-  const RS3FB_LINK = location.origin + "/#p=rs3feedback";
-  const RS3FB_Q = [
+  // make disciples" — kartu di aplikasi + link WhatsApp; rating materi/lama
+  // waktu/pengajar 1-5 bintang + materi paling berkesan & saran; ANONIM; +
+  // "feedback is breakfast for the champion"). Susulan hari yg sama:
+  // dikelompokkan per batch, lalu "buatkan feedback yang sama untuk RS1, RS2,
+  // LTS1, LTS2" + "yang bisa mengisi feedback adalah orang yang sudah
+  // disetujui post testnya" → FB_CLASSES (1 config per kelas, 1 halaman
+  // "feedback" + state.fbKey). Tabel tetap rs3_feedback/rs3_fb_batches (nama
+  // lama) + kolom class_key (supabase/v_class_feedback.sql). RS1/RS2 belum
+  // punya post-test → form TERKUNCI (RLS juga menolak) sampai dibuat.
+  // Link: #p=<page> (diingat lewat sessionStorage kalau harus login dulu).
+  // Tanda "sudah kirim" cuma di perangkat (localStorage) — supaya anonim.
+  const FB_CLASSES = {
+    rs1:  { title:"Rock Solid 1", badge:"🪨 Rock Solid 1", color:"#5F7F5A", until:"selesai", page:"fbrs1", sentKey:"dj_fb_sent_rs1",
+            eligible:() => false, lockText:"Feedback Rock Solid 1 akan dibuka bersamaan dengan post-test Rock Solid 1. Nantikan ya!" },
+    rs2:  { title:"Rock Solid 2", badge:"🌱 Rock Solid 2", color:"#B4822F", until:"selesai", page:"fbrs2", sentKey:"dj_fb_sent_rs2",
+            eligible:() => false, lockText:"Feedback Rock Solid 2 akan dibuka bersamaan dengan post-test Rock Solid 2. Nantikan ya!" },
+    rs3:  { title:"Rock Solid 3", badge:"📘 Rock Solid 3 · Firm Local Church", color:"#4472A8", until:"lulus", page:"rs3feedback", sentKey:"dj_rs3fb_sent",
+            eligible:() => state.rs3AccessStatus === "approved", lockGoto:"rs3", lockBtn:"Ke Post-Test Rock Solid 3",
+            lockText:"Form ini hanya untuk peserta yang aksesnya ke post-test Rock Solid 3 sudah disetujui Admin. Ajukan akses lewat kartu Rock Solid 3 di beranda." },
+    lts1: { title:"Lead To Serve 1", badge:"🧭 Lead To Serve 1 · Serve Road Map", color:"#4B3F72", until:"selesai", page:"fblts1", sentKey:"dj_fb_sent_lts1",
+            eligible:() => state.accessStatus === "approved", lockGoto:"home", lockBtn:"Ke Serve Road Map",
+            lockText:"Form ini hanya untuk peserta yang aksesnya ke Lead To Serve 1 (Serve Road Map) sudah disetujui Admin." },
+    lts2: { title:"Lead To Serve 2", badge:"🤝 Lead To Serve 2 · Servant Leadership", color:"#93683F", until:"lulus", page:"fblts2", sentKey:"dj_fb_sent_lts2",
+            eligible:() => state.lts2AccessStatus === "approved", lockGoto:"lts2", lockBtn:"Ke Post-Test Lead To Serve 2",
+            lockText:"Form ini hanya untuk peserta yang aksesnya ke post-test Lead To Serve 2 sudah disetujui Admin. Ajukan akses lewat kartu Lead To Serve 2 di beranda." },
+  };
+  const FB_PAGE = Object.fromEntries(Object.entries(FB_CLASSES).map(([k, c]) => [c.page, k]));
+  const fbLink = k => location.origin + "/#p=" + FB_CLASSES[k].page;
+  const FB_Q = [
     { k:"materi", l:"Materi secara keseluruhan" },
     { k:"durasi", l:"Lama waktu materi" },
     { k:"pengajar", l:"Penjelasan dari pengajar" },
   ];
-  const RS3FB_SENT_KEY = "dj_rs3fb_sent";
-  const rs3fbSent = () => { try { return !!localStorage.getItem(RS3FB_SENT_KEY); } catch (e) { return false; } };
-  function rs3FeedbackCardHTML() {
-    if (state.persona === "ADMIN" || !(state.rs3Result && state.rs3Result.passed)) return "";
-    const sent = rs3fbSent();
-    return `<button type="button" class="fb-mini" data-goto="rs3feedback">
+  const fbSent = k => { try { return !!localStorage.getItem(FB_CLASSES[k].sentKey); } catch (e) { return false; } };
+  // Kartu kecil di beranda peserta: muncul utk kelas yg sudah lulus/lengkap.
+  function fbHomeCardsHTML(only) {
+    if (state.persona === "ADMIN") return "";
+    const show = [];
+    if (state.rs3Result && state.rs3Result.passed) show.push("rs3");
+    if (state.accessStatus === "approved" && SERVE_SECTIONS.every(x => serveSectionFilled(x.key))) show.push("lts1");
+    if (state.lts2Result && state.lts2Result.passed) show.push("lts2");
+    if (only) show.splice(0, show.length, ...show.filter(k => k === only));
+    return show.map(k => { const c = FB_CLASSES[k], sent = fbSent(k); return `<button type="button" class="fb-mini" style="--fc:${c.color};" data-goto="${c.page}">
       <span class="fb-mini-ic">💌</span>
-      <span style="flex:1;min-width:0;"><b>Terima kasih sudah lulus Rock Solid 3!</b>
+      <span style="flex:1;min-width:0;"><b>Terima kasih sudah ${c.until === "lulus" ? "lulus" : "menyelesaikan"} ${esc(c.title)}!</b>
         <small>${sent ? "Feedback-mu sudah terkirim 🙏 Ketuk untuk membagikan link." : "Bantu kami lewat feedback singkat (anonim) →"}</small></span>
-    </button>`;
+    </button>`; }).join("");
   }
   const fbStarsHTML = (k, v) => `<div class="fb-stars" role="radiogroup" aria-label="${esc(k)}">${[1, 2, 3, 4, 5].map(n => `<button type="button" role="radio" aria-checked="${v === n}" aria-label="${n} bintang" data-fbstar="${k}:${n}" class="${v >= n ? "on" : ""}"><svg viewBox="0 0 24 24" width="28" height="28"><path d="M12 2.8l2.8 5.8 6.4.9-4.6 4.5 1.1 6.3L12 17.3l-5.7 3 1.1-6.3-4.6-4.5 6.4-.9z"/></svg></button>`).join("")}</div>`;
-  RENDER.rs3feedback = function () {
-    state.fbDraft = state.fbDraft || {};
+  RENDER.feedback = function () {
+    const k = FB_CLASSES[state.fbKey] ? state.fbKey : "rs3", c = FB_CLASSES[k];
+    if (state.fbDraftKey !== k) { state.fbDraft = {}; state.fbDraftKey = k; state.fbAgain = false; }
+    const titleEl = el("appbarTitle"); if (titleEl) titleEl.textContent = "Feedback " + c.title;
     const first = (((state.myProfile || {}).name) || "").split(" ")[0];
-    const sent = rs3fbSent();
-    const hero = `<div class="fb-hero">
+    const sent = fbSent(k);
+    const hero = `<div class="fb-hero" style="--fc:${c.color};">
       <svg class="fb-hero-deco" viewBox="0 0 140 140" aria-hidden="true"><circle cx="118" cy="22" r="54" fill="#fff" opacity=".08"/><circle cx="14" cy="128" r="40" fill="#fff" opacity=".06"/>${[[22, 30], [104, 92], [64, 16], [126, 64]].map(([x, y]) => `<path d="M${x} ${y - 5}l1.4 3.6 3.6 1.4-3.6 1.4L${x} ${y + 5}l-1.4-3.6-3.6-1.4 3.6-1.4z" fill="#FFE3A3" opacity=".75"/>`).join("")}</svg>
-      <span class="fb-badge">📘 Rock Solid 3 · Firm Local Church</span>
+      <span class="fb-badge">${esc(c.badge)}</span>
       <h3>Terima kasih${first ? ", " + esc(first) : ""}! 🎉</h3>
-      <p>Terima kasih telah mengikuti <b>Kelas Rock Solid 3</b> dengan setia sampai <b>lulus</b>. Setiap pertemuan, setiap materi, dan setiap langkah yang kamu ambil sangat berarti.</p>
+      <p>Terima kasih telah mengikuti <b>Kelas ${esc(c.title)}</b> dengan setia sampai <b>${c.until}</b>. Setiap pertemuan, setiap materi, dan setiap langkah yang kamu ambil sangat berarti.</p>
       <p>Terima kasih juga karena kamu memiliki hati yang <span class="fb-teach">TEACHABLE</span> — hati yang mau terus diajar, dibentuk, dan bertumbuh di dalam Tuhan dan gereja lokal-Nya.</p>
       <div class="fb-tag">#God has called us to go and make disciples</div>
     </div>`;
-    const share = `<button type="button" class="fb-share" data-fbshare="1"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.4-.7-2.9-1.1-4.7-4-4.9-4.2-.1-.2-1.2-1.6-1.2-3s.7-2.2 1-2.5c.3-.3.6-.3.8-.3h.6c.2 0 .4 0 .6.5l.9 2.1c.1.2.1.4 0 .6l-.4.6-.4.5c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.3 2.4 1.5.3.1.5.1.6-.1l.9-1c.2-.3.4-.2.6-.1l2 1c.3.1.5.2.5.3.1.2.1.7-.1 1.3Z"/></svg>Bagikan link via WhatsApp</button>`;
-    // 2026-10-04 susulan (user: "buat hanya yang sudah disetujui saat mengisi
-    // post test yang dapat memberikan feedback"): server menegakkan hal yg
-    // sama di RLS rfb_insert (v_rs3_feedback.sql); ini cuma tampilan.
-    if (state.persona !== "ADMIN" && state.rs3AccessStatus !== "approved") {
-      el("rs3feedbackBody").innerHTML = `${hero}
+    const share = `<button type="button" class="fb-share" data-fbshare="${k}"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.4-.7-2.9-1.1-4.7-4-4.9-4.2-.1-.2-1.2-1.6-1.2-3s.7-2.2 1-2.5c.3-.3.6-.3.8-.3h.6c.2 0 .4 0 .6.5l.9 2.1c.1.2.1.4 0 .6l-.4.6-.4.5c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.3 2.4 1.5.3.1.5.1.6-.1l.9-1c.2-.3.4-.2.6-.1l2 1c.3.1.5.2.5.3.1.2.1.7-.1 1.3Z"/></svg>Bagikan link via WhatsApp</button>`;
+    // Server menegakkan aturan yg sama di RLS rfb_insert (v_class_feedback.sql); ini cuma tampilan.
+    if (state.persona !== "ADMIN" && !c.eligible()) {
+      el("feedbackBody").innerHTML = `${hero}
         <div class="card pad fb-done">
           <div style="font-size:38px;">🔒</div>
-          <b>Feedback khusus peserta Rock Solid 3</b>
-          <p class="sub">Form ini hanya untuk peserta yang aksesnya ke post-test Rock Solid 3 sudah disetujui Admin. Kalau kamu peserta kelas ini, ajukan akses lewat kartu Rock Solid 3 di beranda.</p>
-          <button type="button" class="fb-again" data-goto="rs3">Ke Post-Test Rock Solid 3</button>
+          <b>Feedback khusus peserta ${esc(c.title)}</b>
+          <p class="sub">${esc(c.lockText)}</p>
+          ${c.lockGoto ? `<button type="button" class="fb-again" data-goto="${c.lockGoto}">${esc(c.lockBtn)}</button>` : ""}
         </div>`;
       return;
     }
     if (sent && !state.fbAgain) {
-      el("rs3feedbackBody").innerHTML = `${hero}
+      el("feedbackBody").innerHTML = `${hero}
         <div class="card pad fb-done">
           <div style="font-size:38px;">🙏</div>
           <b>Feedback-mu sudah kami terima</b>
-          <p class="sub">Terima kasih! Masukanmu akan dipakai untuk membuat kelas Rock Solid 3 berikutnya makin baik.</p>
+          <p class="sub">Terima kasih! Masukanmu akan dipakai untuk membuat kelas ${esc(c.title)} berikutnya makin baik.</p>
           <p class="fb-quote">“Feedback is breakfast for the champion.”</p>
           ${share}
           <button type="button" class="fb-again" data-fbagain="1">Kirim feedback lagi</button>
         </div>`;
       return;
     }
-    el("rs3feedbackBody").innerHTML = `${hero}
+    el("feedbackBody").innerHTML = `${hero}
+      ${state.persona === "ADMIN" && !c.eligible() && k !== "rs3" && k !== "lts1" && k !== "lts2" ? `<div class="card pad" style="margin-bottom:10px;font-size:12.5px;color:var(--ink-soft);">👁 Pratinjau Admin — untuk peserta form ini masih terkunci (${esc(c.lockText)})</div>` : ""}
       <div class="card pad fb-form">
         <p class="fb-quote">“Feedback is breakfast for the champion.”</p>
         <p class="sub" style="margin:0 0 4px;">Beri nilai 1–5 bintang. <b>Feedback ini anonim</b> — namamu tidak disimpan.</p>
-        ${RS3FB_Q.map(q => `<div class="fb-q"><label>${esc(q.l)}</label>${fbStarsHTML(q.k, state.fbDraft[q.k] || 0)}</div>`).join("")}
+        ${FB_Q.map(q => `<div class="fb-q"><label>${esc(q.l)}</label>${fbStarsHTML(q.k, state.fbDraft[q.k] || 0)}</div>`).join("")}
         <div class="fb-q"><label for="fbBerkesan">Materi apa yang paling berkesan buatmu?</label><textarea id="fbBerkesan" rows="3" maxlength="2000" placeholder="Ceritakan materi/momen yang paling menyentuh atau mengubahkan…"></textarea></div>
         <div class="fb-q"><label for="fbSaran">Saran untuk kelas berikutnya</label><textarea id="fbSaran" rows="3" maxlength="2000" placeholder="Apa yang bisa kami tingkatkan?"></textarea></div>
         <button type="button" class="btn btn--primary" id="fbSend">Kirim Feedback</button>
       </div>
       <div style="margin-top:12px;">${share}</div>`;
   };
-  async function shareRs3Feedback() {
-    const text = "Terima kasih sudah mengikuti Kelas Rock Solid 3 sampai lulus! 🎉\nYuk isi feedback singkat (anonim) — feedback is breakfast for the champion 🙏\n\n" + RS3FB_LINK + "\n\n#God has called us to go and make disciples";
+  async function shareFeedback(k) {
+    const c = FB_CLASSES[k] || FB_CLASSES.rs3;
+    const text = "Terima kasih sudah mengikuti Kelas " + c.title + " sampai " + c.until + "! 🎉\nYuk isi feedback singkat (anonim) — feedback is breakfast for the champion 🙏\n\n" + fbLink(FB_CLASSES[k] ? k : "rs3") + "\n\n#God has called us to go and make disciples";
     if (navigator.share) { try { await navigator.share({ text }); return; } catch (e) { if (e && e.name === "AbortError") return; } }
     const wa = "https://wa.me/?text=" + encodeURIComponent(text);
     const w = window.open(wa, "_blank");
     if (!w) location.href = wa;
   }
-  // Admin, tab RS3: ringkasan feedback (rata2 per pertanyaan + daftar isian).
-  // 2026-10-04 susulan (user: "isian feedback akan dikelompokan berdasarkan
-  // dalam batch tertentu sehingga ketika kelas berikutnya ada feedback akan
-  // dikelompokan kembali"): dikelompokkan per batch (rs3_fb_batches) — tiap
-  // batch kartu buka-tutup sendiri (batch aktif terbuka). Feedback baru masuk
-  // ke batch aktif lewat trigger server (v_rs3_feedback_batch.sql).
-  function rs3FbGroupHTML(rows) {
+  // Admin, tiap tab journey: feedback dikelompokkan per batch (batch aktif 1
+  // per kelas; feedback baru masuk ke batch aktif lewat trigger server).
+  function fbGroupHTML(rows) {
     if (!rows.length) return `<p class="jd-empty">Belum ada feedback di batch ini.</p>`;
-    const avg = k => rows.reduce((n, r) => n + (r["rating_" + k] || 0), 0) / rows.length;
-    return `<div class="fb-avg">${RS3FB_Q.map(q => { const a = avg(q.k); return `<div><span>${esc(q.l)}</span><b>${a.toFixed(1)}<small>/5</small></b><i><em style="width:${(a / 5 * 100).toFixed(0)}%"></em></i></div>`; }).join("")}</div>
+    const avg = q => rows.reduce((n, r) => n + (r["rating_" + q] || 0), 0) / rows.length;
+    return `<div class="fb-avg">${FB_Q.map(q => { const a = avg(q.k); return `<div><span>${esc(q.l)}</span><b>${a.toFixed(1)}<small>/5</small></b><i><em style="width:${(a / 5 * 100).toFixed(0)}%"></em></i></div>`; }).join("")}</div>
       ${rows.map(r => `<div class="fb-item">
         <div class="fb-item-h"><span>${"★".repeat(r.rating_materi)}<em>${"★".repeat(5 - r.rating_materi)}</em> materi · ${r.rating_durasi}/5 waktu · ${r.rating_pengajar}/5 pengajar</span><button type="button" class="jd-del" data-fbdel="${esc(r.id)}">Hapus</button></div>
         ${r.berkesan ? `<p><b>Paling berkesan:</b> ${esc(r.berkesan)}</p>` : ""}
@@ -846,33 +879,57 @@
         <small>${esc(new Date(r.created_at).toLocaleDateString("id-ID", { day:"numeric", month:"short", year:"numeric" }))}</small>
       </div>`).join("")}`;
   }
-  function rs3FeedbackAdminHTML() {
-    const rows = state.rs3Feedback || [];
-    const batches = state.rs3FbBatches || [];
+  function fbAdminHTML(k) {
+    const c = FB_CLASSES[k]; if (!c) return "";
+    const ck = r => (r.class_key || "rs3") === k;
+    const rows = (state.rs3Feedback || []).filter(ck);
+    const batches = (state.rs3FbBatches || []).filter(ck);
     const active = batches.find(b => b.is_active);
     const groups = batches.map(b => {
       const list = rows.filter(r => r.batch_id === b.id);
-      return dashSecHTML("rs3:fb:" + b.id, b.name + (b.is_active ? " · aktif" : ""), list.length, !!b.is_active,
-        `<button type="button" class="fb-again" style="margin:10px 0 0;" data-fbbrename="${esc(b.id)}">✎ Ganti nama batch</button>${rs3FbGroupHTML(list)}`, b.is_active ? "var(--good)" : "var(--ink-faint)");
+      return dashSecHTML(k + ":fb:" + b.id, b.name + (b.is_active ? " · aktif" : ""), list.length, !!b.is_active,
+        `<button type="button" class="fb-again" style="margin:10px 0 0;" data-fbbrename="${esc(b.id)}">✎ Ganti nama batch</button>${fbGroupHTML(list)}`, b.is_active ? "var(--good)" : "var(--ink-faint)");
     }).join("");
     const orphan = rows.filter(r => !batches.some(b => b.id === r.batch_id));
+    const locked = !["rs3", "lts1", "lts2"].includes(k);
     const body = `
-      <button type="button" class="fb-share sm" data-fbshare="1" style="margin-top:12px;">Bagikan link feedback via WhatsApp</button>
-      <button type="button" class="fb-again" data-goto="rs3feedback">Lihat kartu feedback</button>
+      ${locked ? `<p class="jd-note" style="margin:12px 0 0;">🔒 Untuk peserta form ini masih terkunci — dibuka bersamaan dengan post-test ${esc(c.title)}.</p>` : `<button type="button" class="fb-share sm" data-fbshare="${k}" style="margin-top:12px;">Bagikan link feedback via WhatsApp</button>`}
+      <button type="button" class="fb-again" data-goto="${c.page}">Lihat kartu feedback</button>
       <div class="fb-batchbar">
         <span>Feedback baru masuk ke<b>${active ? esc(active.name) : "— belum ada batch aktif —"}</b></span>
-        <button type="button" class="btn btn--sm btn--primary" data-fbbnew="1">+ Batch baru</button>
+        <button type="button" class="btn btn--sm btn--primary" data-fbbnew="${k}">+ Batch baru</button>
       </div>
       <div class="fb-batches">${groups || `<p class="jd-empty">Belum ada batch.</p>`}
-      ${orphan.length ? dashSecHTML("rs3:fb:none", "Tanpa batch", orphan.length, false, rs3FbGroupHTML(orphan), "var(--ink-faint)") : ""}</div>`;
-    return dashSecHTML("rs3:feedback", "Feedback peserta (anonim)", rows.length, false, body, "#4472A8");
+      ${orphan.length ? dashSecHTML(k + ":fb:none", "Tanpa batch", orphan.length, false, fbGroupHTML(orphan), "var(--ink-faint)") : ""}</div>`;
+    return dashSecHTML(k + ":feedback", "Feedback peserta (anonim)", rows.length, false, body, c.color);
   }
+  // 2026-10-04 — tab RS1/RS2 peserta: belum ada post-test (user: "nanti saya
+  // akan buatkan post test RS1, RS2"); tampilkan status kelas dari
+  // profiles.classes (ditandai di JB3 HOME Tracker) + feedback (terkunci).
+  function classIntroHTML(k) {
+    const c = DASH_JOURNEYS.find(x => x.key === k), f = FB_CLASSES[k];
+    const done = !!((state.myProfile || {}).classes || [])[c.classIdx];
+    return `<div class="jd-hero" style="--jc:${c.color};">
+        <svg class="jd-hero-deco" viewBox="0 0 120 120" aria-hidden="true"><circle cx="100" cy="18" r="46" fill="#fff" opacity=".08"/><circle cx="18" cy="112" r="34" fill="#fff" opacity=".06"/></svg>
+        <div class="jd-hero-top"><span class="jd-hero-ic">${c.icon}</span><div><small>Discipleship Journey · ${esc(c.tab)}</small><b>${esc(c.title)}</b></div></div>
+        <p class="jd-hero-sub">${done ? "✓ Kelas ini sudah ditandai selesai. Terima kasih sudah setia mengikutinya!" : "Kelas ini belum ditandai selesai. Status kelas dicatat oleh pemimpin HOME/Admin di JB3 HOME Tracker."}</p>
+      </div>
+      <div class="card pad" style="text-align:center;padding:30px 20px;margin-bottom:12px;">
+        <div style="font-size:34px;margin-bottom:8px;">📝</div>
+        <b style="display:block;font-family:var(--font-display);font-size:16px;margin-bottom:6px;">Post-Test ${esc(c.title)} segera hadir</b>
+        <p class="sub" style="margin:0;">Post-test untuk kelas ini sedang disiapkan. Nantikan ya!</p>
+      </div>
+      <button type="button" class="fb-mini" style="--fc:${c.color};" data-goto="${f.page}">
+        <span class="fb-mini-ic">💌</span>
+        <span style="flex:1;min-width:0;"><b>Feedback ${esc(c.title)}</b><small>Dibuka bersamaan dengan post-test kelas ini.</small></span>
+      </button>`;
+  }
+  RENDER.rs1 = () => { el("rs1Body").innerHTML = classIntroHTML("rs1"); };
+  RENDER.rs2 = () => { el("rs2Body").innerHTML = classIntroHTML("rs2"); };
   RENDER.home = function () {
     const unlocked = state.persona === "ADMIN" || state.accessStatus === "approved";
     el("homeBody").innerHTML = `
-      ${rs3FeedbackCardHTML()}
-      ${rs3CardHTML()}
-      ${lts2CardHTML()}
+      ${fbHomeCardsHTML("lts1")}
       ${unlocked ? discCardHTML() + ssdCardHTML() + giftsCardHTML() : ""}
       <div class="divider-note">Serve Road Map — 5 bagian refleksi yang menggabungkan kekuatan, pengalaman, relasi, visi, dan rencana pelayananmu jadi satu peta pribadi. Diperbarui setiap tahun.</div>
       ${unlocked ? serveGridHTML() : lockedHomeHTML()}
@@ -1024,6 +1081,7 @@
     const doneCount = RS3_QUESTIONS.filter(q => answers[q.no]).length;
     const done = rs3Complete(answers);
     el("rs3Body").innerHTML = `
+      ${fbHomeCardsHTML("rs3")}
       ${lastHTML}
       <div class="divider-note">40 soal pilihan ganda tentang modul Rock Solid 3 (Firm Local Church). Skor <b>Good</b> (50%) ke atas dianggap lulus &amp; otomatis menandai kelas Rock Solid 3 selesai.</div>
       ${rows}
@@ -1067,6 +1125,7 @@
     const doneCount = LTS2_QUESTIONS.filter(q => answers[q.no]).length;
     const done = lts2Complete(answers);
     el("lts2Body").innerHTML = `
+      ${fbHomeCardsHTML("lts2")}
       ${lastHTML}
       <div class="divider-note">25 soal pilihan ganda tentang modul Lead To Serve 2 (Servant Leadership). Skor <b>Good</b> (50%) ke atas dianggap lulus &amp; otomatis menandai kelas Lead To Serve 2 selesai.</div>
       ${rows}
@@ -1150,11 +1209,12 @@
           approved.length ? approved.map(r => row(nm(r), "", `<button type="button" class="jd-del" data-${cfg.attr}delreq="${esc(r.id)}" title="Hapus">Hapus</button>`)).join("") : `<p class="jd-empty">Belum ada.</p>`, "var(--good)")
         + (rejected.length ? dashSecHTML(cfg.key + ":rejected", "Ditolak", rejected.length, false, rejected.map(r => row(nm(r))).join(""), "var(--bad)") : "")
         + dashSecHTML(cfg.key + ":done", "Sudah selesai kelas", done.length, false, chips(done))
-        + (cfg.key === "rs3" ? rs3FeedbackAdminHTML() : "");
+        + fbAdminHTML(cfg.key);
     } else {
       nums = [[done.length, "sudah selesai", ""], [notYet.length, "belum", ""], [pctDone + "%", "tingkat selesai", ""]];
       secs = dashSecHTML(cfg.key + ":done", "Sudah selesai kelas", done.length, true, chips(done), "var(--good)")
         + dashSecHTML(cfg.key + ":notyet", "Belum selesai", notYet.length, false, chips(notYet), "var(--ink-faint)")
+        + fbAdminHTML(cfg.key)
         + `<p class="jd-note">Kelas ${esc(cfg.title)} belum punya alur digital di Discipleship Journey — status selesai ditandai lewat JB3 HOME Tracker (detail anggota / profil pengguna).</p>`;
     }
     el("dashboardBody").innerHTML = `
@@ -2190,7 +2250,10 @@
     const T = e.target;
     if (T.closest("#backBtn")) { goBack(); return; }
     const g = T.closest("[data-goto]");
-    if (g) { show(g.dataset.goto); return; }
+    if (g) {
+      if (g.dataset.tabnav) { state.stack = []; show(g.dataset.goto, { replace:true }); const sc = document.querySelector(".scroll"); if (sc) sc.scrollTo({ top:0 }); return; }
+      show(g.dataset.goto); return;
+    }
 
     if (T.closest("#liGo")) {
       const id = el("liId").value.trim(), pw = el("liPw").value;
@@ -2409,26 +2472,29 @@
     }
     if (T.closest("#fbSend")) {
       const d = state.fbDraft || {};
-      if (!RS3FB_Q.every(q => d[q.k] >= 1)) { toast("Beri bintang untuk ketiga penilaian dulu ya."); return; }
+      if (!FB_Q.every(q => d[q.k] >= 1)) { toast("Beri bintang untuk ketiga penilaian dulu ya."); return; }
       const btn = el("fbSend"); btn.disabled = true;
       try {
-        await DB.submitRs3Feedback({ materi:d.materi, durasi:d.durasi, pengajar:d.pengajar, berkesan:el("fbBerkesan").value.trim(), saran:el("fbSaran").value.trim() });
-        try { localStorage.setItem(RS3FB_SENT_KEY, new Date().toISOString()); } catch (e) {}
+        await DB.submitRs3Feedback({ classKey:state.fbKey || "rs3", materi:d.materi, durasi:d.durasi, pengajar:d.pengajar, berkesan:el("fbBerkesan").value.trim(), saran:el("fbSaran").value.trim() });
+        try { localStorage.setItem((FB_CLASSES[state.fbKey] || FB_CLASSES.rs3).sentKey, new Date().toISOString()); } catch (e) {}
         state.fbDraft = {}; state.fbAgain = false;
         toast("Terima kasih! Feedback-mu terkirim 🙏");
-        RENDER.rs3feedback();
+        RENDER.feedback();
         { const sc = document.querySelector(".scroll"); if (sc) sc.scrollTo({ top:0, behavior:"smooth" }); }
       } catch (err) { btn.disabled = false; toast("Gagal mengirim: " + (err.message || err)); }
       return;
     }
-    if (T.closest("[data-fbagain]")) { state.fbAgain = true; RENDER.rs3feedback(); return; }
-    if (T.closest("[data-fbshare]")) { shareRs3Feedback(); return; }
-    if (T.closest("[data-fbbnew]")) {
-      const n = (state.rs3FbBatches || []).length + 1;
+    if (T.closest("[data-fbagain]")) { state.fbAgain = true; RENDER.feedback(); return; }
+    const fbShare = T.closest("[data-fbshare]");
+    if (fbShare) { shareFeedback(fbShare.dataset.fbshare); return; }
+    const fbNew = T.closest("[data-fbbnew]");
+    if (fbNew) {
+      const fk = FB_CLASSES[fbNew.dataset.fbbnew] ? fbNew.dataset.fbbnew : "rs3";
+      const n = (state.rs3FbBatches || []).filter(b => (b.class_key || "rs3") === fk).length + 1;
       const name = (prompt("Nama batch baru (mis. kelas berikutnya). Feedback yang masuk setelah ini akan dikelompokkan ke batch ini:", "Batch " + n) || "").trim();
       if (!name) return;
       try {
-        await DB.startRs3FbBatch(name.slice(0, 80));
+        await DB.startRs3FbBatch(name.slice(0, 80), fk);
         state.rs3FbBatches = await DB.listRs3FbBatches();
         toast("Batch \"" + name + "\" aktif — feedback baru masuk ke sini.");
         RENDER.dashboard();

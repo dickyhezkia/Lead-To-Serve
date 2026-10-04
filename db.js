@@ -60,7 +60,7 @@ window.makeDB = function makeDB(sb) {
     async myProfile() {
       const s = await this.session();
       if (!s) return null;
-      const { data, error } = await sb.from("profiles").select("id,name,phone,role,created_at").eq("id", s.user.id).maybeSingle();
+      const { data, error } = await sb.from("profiles").select("id,name,phone,role,created_at,classes").eq("id", s.user.id).maybeSingle();
       if (error) throw error;
       return data ? inProfile(data) : null;
     },
@@ -391,7 +391,7 @@ window.makeDB = function makeDB(sb) {
     async submitRs3Feedback(f) {
       wrap(await sb.from("rs3_feedback").insert({
         rating_materi:f.materi, rating_durasi:f.durasi, rating_pengajar:f.pengajar,
-        berkesan:f.berkesan || null, saran:f.saran || null,
+        berkesan:f.berkesan || null, saran:f.saran || null, class_key:f.classKey || "rs3",
       }));
     },
     async listRs3Feedback() {
@@ -406,9 +406,11 @@ window.makeDB = function makeDB(sb) {
       if (error) throw error;
       return data || [];
     },
-    async startRs3FbBatch(name) {
-      wrap(await sb.from("rs3_fb_batches").update({ is_active:false }).eq("is_active", true));
-      wrap(await sb.from("rs3_fb_batches").insert({ name, is_active:true }));
+    // 2026-10-04: per kelas (class_key, v_class_feedback.sql) — batch aktif 1 per kelas.
+    async startRs3FbBatch(name, classKey) {
+      classKey = classKey || "rs3";
+      wrap(await sb.from("rs3_fb_batches").update({ is_active:false }).eq("is_active", true).eq("class_key", classKey));
+      wrap(await sb.from("rs3_fb_batches").insert({ name, is_active:true, class_key:classKey }));
     },
     async renameRs3FbBatch(id, name) { wrap(await sb.from("rs3_fb_batches").update({ name }).eq("id", id)); },
     async deleteRs3Feedback(id) { wrap(await sb.from("rs3_feedback").delete().eq("id", id)); },
