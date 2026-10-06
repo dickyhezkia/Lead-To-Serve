@@ -583,7 +583,8 @@
   // 2026-10-04: di dalam lapisan JB3 HOME Tracker → terima token baru dari JB3
   // (JB3 yg memperbarui token; DJ_EMBED mematikan auto-refresh di sini).
   if (DJ_EMBED) window.addEventListener("message", e => {
-    if (!/^https:\/\/jb3-home-tracker[\w.-]*\.dickyhezkia\.workers\.dev$/.test(e.origin) || !e.data || e.data.type !== "jb3-session") return;
+    // 2026-10-06: + alamat baru JB3 (home.jb3church.com) — *.workers.dev diblokir sebagian ISP.
+    if (!/^https:\/\/(jb3-home-tracker[\w.-]*\.dickyhezkia\.workers\.dev|home\.jb3church\.com)$/.test(e.origin) || !e.data || e.data.type !== "jb3-session") return;
     if (e.data.at && e.data.rt) sb.auth.setSession({ access_token:e.data.at, refresh_token:e.data.rt }).catch(() => {});
   });
 
