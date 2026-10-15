@@ -1148,9 +1148,34 @@
       el(k + "Body").innerHTML = hero + pjFbHTML(k) + pjSecHTML("Post-test") + pjLockHTML(st, "reqPt_" + k, "post-test");
       return;
     }
+    // 2026-10-15 (user: "khusus RS2, setelah selesai dan tidak lulus; dapat
+    // memperbaiki jawaban yang salah menjadi benar sampai lulus"): RS2 yg
+    // belum lulus → jawaban yg sudah benar dari percobaan terakhir otomatis
+    // terisi & dikunci, form hanya menampilkan soal yg SALAH utk diperbaiki.
+    // Kirim ulang = percobaan baru (riwayat tetap tersimpan) sampai lulus.
+    const fixMode = k === "rs2" && last && !last.passed && last.answers;
+    const fixKey = fixMode ? (last.id || last.created_at || JSON.stringify(last.answers)) : null;
+    if (fixMode && state.draft.rs2FixOf !== fixKey) {
+      const keep = {};
+      QS.forEach(q => { if (last.answers[String(q.no)] === q.correct) keep[q.no] = q.correct; });
+      state.draft.rs2Answers = keep; state.draft.rs2FixOf = fixKey;
+    }
     const answers = state.draft[k + "Answers"];
     const doneCount = QS.filter(q => answers[q.no]).length;
     const done = ptComplete(k, answers);
+    if (fixMode) {
+      const fixQs = QS.filter(q => last.answers[String(q.no)] !== q.correct);
+      const fixed = fixQs.filter(q => answers[q.no]).length;
+      el(k + "Body").innerHTML = hero
+        + pjFbHTML(k)
+        + pjResultHTML(last, QS)
+        + pjSecHTML("Perbaiki jawaban yang salah", `${fixed}/${fixQs.length} diperbaiki`)
+        + `<p class="sub" style="margin:0 0 8px;">✓ ${QS.length - fixQs.length} jawaban benarmu sudah disimpan. Perbaiki ${fixQs.length} soal di bawah ini, lalu kirim lagi — boleh diulang sampai lulus.</p>`
+        + `<div class="pj-prog"><i style="width:${Math.round(fixed / Math.max(1, fixQs.length) * 100)}%"></i></div>`
+        + `<div class="card pad pj-qs">${pjQuestionsHTML(fixQs, answers, "ptans-" + k)}</div>`
+        + `<button class="btn btn--primary" style="margin:14px 0 18px;" data-ptsave="${k}" ${done ? "" : "disabled"}>${done ? "Kirim Perbaikan" : `Perbaiki semua soal (${fixed}/${fixQs.length})`}</button>`;
+      return;
+    }
     el(k + "Body").innerHTML = hero
       + pjFbHTML(k)
       + pjResultHTML(last, QS)
