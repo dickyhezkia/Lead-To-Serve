@@ -45,6 +45,12 @@
  *    DB.listParticipantResults(year)  (Admin saja — hasil SEMUA peserta yg aksesnya disetujui)
  * ========================================================================== */
 window.makeDB = function makeDB(sb) {
+  // 2026-10-15 (user: "pastikan kelulusan RS dan LTS terhubung dengan 5 bintang
+  // di aplikasi"): profiles.classes = boolean[5] (RS1,RS2,RS3,LTS1,LTS2) =
+  // 5 bintang JB3. Format lama (angka n = n bintang pertama, atau array beda
+  // panjang) DIPERTAHANKAN — dulu di-reset jadi kosong → bintang lama hilang.
+  const normClasses = v => Array.isArray(v) ? Array.from({ length:5 }, (_, i) => !!v[i])
+    : (typeof v === "number" ? Array.from({ length:5 }, (_, i) => i < v) : Array(5).fill(false));
   "use strict";
   const EMAIL_DOMAIN = "jb3.app";   // SAMA persis dgn JB3 HOME Tracker — 1 akun, 2 aplikasi.
   const toEmail = idOrPhone => {
@@ -300,14 +306,7 @@ window.makeDB = function makeDB(sb) {
       wrap(await sb.from("rs3_test_results").insert({
         profile_id: s.user.id, answers, correct, total, score_pct: pct, band, passed,
       }));
-      if (passed) {
-        const { data: prof, error: e1 } = await sb.from("profiles").select("classes").eq("id", s.user.id).maybeSingle();
-        if (e1) throw e1;
-        const NCLASS = 5, RS3_IDX = 2;
-        let arr = Array.isArray(prof && prof.classes) && prof.classes.length === NCLASS ? [...prof.classes] : Array(NCLASS).fill(false);
-        arr[RS3_IDX] = true;
-        wrap(await sb.from("profiles").update({ classes:arr }).eq("id", s.user.id));
-      }
+      if (passed) await this.markClassComplete(2);   // bintang ke-3 di JB3
     },
 
     // ---------- Lead To Serve 2 post-test (2026-09-23, "jika limit cukup,
@@ -366,14 +365,7 @@ window.makeDB = function makeDB(sb) {
       wrap(await sb.from("lts2_test_results").insert({
         profile_id: s.user.id, answers, correct, total, score_pct: pct, band, passed,
       }));
-      if (passed) {
-        const { data: prof, error: e1 } = await sb.from("profiles").select("classes").eq("id", s.user.id).maybeSingle();
-        if (e1) throw e1;
-        const NCLASS = 5, LTS2_IDX = 4;
-        let arr = Array.isArray(prof && prof.classes) && prof.classes.length === NCLASS ? [...prof.classes] : Array(NCLASS).fill(false);
-        arr[LTS2_IDX] = true;
-        wrap(await sb.from("profiles").update({ classes:arr }).eq("id", s.user.id));
-      }
+      if (passed) await this.markClassComplete(4);   // bintang ke-5 di JB3
     },
 
     // ---------- Rock Solid 1 & 2 post-test (2026-10-15, "buat Post test
@@ -513,8 +505,7 @@ window.makeDB = function makeDB(sb) {
       if (!s) throw new Error("Belum login");
       const { data: prof, error: e1 } = await sb.from("profiles").select("classes").eq("id", s.user.id).maybeSingle();
       if (e1) throw e1;
-      const NCLASS = 5;
-      let arr = Array.isArray(prof && prof.classes) && prof.classes.length === NCLASS ? [...prof.classes] : Array(NCLASS).fill(false);
+      const arr = normClasses(prof && prof.classes);
       if (arr[classIdx]) return false;
       arr[classIdx] = true;
       wrap(await sb.from("profiles").update({ classes:arr }).eq("id", s.user.id));
