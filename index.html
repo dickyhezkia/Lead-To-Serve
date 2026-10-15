@@ -24,7 +24,7 @@
 <!-- 2026-10-04 (user: "logo home discipleship journey di homescreen terpotong"): logo-mark.png (120px, transparan, mepet tepi) diganti ikon ber-padding; susulan: latar krem #EADFCB = warna header JB3 HOME Tracker (logo ikut nuansa hangat, multiply) spy beda dari ikon JB3 HOME Tracker. -->
 <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
 <link rel="manifest" href="./manifest.webmanifest">
-<meta name="theme-color" content="#241F30">
+<meta name="theme-color" content="#F5EFE3">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Discipleship Journey">
@@ -44,35 +44,37 @@
   input:not([type="checkbox"]):not([type="radio"]), select, textarea { font-size: 16px; }
 
   :root {
-    --paper:#F6F3F9; --surface:#FFFFFF; --surface-2:#EFE9F5;
-    --ink:#2A2438; --ink-soft:#5D5470; --ink-faint:#8B819C;
-    --line:#E3DCEE; --line-strong:#D0C4E3;
-    --accent:#4B3F72; --accent-ink:#372E54;
+    /* 2026-10-16 (user: "warna background discipleship journey teracota sama seperti jb3 home"):
+       palet ungu → palet JB3 HOME (krem --paper + aksen terracotta). Ungu lama: backups/2026-10-16_pre-warna-jb3 */
+    --paper:#F5EFE3; --surface:#FCFAF4; --surface-2:#F0E8D8;
+    --ink:#2E2A23; --ink-soft:#5E5647; --ink-faint:#877B61;
+    --line:#E2D8C3; --line-strong:#D3C6AB;
+    --accent:#B5623B; --accent-ink:#7A3F22;
     --good:#4C7A54; --warn:#B4822F; --bad:#B2433A; --badge:#B2433A;
     --disc-d:#C0504D; --disc-i:#C99A2E; --disc-s:#4F8F5B; --disc-c:#4472A8;
-    --canvas:#241F30;
-    --shadow: 0 1px 2px rgba(40,30,60,.06), 0 8px 24px rgba(40,30,60,.08);
+    --canvas:#1A2B49;
+    --shadow: 0 1px 2px rgba(50,40,20,.06), 0 8px 24px rgba(50,40,20,.08);
     --r-sm:10px; --r-md:16px; --r-lg:24px;
     --font-display:"Fraunces", Georgia, serif;
     --font-body:"Karla", ui-sans-serif, system-ui, -apple-system, sans-serif;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
-      --paper:#1B1723; --surface:#241F30; --surface-2:#2D2739;
-      --ink:#EDE8F5; --ink-soft:#C4BBD6; --ink-faint:#8F84A3;
-      --line:#332C42; --line-strong:#443A57;
-      --accent:#B0A3E8; --accent-ink:#D3C9F5;
+      --paper:#211E19; --surface:#2A2620; --surface-2:#332E26;
+      --ink:#F2ECDD; --ink-soft:#C6BCA4; --ink-faint:#9A8D70;
+      --line:#3B352B; --line-strong:#4C4437;
+      --accent:#E08B5D; --accent-ink:#F0B48C;
       --good:#8FBB93; --warn:#D3A461; --bad:#D5796E;
-      --canvas:#0F0D15;
+      --canvas:#131E33;
     }
   }
   :root[data-theme="dark"] {
-    --paper:#1B1723; --surface:#241F30; --surface-2:#2D2739;
-    --ink:#EDE8F5; --ink-soft:#C4BBD6; --ink-faint:#8F84A3;
-    --line:#332C42; --line-strong:#443A57;
-    --accent:#B0A3E8; --accent-ink:#D3C9F5;
+    --paper:#211E19; --surface:#2A2620; --surface-2:#332E26;
+    --ink:#F2ECDD; --ink-soft:#C6BCA4; --ink-faint:#9A8D70;
+    --line:#3B352B; --line-strong:#4C4437;
+    --accent:#E08B5D; --accent-ink:#F0B48C;
     --good:#8FBB93; --warn:#D3A461; --bad:#D5796E;
-    --canvas:#0F0D15;
+    --canvas:#131E33;
   }
 
   body {
