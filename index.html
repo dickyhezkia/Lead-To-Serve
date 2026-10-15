@@ -483,6 +483,26 @@
   .dinsight .drow > b { display:block; font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-soft); margin-bottom:3px; }
   .dinsight .drow p { margin:0; font-size:13px; line-height:1.5; color:var(--ink); }
   .dinsight .drow ul { margin:0; padding-left:18px; font-size:13px; line-height:1.5; color:var(--ink); }
+  /* 2026-10-15 — Bahan Ajar RS1–3 (RENDER.materi, Admin saja) */
+  .mt-lock { font-size:11.5px; font-weight:700; color:var(--ink-soft); background:rgba(0,0,0,.05); border-radius:999px; padding:6px 12px; display:inline-block; margin:4px 0 10px; }
+  .mt-tabs { display:flex; gap:8px; margin-bottom:12px; }
+  .mt-tab { flex:1; border:1.5px solid var(--jc); background:transparent; color:var(--jc); border-radius:12px; padding:9px 6px; font-weight:800; font-size:13px; cursor:pointer; font-family:inherit; }
+  .mt-tab[aria-pressed="true"] { background:var(--jc); color:#fff; }
+  .mt-intro { margin-bottom:10px; }
+  .mt-h2 { font-family:var(--font-display); font-size:18px; margin:0 0 6px; line-height:1.3; }
+  .mt-sec { margin-bottom:10px; padding:0; overflow:hidden; }
+  .mt-sec > summary { cursor:pointer; padding:14px 36px 14px 16px; font-family:var(--font-display); font-weight:700; font-size:15px; list-style:none; position:relative; }
+  .mt-sec > summary::-webkit-details-marker { display:none; }
+  .mt-sec > summary::after { content:"▾"; position:absolute; right:16px; top:14px; color:var(--ink-faint); transition:transform .2s; }
+  .mt-sec[open] > summary::after { transform:rotate(180deg); }
+  .mt-body { padding:0 16px 14px; }
+  .mt-h3 { font-size:12.5px; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-soft); margin:14px 0 6px; }
+  .mt-h4 { font-size:13.5px; margin:10px 0 4px; }
+  .mt-p { font-size:13.5px; line-height:1.55; margin:6px 0; color:var(--ink); }
+  .mt-ul { margin:4px 0 8px; padding-left:18px; font-size:13.5px; line-height:1.55; color:var(--ink); }
+  .mt-ul li { margin:3px 0; }
+  .mt-q { margin:8px 0; padding:8px 12px; border-left:3px solid var(--accent); background:rgba(0,0,0,.035); border-radius:0 10px 10px 0; font-size:13px; line-height:1.5; font-style:italic; color:var(--ink); }
+  .mt-note { margin:8px 0; padding:8px 12px; background:#FFF6DD; color:#5B4613; border-radius:10px; font-size:12.5px; line-height:1.5; }
 </style>
 </head>
 <body>
@@ -500,6 +520,9 @@
         </button>
         <img class="appbar__logo" src="./logo-mark.png" alt="JB3 Church">
         <div class="appbar__title" id="appbarTitle">Discipleship Journey</div>
+        <button class="appbar__gear" id="materiBtn" hidden aria-label="Bahan Ajar Rock Solid (Admin)" title="Bahan Ajar Rock Solid 1–3 (khusus Admin)">
+          <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2z"/><path d="M22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z"/></svg>
+        </button>
         <button class="appbar__gear" id="gearBtn" hidden aria-label="Profil & pengaturan" title="Profil & pengaturan">
           <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
         </button>
@@ -530,6 +553,7 @@
           <section class="page" data-page="hasil"><div id="hasilBody"></div></section>
           <section class="page" data-page="dashboard"><div id="dashboardBody"></div></section>
           <section class="page" data-page="profile"><div id="profileBody"></div></section>
+          <section class="page" data-page="materi"><div id="materiBody"></div></section>
         </div>
       </div>
       <nav class="tabbar hidden" id="tabbar"></nav>
@@ -559,7 +583,8 @@
     SSD_QUESTIONS, SSD_CATEGORIES, SSD_SCALE, computeSsdScores, ssdComplete,
     GIFTS_QUESTIONS, GIFTS_LIST, GIFTS_SCALE, computeGiftsScores, giftsComplete, giftName,
     DISC_PROFILES, DISC_INTERP, SSD_INSIGHT, RS3_QUESTIONS, RS3_BANDS, computeRs3Result, rs3Complete,
-    LTS2_QUESTIONS, LTS2_BANDS, computeLts2Result, lts2Complete } = window.LTS;
+    LTS2_QUESTIONS, LTS2_BANDS, computeLts2Result, lts2Complete,
+    PT_QUESTIONS, computePtResult, ptComplete } = window.LTS;
   const CURRENT_YEAR = new Date().getFullYear();
   const el = id => document.getElementById(id);
   const $ = s => document.querySelector(s);
@@ -593,7 +618,7 @@
   // 2026-09-22 susulan ("bangun assesment DISC dengan hasil masking, real,
   // stress"): myDisc (baris tahun INI, null kalau belum diisi) + draft.discPicks
   // (isian yg sedang dikerjakan, blm disimpan) ditambahkan.
-  const state = { page:"login", stack:[], persona:null, meId:null, myProfile:null, accessStatus:null, accessRequests:[], myDisc:null, myRoadmap:null, mySsd:null, myGifts:null, rs3AccessStatus:null, rs3AccessRequests:[], rs3Result:null, lts2AccessStatus:null, lts2AccessRequests:[], lts2Result:null, participantResults:null, viewProfileId:null, resultsFilter:"all", draft:{ discPicks:[], roadmapData:{}, ssdAnswers:{}, giftsAnswers:{}, rs3Answers:{}, lts2Answers:{} } };
+  const state = { page:"login", stack:[], persona:null, meId:null, myProfile:null, accessStatus:null, accessRequests:[], myDisc:null, myRoadmap:null, mySsd:null, myGifts:null, rs3AccessStatus:null, rs3AccessRequests:[], rs3Result:null, lts2AccessStatus:null, lts2AccessRequests:[], lts2Result:null, rs1AccessStatus:null, rs1AccessRequests:[], rs1Result:null, rs2AccessStatus:null, rs2AccessRequests:[], rs2Result:null, materi:null, materiKey:"rs1", participantResults:null, viewProfileId:null, resultsFilter:"all", draft:{ discPicks:[], roadmapData:{}, ssdAnswers:{}, giftsAnswers:{}, rs3Answers:{}, lts2Answers:{}, rs1Answers:{}, rs2Answers:{} } };
   const NOCHROME = ["login"];
 
   function initials(name) { return String(name || "?").trim().split(/\s+/).slice(0, 2).map(w => w[0] || "").join("").toUpperCase() || "?"; }
@@ -658,6 +683,7 @@
     expansion: { h:"Expansion", back:true },
     hasil: { h:"Hasil Asesmen", back:true },
     dashboard: { h:"Dashboard Admin", tab:"dashboard" },
+    materi: { h:"Bahan Ajar Rock Solid", back:true },
     profile: { h:"Profil Saya", tab:"profile" },
   };
 
@@ -694,6 +720,8 @@
     const isAdm = state.persona === "ADMIN";
     el("appbar").setAttribute("data-back", (meta.back || state.page === "profile") ? "true" : "false");
     el("gearBtn").hidden = state.page === "profile";
+    // 2026-10-15: Bahan Ajar RS1–3 — ikon buku di bar atas, HANYA Admin (data juga dikunci RLS dj_materi).
+    el("materiBtn").hidden = !isAdm || state.page === "materi";
     el("appbarTitle").textContent = meta.h || "Discipleship Journey";
     const idb = el("identityBar");
     idb.innerHTML = `<span class="ib-ava">${esc(initials(state.myProfile && state.myProfile.name))}</span>
@@ -878,9 +906,11 @@
   // Tanda "sudah kirim" cuma di perangkat (localStorage) — supaya anonim.
   const FB_CLASSES = {
     rs1:  { title:"Rock Solid 1", badge:"🪨 Rock Solid 1", color:"#5F7F5A", until:"selesai", page:"fbrs1", sentKey:"dj_fb_sent_rs1",
-            eligible:() => false, lockText:"Feedback Rock Solid 1 akan dibuka bersamaan dengan post-test Rock Solid 1. Nantikan ya!" },
+            eligible:() => state.rs1AccessStatus === "approved", lockGoto:"rs1", lockBtn:"Ke Post-Test Rock Solid 1",
+            lockText:"Form ini hanya untuk peserta yang aksesnya ke post-test Rock Solid 1 sudah disetujui Admin. Ajukan akses lewat tab RS1." },
     rs2:  { title:"Rock Solid 2", badge:"🌱 Rock Solid 2", color:"#B4822F", until:"selesai", page:"fbrs2", sentKey:"dj_fb_sent_rs2",
-            eligible:() => false, lockText:"Feedback Rock Solid 2 akan dibuka bersamaan dengan post-test Rock Solid 2. Nantikan ya!" },
+            eligible:() => state.rs2AccessStatus === "approved", lockGoto:"rs2", lockBtn:"Ke Post-Test Rock Solid 2",
+            lockText:"Form ini hanya untuk peserta yang aksesnya ke post-test Rock Solid 2 sudah disetujui Admin. Ajukan akses lewat tab RS2." },
     rs3:  { title:"Rock Solid 3", badge:"📘 Rock Solid 3 · Firm Local Church", color:"#4472A8", until:"lulus", page:"rs3feedback", sentKey:"dj_rs3fb_sent",
             eligible:() => state.rs3AccessStatus === "approved", lockGoto:"rs3", lockBtn:"Ke Post-Test Rock Solid 3",
             lockText:"Form ini hanya untuk peserta yang aksesnya ke post-test Rock Solid 3 sudah disetujui Admin. Ajukan akses lewat kartu Rock Solid 3 di beranda." },
@@ -907,13 +937,14 @@
     if (state.persona === "ADMIN" || !FB_CLASSES[k]) return "";
     const c = FB_CLASSES[k];
     const finished = k === "rs3" ? !!(state.rs3Result && state.rs3Result.passed)
+      : (k === "rs1" || k === "rs2") && state[k + "Result"] && state[k + "Result"].passed ? true
       : k === "lts2" ? !!(state.lts2Result && state.lts2Result.passed)
       : k === "lts1" ? SERVE_SECTIONS.every(x => serveSectionFilled(x.key))
       : !!(((state.myProfile || {}).classes || [])[k === "rs1" ? 0 : 1]);
     let head, sub;
     if (!c.eligible()) {
       head = "Feedback " + c.title;
-      sub = (k === "rs1" || k === "rs2") ? "🔒 Dibuka bersamaan dengan post-test kelas ini." : "🔒 Untuk peserta yang aksesnya sudah disetujui Admin.";
+      sub = "🔒 Untuk peserta yang aksesnya sudah disetujui Admin.";
     } else if (fbSent(k)) {
       head = "Terima kasih atas feedback-mu! 🙏"; sub = "Feedback " + c.title + " sudah terkirim. Ketuk untuk membagikan link ke teman sekelas.";
     } else if (finished) {
@@ -966,7 +997,7 @@
       return;
     }
     el("feedbackBody").innerHTML = `${hero}
-      ${state.persona === "ADMIN" && !c.eligible() && k !== "rs3" && k !== "lts1" && k !== "lts2" ? `<div class="card pad" style="margin-bottom:10px;font-size:12.5px;color:var(--ink-soft);">👁 Pratinjau Admin — untuk peserta form ini masih terkunci (${esc(c.lockText)})</div>` : ""}
+      ${state.persona === "ADMIN" && !c.eligible() && false ? `<div class="card pad" style="margin-bottom:10px;font-size:12.5px;color:var(--ink-soft);">👁 Pratinjau Admin — untuk peserta form ini masih terkunci (${esc(c.lockText)})</div>` : ""}
       <div class="card pad fb-form">
         <p class="fb-quote">“Feedback is breakfast for the champion.”</p>
         <p class="sub" style="margin:0 0 4px;">Beri nilai 1–5 bintang. <b>Feedback ini anonim</b> — namamu tidak disimpan.</p>
@@ -1010,7 +1041,7 @@
         `<button type="button" class="fb-again" style="margin:10px 0 0;" data-fbbrename="${esc(b.id)}">✎ Ganti nama batch</button>${fbGroupHTML(list)}`, b.is_active ? "var(--good)" : "var(--ink-faint)");
     }).join("");
     const orphan = rows.filter(r => !batches.some(b => b.id === r.batch_id));
-    const locked = !["rs3", "lts1", "lts2"].includes(k);
+    const locked = false;
     const body = `
       ${locked ? `<p class="jd-note" style="margin:12px 0 0;">🔒 Untuk peserta form ini masih terkunci — dibuka bersamaan dengan post-test ${esc(c.title)}.</p>` : `<button type="button" class="fb-share sm" data-fbshare="${k}" style="margin-top:12px;">Bagikan link feedback via WhatsApp</button>`}
       <button type="button" class="fb-again" data-goto="${c.page}">Lihat kartu feedback</button>
@@ -1095,8 +1126,33 @@
         <p class="sub">Post-test untuk kelas ini sedang disiapkan. Nantikan ya!</p>
       </div>`;
   }
-  RENDER.rs1 = () => { el("rs1Body").innerHTML = classIntroHTML("rs1"); };
-  RENDER.rs2 = () => { el("rs2Body").innerHTML = classIntroHTML("rs2"); };
+  // 2026-10-15 ("buat Post test untuk Rock Solid 1 dan 2 di Discipleship
+  // Journey"): RS1/RS2 kini punya post-test digital — pola SAMA dgn RENDER.rs3
+  // (minta akses → Admin setuju → kerjakan; Good+ = lulus & kelas otomatis
+  // ditandai selesai). Satu renderer generik utk dua kelas (k = "rs1"|"rs2"),
+  // data: state[k+"AccessStatus"], state[k+"Result"], state.draft[k+"Answers"].
+  function renderPt(k) {
+    const QS = PT_QUESTIONS[k];
+    const st = state[k + "AccessStatus"], last = state[k + "Result"];
+    const unlocked = state.persona === "ADMIN" || st === "approved";
+    const hero = pjHeroHTML(k, `Post-test ${QS.length} soal pilihan ganda. Skor <b>Good</b> (50%) ke atas = lulus &amp; kelas otomatis ditandai selesai.`, pjStatusPill(st, last));
+    if (!unlocked) {
+      el(k + "Body").innerHTML = hero + pjFbHTML(k) + pjSecHTML("Post-test") + pjLockHTML(st, "reqPt_" + k, "post-test");
+      return;
+    }
+    const answers = state.draft[k + "Answers"];
+    const doneCount = QS.filter(q => answers[q.no]).length;
+    const done = ptComplete(k, answers);
+    el(k + "Body").innerHTML = hero
+      + pjFbHTML(k)
+      + pjResultHTML(last, QS)
+      + pjSecHTML(last ? "Coba lagi" : "Soal post-test", `${doneCount}/${QS.length} dijawab`)
+      + `<div class="pj-prog"><i style="width:${Math.round(doneCount / QS.length * 100)}%"></i></div>`
+      + `<div class="card pad pj-qs">${pjQuestionsHTML(QS, answers, "ptans-" + k)}</div>`
+      + `<button class="btn btn--primary" style="margin:14px 0 18px;" data-ptsave="${k}" ${done ? "" : "disabled"}>${done ? "Kirim Jawaban" : `Jawab semua soal (${doneCount}/${QS.length})`}</button>`;
+  }
+  RENDER.rs1 = () => renderPt("rs1");
+  RENDER.rs2 = () => renderPt("rs2");
   RENDER.home = function () {
     const unlocked = state.persona === "ADMIN" || state.accessStatus === "approved";
     const nInst = [state.myDisc, state.mySsd, state.myGifts].filter(Boolean).length;
@@ -1297,8 +1353,8 @@
   // JB3 HOME Tracker). RS3/LTS1/LTS2: permintaan akses + kelas selesai.
   // Semua data-attribute tombol Setujui/Tolak/Hapus TETAP SAMA spt dulu.
   const DASH_JOURNEYS = [
-    { key:"rs1", tab:"RS1", title:"Rock Solid 1", sub:"Kelas dasar pemuridan · ditandai di JB3 HOME Tracker", icon:"🪨", color:"#5F7F5A", classIdx:0 },
-    { key:"rs2", tab:"RS2", title:"Rock Solid 2", sub:"Kelas lanjutan pemuridan · ditandai di JB3 HOME Tracker", icon:"🌱", color:"#B4822F", classIdx:1 },
+    { key:"rs1", tab:"RS1", title:"Rock Solid 1", sub:"Post-test Firm Foundation · 20 soal", icon:"🪨", color:"#5F7F5A", classIdx:0, stateKey:"rs1AccessRequests", attr:"pt" },
+    { key:"rs2", tab:"RS2", title:"Rock Solid 2", sub:"Post-test Firm Faith, True Knowledge · 40 soal", icon:"🌱", color:"#B4822F", classIdx:1, stateKey:"rs2AccessRequests", attr:"pt" },
     { key:"rs3", tab:"RS3", title:"Rock Solid 3", sub:"Post-test Firm Local Church · 40 soal", icon:"📘", color:"#4472A8", classIdx:2, stateKey:"rs3AccessRequests", attr:"rs3" },
     { key:"lts1", tab:"LTS1", title:"Lead To Serve 1", sub:"Serve Road Map · DISC · SSD · Karunia Rohani", icon:"🧭", color:"#4B3F72", classIdx:3, stateKey:"accessRequests", attr:"" },
     { key:"lts2", tab:"LTS2", title:"Lead To Serve 2", sub:"Post-test Servant Leadership · 25 soal", icon:"🤝", color:"#93683F", classIdx:4, stateKey:"lts2AccessRequests", attr:"lts2" },
@@ -1405,6 +1461,62 @@
   // yg sama dipakai roster) — murni agregasi client-side, TAK ADA query
   // baru. `bar()` (helper grafik batang generik, sudah dipakai di Hasil
   // Asesmen utk skor SSD/Karunia) dipakai ulang di sini spy konsisten.
+  // 2026-10-15 (permintaan user: "susun bahan Rock Solid 1,2,3 dan simpan di
+  // bar atas di Discipleship Journey, hanya bisa dilihat oleh Admin saja"):
+  // ikon buku di app bar (#materiBtn, Admin saja) → halaman "materi". Isi dari
+  // tabel dj_materi (RLS select = is_admin(), jadi peserta tak bisa membaca
+  // walau tahu caranya). Sumber teks: sumber/materi/rs1.md, rs2.md, rs3.md →
+  // supabase/v_dj_materi_isi.sql (sumber/materi/build_sql.py).
+  // Format markdown sederhana: "# " judul sesi (kartu buka-tutup), "## "/"### "
+  // subjudul, "- " poin, "> " ayat, "! " catatan pengajar, **tebal**.
+  function mdInline(s) { return esc(s).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>"); }
+  function mdBlocks(lines) {
+    let h = "", list = false;
+    const close = () => { if (list) { h += "</ul>"; list = false; } };
+    lines.forEach(raw => {
+      const l = raw.trimEnd();
+      if (!l.trim()) { close(); return; }
+      if (l.startsWith("### ")) { close(); h += `<h4 class="mt-h4">${mdInline(l.slice(4))}</h4>`; }
+      else if (l.startsWith("## ")) { close(); h += `<h3 class="mt-h3">${mdInline(l.slice(3))}</h3>`; }
+      else if (l.startsWith("- ")) { if (!list) { h += `<ul class="mt-ul">`; list = true; } h += `<li>${mdInline(l.slice(2))}</li>`; }
+      else if (l.startsWith("> ")) { close(); h += `<blockquote class="mt-q">${mdInline(l.slice(2))}</blockquote>`; }
+      else if (l.startsWith("! ")) { close(); h += `<div class="mt-note">📝 ${mdInline(l.slice(2))}</div>`; }
+      else { close(); h += `<p class="mt-p">${mdInline(l)}</p>`; }
+    });
+    close();
+    return h;
+  }
+  function mdDoc(md) {
+    const parts = String(md || "").split(/\n(?=# )/);
+    // bagian pertama = judul dokumen + pengantar; sisanya = sesi/bab (buka-tutup)
+    return parts.map((part, i) => {
+      const lines = part.split("\n");
+      const head = lines[0].replace(/^# /, "");
+      if (i === 0) return `<div class="card pad mt-intro"><h2 class="mt-h2">${mdInline(head)}</h2>${mdBlocks(lines.slice(1))}</div>`;
+      return `<details class="card mt-sec"><summary>${mdInline(head)}</summary><div class="mt-body">${mdBlocks(lines.slice(1))}</div></details>`;
+    }).join("");
+  }
+  RENDER.materi = function () {
+    if (state.persona !== "ADMIN") { show("home", { replace:true }); return; }
+    const box = el("materiBody");
+    if (state.materi === null) {
+      state.materi = undefined;
+      box.innerHTML = `<p class="jd-empty" style="padding:30px 0;text-align:center;">Memuat bahan ajar…</p>`;
+      DB.listMateri().then(rows => { state.materi = rows; if (state.page === "materi") RENDER.materi(); })
+        .catch(err => { state.materi = null; box.innerHTML = `<div class="card pad"><b>Bahan ajar belum bisa dimuat.</b><p class="sub">${esc(err.message || String(err))}<br>Pastikan supabase/v_rs12_posttest.sql dan v_dj_materi_isi.sql sudah dijalankan.</p></div>`; });
+      return;
+    }
+    if (state.materi === undefined) return;
+    const rows = state.materi || [];
+    const cur = rows.find(r => r.key === state.materiKey) || rows[0];
+    const tabs = ["rs1", "rs2", "rs3"].map(k => { const c = DASH_JOURNEYS.find(x => x.key === k);
+      return `<button type="button" class="mt-tab" style="--jc:${c.color};" data-materitab="${k}" aria-pressed="${!!cur && cur.key === k}">${c.icon} ${c.tab}</button>`; }).join("");
+    box.innerHTML = `<div class="mt-lock">🔒 Khusus Admin · tidak terlihat oleh peserta</div>
+      <div class="mt-tabs">${tabs}</div>
+      ${cur ? mdDoc(cur.body) + `<p class="jd-note">Diperbarui ${esc(new Date(cur.updated_at).toLocaleDateString("id-ID", { day:"numeric", month:"long", year:"numeric" }))}</p>`
+        : `<div class="card pad"><p class="sub">Belum ada bahan untuk kelas ini.</p></div>`}`;
+  };
+
   function resultsAnalyticsHTML(rows) {
     const total = rows.length;
     if (!total) return "";
@@ -1546,7 +1658,7 @@
         <b style="font-family:var(--font-display);font-size:16px;">${esc(r.name)}</b>
         <div class="sub" style="margin-top:3px;">${esc(r.phone || "")}</div>
       </div>
-      ${resultBodyHTML(r.disc, r.ssd, r.gifts, (r.roadmap && r.roadmap.data) || {}, r.rs3, r.lts2, false)}
+      ${resultBodyHTML(r.disc, r.ssd, r.gifts, (r.roadmap && r.roadmap.data) || {}, r.rs3, r.lts2, false, { rs1:r.rs1, rs2:r.rs2 })}
     `;
   };
 
@@ -2218,7 +2330,11 @@
   // mengontrol satu-satunya perbedaan: tombol "Isi ..." (masuk akal cuma utk
   // diri sendiri) vs pesan polos "Belum diisi" (utk org lain, Admin tak bisa
   // mengisikan punya org lain).
-  function resultBodyHTML(disc, ssd, gifts, roadmapData, rs3, lts2, viewingSelf) {
+  function resultBodyHTML(disc, ssd, gifts, roadmapData, rs3, lts2, viewingSelf, pt) {
+    pt = pt || {};
+    const ptHTML = k => { const r = pt[k], c = DASH_JOURNEYS.find(x => x.key === k);
+      return `<h2 class="section">${esc(c.title)} — Post-Test</h2>` + (r ? `<div class="card pad"><p class="sub" style="margin:0;">${r.correct}/${r.total} benar (${r.score_pct}%) — <b>${esc(r.band)}</b>${r.passed ? " ✅ Lulus" : " — belum lulus"}</p>${postTestReviewHTML(PT_QUESTIONS[k], r, false, viewingSelf ? "" : "Jawaban peserta")}</div>`
+        : `<div class="card pad"><p class="sub" style="margin:0 0 ${viewingSelf ? 8 : 0}px;">Post-test ${esc(c.title)} belum diambil${viewingSelf ? "" : " oleh peserta ini"}.</p>${viewingSelf ? `<button type="button" class="btn btn--ghost" data-goto="${k}">Ke Post-Test ${esc(c.tab)}</button>` : ""}</div>`); };
     const n = buildHasilNarrative(disc, ssd, gifts, roadmapData);
     const rs3HTML = rs3 ? `<div class="card pad"><p class="sub" style="margin:0;">${rs3.correct}/${rs3.total} benar (${rs3.score_pct}%) — <b>${esc(rs3.band)}</b>${rs3.passed ? " ✅ Lulus" : " — belum lulus"}</p>${postTestReviewHTML(RS3_QUESTIONS, rs3, false, viewingSelf ? "" : "Jawaban peserta")}</div>`
       : `<div class="card pad"><p class="sub" style="margin:0 0 ${viewingSelf ? 8 : 0}px;">Post-test Rock Solid 3 belum diambil${viewingSelf ? "" : " oleh peserta ini"}.</p>${viewingSelf ? `<button type="button" class="btn btn--ghost" data-goto="rs3">Ke Post-Test RS3</button>` : ""}</div>`;
@@ -2270,6 +2386,8 @@
       : `<div class="card pad"><p class="sub" style="margin:0;">Belum ada isian Serve Road Map${viewingSelf ? " — isi lewat menu S-E-R-V-E di beranda." : " oleh peserta ini."}</p></div>`;
     const recoHTML = `<div class="card pad"><p class="sub" style="margin:0;">${n.recommendation ? esc(n.recommendation) : "Isi DISC & Karunia Rohani dulu untuk melihat rekomendasi di sini."}</p></div>`;
     return `
+      ${ptHTML("rs1")}
+      ${ptHTML("rs2")}
       <h2 class="section">Rock Solid 3 — Post-Test</h2>
       ${rs3HTML}
       <h2 class="section">Lead To Serve 2 — Post-Test</h2>
@@ -2307,7 +2425,7 @@
       <button type="button" class="btn btn--ghost" style="margin-top:8px;" id="pdfHasilBtn">⬇️ Unduh PDF — Hasil Asesmen Lengkap</button>
       <button type="button" class="btn btn--ghost" style="margin-top:8px;" id="shareHasilBtn">🔗 Bagikan PDF — Hasil Asesmen Lengkap</button>
     </div>`;
-    if (!state.myDisc && !state.mySsd && !state.myGifts && !state.rs3Result && !state.lts2Result) {
+    if (!state.myDisc && !state.mySsd && !state.myGifts && !state.rs3Result && !state.lts2Result && !state.rs1Result && !state.rs2Result) {
       el("hasilBody").innerHTML = `<div class="card pad" style="text-align:center;padding:40px 20px;">
         <b style="display:block;font-family:var(--font-display);font-size:16px;margin-bottom:6px;">Hasil Asesmen</b>
         <p class="sub" style="margin:0 0 14px;">Isi DISC, SSD, Karunia Rohani, atau post-test Rock Solid 3/Lead To Serve 2 dulu untuk melihat hasilnya di sini secara detail.</p>
@@ -2320,7 +2438,7 @@
     }
     el("hasilBody").innerHTML = `
       <div class="divider-note">Hasil asesmen ${CURRENT_YEAR} — kepribadian, keahlian, & area pelayanan yang tepat untukmu.</div>
-      ${resultBodyHTML(state.myDisc, state.mySsd, state.myGifts, state.draft.roadmapData, state.rs3Result, state.lts2Result, true)}
+      ${resultBodyHTML(state.myDisc, state.mySsd, state.myGifts, state.draft.roadmapData, state.rs3Result, state.lts2Result, true, { rs1:state.rs1Result, rs2:state.rs2Result })}
       ${serveGroup}${hasilGroup}
     `;
   };
@@ -2378,6 +2496,15 @@
     ]);
     if (isAdm) Object.assign(state, { accessRequests:acc, rs3AccessRequests:rs3Acc, lts2AccessRequests:lts2Acc, classProgress, postTestBest, rs3Feedback, rs3FbBatches });
     else Object.assign(state, { accessStatus:acc, rs3AccessStatus:rs3Acc, lts2AccessStatus:lts2Acc });
+    // 2026-10-15: RS1/RS2 post-test (tabel baru rs12_* — soft: kalau migrasi
+    // v_rs12_posttest.sql belum dijalankan, app tetap jalan, RS1/RS2 terkunci).
+    const [pt, rs1Res, rs2Res] = await Promise.all([
+      isAdm ? soft(DB.listAllPtAccessRequests(), { rs1:[], rs2:[] }) : Promise.all([soft(DB.myPtStatus("rs1"), null), soft(DB.myPtStatus("rs2"), null)]),
+      soft(DB.myPtLatest("rs1"), null), soft(DB.myPtLatest("rs2"), null),
+    ]);
+    if (isAdm) Object.assign(state, { rs1AccessRequests:pt.rs1, rs2AccessRequests:pt.rs2 });
+    else Object.assign(state, { rs1AccessStatus:pt[0], rs2AccessStatus:pt[1] });
+    state.rs1Result = rs1Res; state.rs2Result = rs2Res; state.draft.rs1Answers = {}; state.draft.rs2Answers = {};
     state.rs3Result = rs3Res; state.draft.rs3Answers = {};
     state.lts2Result = lts2Res; state.draft.lts2Answers = {};
     if (isAdm || state.accessStatus === "approved") {
@@ -2475,7 +2602,7 @@
     }
     if (T.closest("#pfLogout") || T.closest("#rolePill")) {
       await DB.logout().catch(() => {});
-      Object.assign(state, { page:"login", stack:[], persona:null, meId:null, myProfile:null, accessStatus:null, accessRequests:[], myDisc:null, myRoadmap:null, mySsd:null, myGifts:null, rs3AccessStatus:null, rs3AccessRequests:[], rs3Result:null, lts2AccessStatus:null, lts2AccessRequests:[], lts2Result:null, participantResults:null, participantResultsP:null, viewProfileId:null, resultsFilter:"all", dashKey:null, dashOpen:{}, classProgress:null, rs3Feedback:null, rs3FbBatches:null, fbDraft:{}, fbAgain:false, draft:{ discPicks:[], roadmapData:{}, ssdAnswers:{}, giftsAnswers:{}, rs3Answers:{}, lts2Answers:{} } });
+      Object.assign(state, { page:"login", stack:[], persona:null, meId:null, myProfile:null, accessStatus:null, accessRequests:[], myDisc:null, myRoadmap:null, mySsd:null, myGifts:null, rs3AccessStatus:null, rs3AccessRequests:[], rs3Result:null, lts2AccessStatus:null, lts2AccessRequests:[], lts2Result:null, rs1AccessStatus:null, rs1AccessRequests:[], rs1Result:null, rs2AccessStatus:null, rs2AccessRequests:[], rs2Result:null, materi:null, materiKey:"rs1", participantResults:null, participantResultsP:null, viewProfileId:null, resultsFilter:"all", dashKey:null, dashOpen:{}, classProgress:null, rs3Feedback:null, rs3FbBatches:null, fbDraft:{}, fbAgain:false, draft:{ discPicks:[], roadmapData:{}, ssdAnswers:{}, giftsAnswers:{}, rs3Answers:{}, lts2Answers:{}, rs1Answers:{}, rs2Answers:{} } });
       show("login", { replace:true });
       return;
     }
@@ -2742,6 +2869,63 @@
       return;
     }
     if (T.closest("#gearBtn")) { show("profile"); return; }
+    if (T.closest("#materiBtn")) { show("materi"); return; }
+    const matTab = T.closest("[data-materitab]");
+    if (matTab) { state.materiKey = matTab.dataset.materitab; RENDER.materi(); const sc = document.querySelector(".scroll"); if (sc) sc.scrollTo({ top:0 }); return; }
+
+    // ---- RS1/RS2 post-test (2026-10-15): minta akses, pilih jawaban, kirim. ----
+    const ptReq = T.closest('[id^="reqPt_"]');
+    if (ptReq) {
+      const k = ptReq.id.slice(6);
+      try { await DB.requestPtAccess(k); state[k + "AccessStatus"] = "pending"; toast("Permintaan terkirim ke Admin."); RENDER[k](); }
+      catch (err) { toast("Gagal mengirim: " + (err.message || err)); }
+      return;
+    }
+    const ptAns = T.closest("[data-ptans-rs1],[data-ptans-rs2]");
+    if (ptAns) {
+      const k = ptAns.hasAttribute("data-ptans-rs1") ? "rs1" : "rs2";
+      const [no, key] = ptAns.getAttribute("data-ptans-" + k).split(":");
+      state.draft[k + "Answers"][no] = key;
+      RENDER[k]();
+      return;
+    }
+    const ptSave = T.closest("[data-ptsave]");
+    if (ptSave) {
+      const k = ptSave.dataset.ptsave, title = k === "rs1" ? "Rock Solid 1" : "Rock Solid 2";
+      const result = computePtResult(k, state.draft[k + "Answers"]);
+      ptSave.disabled = true;
+      try {
+        await DB.savePtResult(k, { answers:state.draft[k + "Answers"], correct:result.correct, total:result.total, pct:result.pct, band:result.bandLabel, passed:result.passed });
+        state[k + "Result"] = await DB.myPtLatest(k);
+        if (result.passed && state.myProfile) { const cl = Array.isArray(state.myProfile.classes) && state.myProfile.classes.length === 5 ? [...state.myProfile.classes] : Array(5).fill(false); cl[k === "rs1" ? 0 : 1] = true; state.myProfile.classes = cl; }
+        toast(result.passed ? `Lulus (${result.bandLabel})! Kelas ${title} sudah ditandai selesai.` : `Belum lulus (${result.bandLabel}) — boleh coba lagi.`);
+        RENDER[k]();
+        { const sc = document.querySelector(".scroll"); if (sc) sc.scrollTo({ top:0, behavior:"smooth" }); }
+      } catch (err) { ptSave.disabled = false; toast("Gagal mengirim: " + (err.message || err)); }
+      return;
+    }
+    const ptApp = T.closest("[data-ptappreq]"), ptRej = T.closest("[data-ptrejreq]");
+    if (ptApp || ptRej) {
+      const id = (ptApp || ptRej).dataset.ptappreq || (ptApp || ptRej).dataset.ptrejreq;
+      try {
+        await DB.decidePtAccessRequest(id, !!ptApp);
+        toast(ptApp ? "Permintaan disetujui." : "Permintaan ditolak.");
+        const all = await DB.listAllPtAccessRequests(); state.rs1AccessRequests = all.rs1; state.rs2AccessRequests = all.rs2;
+        renderChrome(); RENDER.dashboard();
+      } catch (err) { toast("Gagal: " + (err.message || err)); }
+      return;
+    }
+    const ptDel = T.closest("[data-ptdelreq]");
+    if (ptDel) {
+      if (!confirm("Hapus persetujuan akses orang ini? Post-test akan terkunci lagi baginya sampai mengajukan ulang.")) return;
+      try {
+        await DB.deletePtAccessRequest(ptDel.dataset.ptdelreq);
+        toast("Akses dihapus.");
+        const all = await DB.listAllPtAccessRequests(); state.rs1AccessRequests = all.rs1; state.rs2AccessRequests = all.rs2;
+        RENDER.dashboard();
+      } catch (err) { toast("Gagal: " + (err.message || err)); }
+      return;
+    }
     const resFilter = T.closest("[data-resultsfilter]");
     if (resFilter) {
       state.resultsFilter = resFilter.dataset.resultsfilter;
