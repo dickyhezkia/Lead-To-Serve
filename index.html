@@ -199,6 +199,14 @@
   .rv-line small { display: block; font-size: 10px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; opacity: .8; margin-bottom: 2px; }
   .rv-wrong { background: color-mix(in srgb, var(--bad) 12%, var(--surface)); color: var(--bad); }
   .rv-good { background: color-mix(in srgb, var(--good) 14%, var(--surface)); color: var(--good); }
+  .rv-opt { display: flex; gap: 8px; align-items: flex-start; font-size: 12.5px; line-height: 1.4; padding: 7px 10px; border-radius: 9px; margin-top: 4px; color: var(--ink-faint); border: 1px solid var(--line); }
+  .rv-opt-k { flex: none; width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; font-size: 11px; font-weight: 800; background: var(--line); color: var(--ink-soft); }
+  .rv-opt-t small { display: block; font-size: 10px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; margin-top: 2px; }
+  .rv-opt--key { background: color-mix(in srgb, var(--good) 14%, var(--surface)); color: var(--good); border-color: color-mix(in srgb, var(--good) 45%, transparent); font-weight: 700; }
+  .rv-opt--key .rv-opt-k { background: var(--good); color: #fff; }
+  .rv-opt--bad { background: color-mix(in srgb, var(--bad) 12%, var(--surface)); color: var(--bad); border-color: color-mix(in srgb, var(--bad) 45%, transparent); text-decoration: line-through; text-decoration-thickness: 1px; }
+  .rv-opt--bad .rv-opt-k { background: var(--bad); color: #fff; }
+  .rv-opt--bad small { text-decoration: none; display: block; }
 
   .barrow { margin-bottom: 10px; }
   .barrow .bhead { display: flex; justify-content: space-between; font-size: 11.5px; margin-bottom: 4px; }
@@ -1107,7 +1115,7 @@
             <small>${last.correct} dari ${last.total} soal benar${last.passed ? "" : " · boleh coba lagi di bawah"}</small>
           </span>
         </div>
-        ${postTestReviewHTML(questions, last, false)}
+        ${postTestReviewHTML(questions, last, true)}
       </div>`;
   }
   // Soal pilihan ganda — tombol opsi dgn bulatan huruf (warna kelas).
@@ -1267,26 +1275,30 @@
     const ans = res.answers || {};
     const wrong = questions.filter(q => ans[String(q.no)] !== q.correct);
     const right = questions.filter(q => ans[String(q.no)] === q.correct);
-    const opt = (q, k) => k && q.options[k] ? `${k}) ${esc(q.options[k])}` : "— (tidak dijawab)";
-    // 2026-10-04 susulan (user: "agar tidak memenuhi tampilan, maka semua
-    // pertanyaan itu dapat di buka tutup"): tiap soal = <details> sendiri —
-    // tertutup cuma nomor + tanda ✗/✓ + teks soal (dipotong 2 baris), ketuk
-    // utk lihat jawaban (salah merah, benar hijau).
-    const item = (q, ok) => `<details class="rv-item ${ok ? "rv-ok" : "rv-bad"}">
+    // 2026-10-15 (user: "jawaban yang salah; setelah hasil akhir muncul, kamu
+    // buat tandai jawaban yang salah dan yang benar sehingga jadi
+    // pembelajaran"): tiap soal kini menampilkan KEEMPAT pilihan — pilihan
+    // peserta yg salah merah ✗, kunci hijau ✓, sisanya pudar. Di halaman
+    // post-test (open=true) pembahasan langsung terbuka & soal yg salah
+    // sudah terbuka; di Hasil Asesmen/Admin tetap ringkas (tertutup).
+    const opts = (q, ok) => ["A", "B", "C", "D"].filter(k => q.options[k]).map(k => {
+      const mine = ans[String(q.no)] === k, key = q.correct === k;
+      const cls = key ? "rv-opt rv-opt--key" : mine ? "rv-opt rv-opt--bad" : "rv-opt";
+      const tag = key ? (mine ? "✓ Jawabanmu benar" : "✓ Jawaban benar") : mine ? `✗ ${who || "Jawabanmu"}` : "";
+      return `<div class="${cls}"><span class="rv-opt-k">${k}</span><span class="rv-opt-t">${esc(q.options[k])}${tag ? `<small>${esc(tag)}</small>` : ""}</span></div>`;
+    }).join("") + (!ok && !ans[String(q.no)] ? `<div class="rv-line rv-wrong">✗ Tidak dijawab</div>` : "");
+    const item = (q, ok, openItem) => `<details class="rv-item ${ok ? "rv-ok" : "rv-bad"}" ${openItem ? "open" : ""}>
         <summary class="rv-q"><span class="rv-mark">${ok ? "✓" : "✗"}</span><span class="rv-qt"><span class="qno">${q.no}.</span>${esc(q.text)}</span></summary>
-        <div class="rv-ans">
-        ${ok ? `<div class="rv-line rv-good">✓ ${opt(q, q.correct)}</div>`
-          : `<div class="rv-line rv-wrong"><small>${who || "Jawabanmu"}</small>✗ ${opt(q, ans[String(q.no)])}</div>
-             <div class="rv-line rv-good"><small>Jawaban benar</small>✓ ${opt(q, q.correct)}</div>`}
-        </div>
+        <div class="rv-ans">${opts(q, ok)}</div>
       </details>`;
     return `<details class="rv" ${open ? "open" : ""}>
-        <summary>Pembahasan jawaban — ${wrong.length ? `<b>${wrong.length} salah</b>` : "<b>semua benar 🎉</b>"}</summary>
-        ${wrong.length ? `<p class="rv-hint">Ketuk soal untuk melihat jawabanmu &amp; jawaban yang benar.</p>` : ""}
-        ${wrong.map(q => item(q, false)).join("")}
-        ${right.length ? `<details class="rv-sub"><summary>Lihat ${right.length} soal yang dijawab benar</summary>${right.map(q => item(q, true)).join("")}</details>` : ""}
+        <summary>Pembahasan jawaban — ${wrong.length ? `<b>${wrong.length} salah</b> · ${right.length} benar` : "<b>semua benar 🎉</b>"}</summary>
+        ${wrong.length ? `<p class="rv-hint">${open ? "Pelajari soal yang salah di bawah ini: ✗ merah = pilihanmu, ✓ hijau = jawaban yang benar." : "Ketuk soal untuk melihat pilihan & jawaban yang benar."}</p>` : ""}
+        ${wrong.map(q => item(q, false, open)).join("")}
+        ${right.length ? `<details class="rv-sub"><summary>Lihat ${right.length} soal yang dijawab benar</summary>${right.map(q => item(q, true, false)).join("")}</details>` : ""}
       </details>`;
   }
+
   RENDER.rs3 = function () {
     const st = state.rs3AccessStatus, last = state.rs3Result;
     const unlocked = state.persona === "ADMIN" || st === "approved";
