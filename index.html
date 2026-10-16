@@ -606,6 +606,7 @@
   .bj-list li { position: relative; padding: 4px 0 4px 18px; font-size: 14px; line-height: 1.45; color: var(--ink-soft); }
   .bj-list li::before { content: ""; position: absolute; left: 3px; top: 11px; width: 7px; height: 7px; border-radius: 50%; background: var(--jc); }
   .bj-list li b { color: var(--ink); }
+  .bj-list li + li { margin-top: 3px; }
   .bj-out { display: flex; gap: 10px; align-items: flex-start; margin-top: 12px; padding: 10px 12px; border: 1px dashed var(--line-strong); border-radius: var(--r-sm); font-size: 14px; line-height: 1.45; }
   .bj-facts { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
   .bj-facts span { font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 999px; background: var(--surface-2); color: var(--ink-soft); }
@@ -1286,12 +1287,22 @@
       facts:["3 sesi", "Post-test 40 soal"] },
     lts1: { tag:"Serve with Vision", page:"home",
       def:"Menemukan visi dan panggilan untuk melayani.",
-      learn:["<b>DISC</b> — gaya kepribadianmu", "<b>Karunia Rohani</b> — 17 karunia, mana yang menonjol", "<b>SSD</b> — pola pikir yang perlu dibenahi", "<b>Serve Road Map S-E-R-V-E</b> — Strength, Experience, Relationship, Vision, Expansion"],
+      // 2026-10-17 (user): "yang kamu pelajari" LTS1 = S-E-R-V-E, masing-masing dijelaskan (isi dari lembar Serve Road Map).
+      learn:["<b>S — Strength</b> · menemukan kekuatanmu: apa yang kamu <i>bisa</i> (ability) dan <i>suka</i> (passion) lakukan. Perpotongan keduanya — dibantu asesmen DISC, Karunia Rohani & SSD — menjadi <i>strength statement</i>: “Saya bisa dan suka … supaya …”",
+        "<b>E — Experience</b> · membaca kembali titik tertinggi & terendah hidupmu. Tuhan memakai keduanya untuk membentukmu; kamu belajar beradaptasi (3A) dari pengalaman itu",
+        "<b>R — Relationship</b> · melayani tidak sendirian: siapa <i>mentor</i> yang berjalan di depanmu, <i>buddy</i> yang berdiri di sampingmu, dan <i>mentee</i> yang kamu bimbing",
+        "<b>V — Vision</b> · menemukan <i>holy discontent</i> — hal yang paling tidak bisa kamu diamkan — lalu merumuskan <i>vision statement</i>: apa yang ingin kamu lihat lahir dan bangkit",
+        "<b>E — Expansion</b> · mewujudkan visi lewat rencana aksi 3–6 bulan: Goal, Measurement, When, How, dan Who yang menolong & mengingatkanmu"],
       out:"Kamu pulang dengan <b>vision statement</b> pribadi dan <b>rencana aksi 3–6 bulan</b>.",
       facts:["4 asesmen pribadi", "Diperbarui tiap tahun"] },
     lts2: { tag:"Servant Leadership", page:"lts2",
       def:"Kepemimpinan yang berakar pada teladan Kristus.",
-      learn:["<b>Servant leadership</b> — peran arahan & peran pelaksanaan", "<b>Pola pelayanan Yesus</b> — Raja yang membasuh kaki", "<b>Memahami Firman</b> sebagai dasar memimpin", "Teladan <b>Yusuf</b>"],
+      // 2026-10-17 (user): LTS2 = Servant Leadership, belajar dari pola kepemimpinan Yesus (isi dari materi/post-test LTS2).
+      learn:["<b>Servant Leadership</b> — belajar dari <b>pola kepemimpinan Yesus</b>: memimpin berarti memengaruhi dan menolong orang lain bertumbuh menuju visi",
+        "<b>Raja yang menjadi hamba</b> — Yesus mengosongkan diri (Flp 2:6-8) dan membasuh kaki murid-murid-Nya: kuasa diberikan untuk melayani",
+        "<b>Pola pelayanan Yesus</b> — melihat kebutuhan → tergerak oleh belas kasihan → melakukan sesuatu → Tuhan bekerja (Mat 14:13-20)",
+        "<b>Memimpin dengan menghampiri</b> — seperti gembala mencari domba yang hilang; membangun hubungan lewat 5F: Face, Facts, Feelings, Fears, Faith",
+        "<b>Memuridkan pemimpin baru</b> — memakai gereja untuk membangun orang, sampai mereka mampu mengajar orang lain (2Tim 2:2)"],
       out:"Kamu memimpin dengan <b>melayani</b> — membantu orang lain bertumbuh menuju visi.",
       facts:["Kelas tatap muka", "Post-test 25 soal"] },
   };
