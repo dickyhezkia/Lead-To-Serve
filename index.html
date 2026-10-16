@@ -535,7 +535,10 @@
   .bj-map svg { display: block; width: 100%; max-width: 360px; margin: 0 auto; height: auto; overflow: visible; }
   .bj-map .disc { fill: var(--surface-2); stroke: var(--line); }
   .bj-map .core { fill: var(--surface); stroke: var(--line); }
-  .bj-map text { font-family: var(--font-body); text-anchor: middle; dominant-baseline: middle; }
+  /* 2026-10-16: teks lengkung TANPA dominant-baseline (Safari/iOS mengabaikannya di textPath → GROW di
+     lengkung bawah menabrak lingkaran tengah). Radius garis dasar diatur eksplisit per arah di bjMapSVG. */
+  .bj-map text { font-family: var(--font-body); text-anchor: middle; }
+  .bj-map text[x] { dominant-baseline: middle; }
   .bj-map .w { font-size: 22px; font-weight: 800; letter-spacing: .06em; fill: #fff; }
   .bj-map .l { font-size: 8.5px; font-weight: 800; letter-spacing: .08em; fill: #fff; opacity: .85; }
   .bj-map .r { font-size: 11px; font-weight: 700; fill: var(--ink-soft); }
@@ -1311,7 +1314,7 @@
       const c = ph.ang, d1 = c - 38, d2 = c + 30, rev = ph.key === "grow";
       const head = `M ${pt(R - W / 2 - 6, d2)} L ${pt(R + W / 2 + 6, d2)} L ${pt(R, d2 + 13)} Z`;
       return `<g data-stage="${ph.keys[0]}" class="${isCur ? "cur" : ""}">
-        <defs><path id="bjw${i}" d="${arc(121, c - 46, c + 46, rev)}"/><path id="bjl${i}" d="${arc(101, c - 46, c + 46, rev)}"/><path id="bjr${i}" d="${arc(153, c - 50, c + 50, rev)}"/></defs>
+        <defs><path id="bjw${i}" d="${arc(rev ? 130 : 113, c - 50, c + 50, rev)}"/><path id="bjl${i}" d="${arc(rev ? 105 : 98, c - 50, c + 50, rev)}"/><path id="bjr${i}" d="${arc(rev ? 157 : 149, c - 55, c + 55, rev)}"/></defs>
         ${isCur ? `<path class="glow" d="${arc(R, d1, d2)}" stroke="${col}" stroke-width="${W + 14}" fill="none"/>` : ""}
         <path d="${arc(R, d1, d2)}" stroke="${col}" stroke-width="${W}" fill="none"/>
         <path d="${head}" fill="${col}"/>
