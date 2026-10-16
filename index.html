@@ -580,6 +580,19 @@
   .bj-facts span { font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 999px; background: var(--surface-2); color: var(--ink-soft); }
   .bj-go { margin-top: 14px; width: 100%; border: 0; border-radius: 12px; padding: 11px 14px; background: var(--jc); color: #fff; font: 700 14px var(--font-body); cursor: pointer; }
 
+  .bj-stars { display: inline-block; margin-left: 4px; color: #D9A23A; letter-spacing: 1px; font-size: 12px; white-space: nowrap; }
+  .bj-stars i { font-style: normal; color: var(--line-strong); }
+  .bj-hero-stars { position: relative; display: inline-block; margin-top: 10px; padding: 4px 10px; border-radius: 999px; background: rgba(255,255,255,.18); font-size: 12.5px; font-weight: 800; }
+  .bj-ach { margin: 0 0 14px; border: 1px solid var(--line); border-radius: var(--r-sm); overflow: hidden; }
+  .bj-ach-top { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: var(--surface-2); font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); }
+  .bj-ach-top .bj-stars { font-size: 15px; }
+  .bj-ach ul { list-style: none; margin: 0; padding: 4px 12px; }
+  .bj-ach li { display: grid; grid-template-columns: 20px 1fr; gap: 0 8px; padding: 7px 0; font-size: 13.5px; border-bottom: 1px dashed var(--line); }
+  .bj-ach li:last-child { border-bottom: 0; }
+  .bj-ach li small { grid-column: 2; color: var(--ink-faint); font-size: 12.5px; line-height: 1.4; }
+  .bj-ach-ic { grid-row: span 2; width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; font-size: 11px; font-weight: 800; background: var(--surface-2); color: var(--ink-faint); }
+  .bj-ach li.ok .bj-ach-ic { background: var(--good); color: #fff; }
+  .bj-ach li.ok > span:nth-child(2) { font-weight: 700; }
   .bj-how { counter-reset: bj; margin: 0; padding: 0; list-style: none; }
   .bj-how li { counter-increment: bj; position: relative; padding: 0 0 14px 40px; font-size: 14px; line-height: 1.45; color: var(--ink-soft); }
   .bj-how li::before { content: counter(bj); position: absolute; left: 0; top: 0; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; background: var(--accent); color: #fff; font: 800 12px var(--font-body); }
@@ -1247,10 +1260,43 @@
     { no:3, key:"serve", word:"SERVE", role:"A Minister", cls:"Lead To Serve 1", ang:270, title:"Serve — melayani sesuai panggilan", sub:"Mengenal diri & karunia, lalu melayani dengan visi.", keys:["lts1"] },
     { no:4, key:"lead", word:"LEAD", role:"A Discipler at HOME", cls:"Lead To Serve 2", ang:0, title:"Lead — memuridkan di HOME", sub:"Memimpin dengan melayani, menolong orang lain bertumbuh — dan siklus berulang.", keys:["lts2"] },
   ];
+  // 2026-10-16 (user: "hubungkan keberadaan pengguna dengan semua bintang / post test / asesmen yang
+  // telah diikuti"): bintang per tahap — post-test: Excellent 3 / Better 2 / Good 1; LTS1: 1 per asesmen
+  // (DISC, SSD, Karunia Rohani). Maks 15. Tahap "selesai" = profiles.classes ATAU post-test lulus.
+  const BJ_CHEV = `<svg class="bj-chev" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`;
+  const BJ_BAND_STARS = { Excellent:3, Better:2, Good:1 };
+  function bjStars(k) {
+    if (k === "lts1") return [state.myDisc, state.mySsd, state.myGifts].filter(Boolean).length;
+    const r = state[k + "Result"]; return r && r.passed ? (BJ_BAND_STARS[r.band] || 0) : 0;
+  }
+  const bjStarsHTML = n => `<span class="bj-stars" aria-label="${n} dari 3 bintang">${"★".repeat(n)}<i>${"★".repeat(3 - n)}</i></span>`;
+  const bjServeN = () => SERVE_SECTIONS.filter(x => serveSectionFilled(x.key)).length;
+  function bjAchHTML(k) {
+    const row = (ok, t, v) => `<li class="${ok ? "ok" : ""}"><span class="bj-ach-ic">${ok ? "✓" : "○"}</span><span>${t}</span><small>${v}</small></li>`;
+    const classes = (state.myProfile || {}).classes || [], c = DASH_JOURNEYS.find(x => x.key === k);
+    let rows = "";
+    if (k === "lts1") {
+      if (state.accessStatus !== "approved") rows = row(false, "Asesmen pribadi", state.accessStatus === "pending" ? "⏳ Menunggu Admin" : "🔒 Ajukan akses dulu");
+      else {
+        const d = state.myDisc, g = state.myGifts, n = bjServeN();
+        const dl = d ? DISC_LETTERS.reduce((a, b) => (d.graph3[b] > d.graph3[a] ? b : a), DISC_LETTERS[0]) : null;
+        rows = row(!!d, "DISC", d ? esc(DISC_PROFILES[dl].name.split(" (")[0]) : "Belum diisi")
+          + row(!!g, "Karunia Rohani", g ? esc(g.scores.top3.map(giftName).join(" · ")) : "Belum diisi")
+          + row(!!state.mySsd, "Skala Sikap (SSD)", state.mySsd ? "Sudah diisi" : "Belum diisi")
+          + row(n === 5, "Serve Road Map S-E-R-V-E", `${n}/5 bagian`);
+      }
+    } else {
+      const r = state[k + "Result"], acc = state[k + "AccessStatus"];
+      rows = row(!!(r && r.passed), "Post-test", r ? `<span class="jd-band jd-band--${BAND_TONE[r.band] || "mn"}">${esc(r.band)}</span> ${Number(r.score_pct) || 0}% · ${r.correct}/${r.total} benar${r.passed ? "" : " · coba lagi"}`
+        : acc === "approved" ? "Siap dikerjakan" : acc === "pending" ? "⏳ Menunggu Admin" : "🔒 Ajukan akses");
+    }
+    rows += row(!!classes[c.classIdx], "Tercatat selesai di JB3 HOME", classes[c.classIdx] ? "Ya" : "Belum");
+    return `<div class="bj-ach"><div class="bj-ach-top"><span>Pencapaianmu</span>${bjStarsHTML(bjStars(k))}</div><ul>${rows}</ul></div>`;
+  }
   function bjStatus(k) {
     const c = DASH_JOURNEYS.find(x => x.key === k);
     const classes = (state.myProfile || {}).classes || [];
-    if (classes[c.classIdx]) return "done";
+    if (classes[c.classIdx] || (k !== "lts1" && state[k + "Result"] && state[k + "Result"].passed)) return "done";
     const acc = k === "lts1" ? state.accessStatus : state[k + "AccessStatus"];
     return acc === "pending" ? "wait" : "todo";
   }
@@ -1276,7 +1322,7 @@
     }).join("");
     const doneN = order.filter(k => bjStatus(k) === "done").length;
     const centre = curPh
-      ? `<text class="c1" x="${C}" y="${C - 30}">KAMU DI TAHAP</text><text class="c2" x="${C}" y="${C + 4}">${curPh.word}</text><text class="c3" x="${C}" y="${C + 28}">${esc(curPh.role)}</text><text class="c4" x="${C}" y="${C + 48}">${doneN} dari 5 kelas selesai</text>`
+      ? `<text class="c1" x="${C}" y="${C - 30}">KAMU DI TAHAP</text><text class="c2" x="${C}" y="${C + 4}">${curPh.word}</text><text class="c3" x="${C}" y="${C + 28}">${esc(curPh.role)}</text><text class="c4" x="${C}" y="${C + 48}">${doneN}/5 kelas · ★ ${order.reduce((a, k) => a + bjStars(k), 0)} bintang</text>`
       : `<text class="c1" x="${C}" y="${C - 22}">SIKLUS LENGKAP</text><text class="c2" x="${C}" y="${C + 10}">🎉</text><text class="c3" x="${C}" y="${C + 36}">Kini muridkan orang lain</text>`;
     return `<svg viewBox="0 0 340 340" role="img" aria-label="Siklus Discipleship Journey: Grow (Rock Solid 1–2), Plant (Rock Solid 3), Serve (Lead To Serve 1), Lead (Lead To Serve 2)">
       <circle cx="${C}" cy="${C}" r="168" class="disc"/><circle cx="${C}" cy="${C}" r="88" class="core"/>
@@ -1285,6 +1331,7 @@
   RENDER.journey = function () {
     const order = ["rs1", "rs2", "rs3", "lts1", "lts2"];
     const done = order.filter(k => bjStatus(k) === "done").length;
+    const stars = order.reduce((a, k) => a + bjStars(k), 0);
     const cur = order.find(k => bjStatus(k) !== "done") || null;
     const curC = cur && DASH_JOURNEYS.find(x => x.key === cur);
     const first = (((state.myProfile || {}).name || "").trim().split(/\s+/)[0]) || "Sahabat";
@@ -1293,14 +1340,15 @@
       const c = DASH_JOURNEYS.find(x => x.key === k), d = BJ_STAGES[k], n = order.indexOf(k) + 1;
       let st = bjStatus(k); const isCur = k === cur;
       const pill = st === "done" ? "done" : st === "wait" ? "wait" : isCur ? "now" : "todo";
-      return `<details class="card bj-stage" style="--jc:${c.color};" data-bj="${k}" ${isCur ? "open" : ""}>
+      return `<details class="card bj-stage" style="--jc:${c.color};" data-bj="${k}">
         <summary>
           <span class="bj-stage-ic">${c.icon}</span>
-          <span class="bj-stage-t"><small>Tahap ${n} · ${c.tab}</small><b>${esc(c.title)}</b><em>${esc(d.tag)}</em></span>
+          <span class="bj-stage-t"><small>Tahap ${n} · ${c.tab}</small><b>${esc(c.title)}</b><em>${esc(d.tag)} ${bjStarsHTML(bjStars(k))}</em></span>
           <span class="bj-st bj-st--${pill}">${ST_LBL[pill]}</span>
-          <svg class="bj-chev" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          ${BJ_CHEV}
         </summary>
         <div class="bj-stage-body">
+          ${bjAchHTML(k)}
           <p class="bj-def">${esc(d.def)}</p>
           <div class="bj-h">Yang kamu pelajari</div>
           <ul class="bj-list">${d.learn.map(x => `<li>${x}</li>`).join("")}</ul>
@@ -1318,6 +1366,7 @@
         <small>Discipleship Journey · JB3</small>
         <h2>Halo, ${esc(first)} 👋</h2>
         <p>Lima kelas, satu arah: menjadi murid Kristus yang berakar di gereja lokal dan melayani dengan visi.</p>
+        <span class="bj-hero-stars">★ ${stars} dari 15 bintang terkumpul</span>
         <div class="bj-hero-row">
           <span class="bj-ring" style="--p:${done * 20};"><b>${done}/5<span>tahap</span></b></span>
           <span class="bj-next">${cur
@@ -1331,21 +1380,22 @@
 
       ${BJ_PHASES.map(ph => `<div class="bj-phase"><span class="bj-phase-no">${ph.no}</span><div><b>${esc(ph.title)}</b><small>${esc(ph.sub)} <i>· ${esc(ph.cls)}</i></small></div></div>${fixLts1(ph.keys.map(card).join(""))}`).join("")}
 
-      ${pjSecHTML("Bagaimana setiap tahap berjalan")}
-      <div class="card pad"><ol class="bj-how">
+      ${pjSecHTML("Panduan")}
+      <details class="card bj-stage" style="--jc:var(--accent);"><summary><span class="bj-stage-ic">🗺️</span><span class="bj-stage-t"><b>Bagaimana setiap tahap berjalan</b><em>Kelas → akses → post-test → tercatat</em></span>${BJ_CHEV}</summary>
+      <div class="bj-stage-body"><ol class="bj-how">
         <li><b>Ikuti kelasnya</b>Tatap muka bersama pengajar & teman sekelas — aplikasi ini pendamping, bukan pengganti kelas.</li>
         <li><b>Ajukan akses</b>Buka tab kelasnya, ketuk <i>Ajukan Akses</i>. Admin membuka setelah kamu mengikuti kelas.</li>
         <li><b>Kerjakan & lulus</b>Post-test pilihan ganda — nilai <i>Good</i> (50%) ke atas = lulus. Belum lulus? Boleh coba lagi.</li>
         <li><b>Tercatat & beri feedback</b>Kelas otomatis ditandai selesai di JB3 HOME. Ceritakan pengalamanmu lewat feedback kelas.</li>
-      </ol></div>
+      </ol></div></details>
 
-      ${pjSecHTML("Jalur pertumbuhan di JB3")}
-      <div class="card pad"><div class="bj-ladder">
+      <details class="card bj-stage" style="--jc:var(--accent);"><summary><span class="bj-stage-ic">🪜</span><span class="bj-stage-t"><b>Jalur pertumbuhan di JB3</b><em>Jemaat → Home Member → Core Team → Home Leader</em></span>${BJ_CHEV}</summary>
+      <div class="bj-stage-body"><div class="bj-ladder">
         <div class="bj-rung"><i>⛪</i><span><b>Jemaat</b><small>Hadir konsisten dalam ibadah Minggu — mengenal kebenaran Firman.</small></span></div>
         <div class="bj-rung"><i>🏡</i><span><b>Home Member</b><small>Hadir di komunitas kecil — dimuridkan di HOME, melakukan Firman.</small></span></div>
         <div class="bj-rung"><i>🤲</i><span><b>Core Team</b><small>Setia di HOME 6 bulan — membantu orang lain melakukan Firman.</small></span></div>
         <div class="bj-rung bj-rung--key"><i>🔥</i><span><b>Home Leader</b><small>Sudah mengikuti <b>Rock Solid 1–3</b> — memimpin orang lain mengenal & melakukan Firman.</small></span></div>
-      </div></div>
+      </div></div></details>
 
       <p class="bj-verse">“Jikalau kamu tetap dalam firman-Ku, kamu benar-benar adalah murid-Ku.”<small>Yohanes 8:31</small></p>`;
   };
@@ -2836,7 +2886,10 @@
       let pend = null;
       try { pend = sessionStorage.getItem("dj_pending_page"); sessionStorage.removeItem("dj_pending_page"); } catch (e) {}
       const target = handoff.page || pend;
-      show((target && META[target]) ? target : (state.persona === "ADMIN" ? "home" : "journey"), { replace:true });
+      // 2026-10-16 (user: "begitu masuk ke discipleship journey, langsung ke nav beranda"): peserta SELALU
+      // mendarat di Beranda; pengecualian hanya link feedback kelas (#p=fb…) dari JB3.
+      const fbLink = target && (FB_PAGE[target] || target === "feedback");
+      show(state.persona === "ADMIN" ? ((target && META[target]) ? target : "home") : (fbLink ? target : "journey"), { replace:true });
     } catch (e) {
       console.error(e);
       Object.assign(state, { persona:null, myProfile:null, meId:null });
