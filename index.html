@@ -234,6 +234,9 @@
   .serve-tile .sub { font-size: 10px; }
   /* 2026-10-04 — Dashboard Admin per journey (RENDER.dashboard / dashSecHTML) */
   .jd-hero { position: relative; overflow: hidden; border-radius: var(--r-lg); padding: 18px 18px 16px; margin-bottom: 16px; color: #fff; background: linear-gradient(140deg, var(--jc) 0%, color-mix(in srgb, var(--jc) 60%, #000) 100%); box-shadow: 0 10px 28px color-mix(in srgb, var(--jc) 35%, transparent); }
+  /* 2026-10-17: foto kelas (sama dgn kartu Discipleship Journey di JB3 HOME) di balik hero, ditutup gradasi warna kelas */
+  .jd-hero--ph { background: linear-gradient(165deg, color-mix(in srgb, var(--jc) 50%, transparent) 0%, color-mix(in srgb, var(--jc) 88%, #000) 62%, color-mix(in srgb, var(--jc) 62%, #000) 100%), var(--ph) center 30% / cover no-repeat, var(--jc); }
+  .jd-hero-ic svg { width: 23px; height: 23px; }
   .jd-hero-deco { position: absolute; right: 0; top: 0; width: 160px; height: 160px; pointer-events: none; }
   .jd-hero-top { position: relative; display: flex; align-items: center; gap: 12px; }
   .jd-hero-ic { flex: none; width: 46px; height: 46px; border-radius: 14px; display: grid; place-items: center; font-size: 23px; background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.25); }
@@ -353,12 +356,21 @@
   .jd-chips span { font-size: 12px; font-weight: 600; padding: 5px 10px; border-radius: 999px; background: var(--surface-2); color: var(--ink-soft); border: 1px solid var(--line); }
   .jd-empty { margin: 12px 0 0; font-size: 12px; color: var(--ink-faint); }
   .jd-note { margin: 4px 4px 12px; font-size: 11.5px; line-height: 1.5; color: var(--ink-faint); }
-  .tab.jtab .ico { font-size: 20px; line-height: 1; width: 42px; height: 34px; color: var(--ink-faint); }
-  .tab.jtab .lbl { font-size: 10.5px; }
+  /* 2026-10-17: nav bar — ikon SVG dlm tile berwarna kelas (palet kartu Discipleship di JB3 HOME) */
+  .tab.jtab { gap: 4px; padding-top: 2px; }
+  .tab.jtab .ico { position: relative; width: 38px; height: 32px; border-radius: 12px; color: color-mix(in srgb, var(--jc) 78%, var(--ink-faint)); background: color-mix(in srgb, var(--jc) 11%, transparent); transition: transform .22s cubic-bezier(.3,1.4,.5,1), background .2s, box-shadow .2s; }
+  .tab.jtab .ico svg { width: 19px; height: 19px; stroke: currentColor; }
+  .tab.jtab .tab-n { position: absolute; top: -4px; right: -5px; min-width: 15px; height: 15px; padding: 0 3px; border-radius: 999px; display: grid; place-items: center; font-family: var(--font-display); font-style: normal; font-size: 9.5px; font-weight: 700; line-height: 1; color: #fff; background: var(--jc); border: 1.5px solid var(--paper); }
+  .tab.jtab .lbl { font-size: 10.5px; letter-spacing: .01em; }
   .tab.jtab[aria-current="page"] { color: var(--jc); }
-  .tab.jtab[aria-current="page"] .ico { background: var(--jc); color: #fff; }
+  .tab.jtab[aria-current="page"] .ico { color: #fff; transform: translateY(-3px); background: linear-gradient(145deg, color-mix(in srgb, var(--jc) 82%, #fff), var(--jc) 55%, color-mix(in srgb, var(--jc) 70%, #000)); box-shadow: 0 6px 14px color-mix(in srgb, var(--jc) 42%, transparent), inset 0 1px 0 rgba(255,255,255,.35); }
+  .tab.jtab[aria-current="page"] .ico svg { stroke: #fff; }
+  .tab.jtab[aria-current="page"] .tab-n { color: var(--jc); background: #fff; border-color: var(--jc); }
+  .tab.jtab:active .ico { transform: scale(.92); }
   :root[data-theme="dark"] .tab.jtab[aria-current="page"] { color: var(--ink); }
-  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .tab.jtab[aria-current="page"] { color: var(--ink); } }
+  :root[data-theme="dark"] .tab.jtab:not([aria-current]) .ico { background: color-mix(in srgb, var(--jc) 20%, transparent); color: color-mix(in srgb, var(--jc) 45%, var(--ink)); }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .tab.jtab[aria-current="page"] { color: var(--ink); } :root:not([data-theme="light"]) .tab.jtab:not([aria-current]) .ico { background: color-mix(in srgb, var(--jc) 20%, transparent); color: color-mix(in srgb, var(--jc) 45%, var(--ink)); } }
+  @media (prefers-reduced-motion: reduce) { .tab.jtab .ico { transition: none; } }
   .appbar__gear { flex: none; border: none; background: none; padding: 6px; margin: -6px -2px -6px 0; color: var(--ink-soft); cursor: pointer; border-radius: 8px; display: inline-flex; }
   @media (prefers-reduced-motion: reduce) { .jd-hero-nums span.hot { animation: none; } .jd-chev { transition: none; } }
   /* 2026-10-04 — Feedback Rock Solid 3 (RENDER.rs3feedback) */
@@ -561,6 +573,10 @@
   .bj-stage summary { list-style: none; display: flex; align-items: center; gap: 12px; padding: 14px 14px 14px 12px; cursor: pointer; }
   .bj-stage summary::-webkit-details-marker { display: none; }
   .bj-stage-ic { flex: none; width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center; font-size: 22px; background: color-mix(in srgb, var(--jc) 14%, var(--surface)); }
+  .bj-stage-ph { position: relative; overflow: visible; padding: 0; background: var(--jc); }
+  .bj-stage-ph img { width: 100%; height: 100%; object-fit: cover; border-radius: inherit; display: block; }
+  .bj-stage-ph::after { content: ""; position: absolute; inset: 0; border-radius: inherit; background: linear-gradient(to bottom, transparent 35%, color-mix(in srgb, var(--jc) 55%, transparent)); }
+  .bj-stage-ph i { position: absolute; right: -5px; bottom: -5px; z-index: 1; width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; font-family: var(--font-display); font-style: normal; font-size: 11px; font-weight: 700; color: #fff; background: var(--jc); border: 2px solid var(--surface); }
   .bj-stage-t { flex: 1; min-width: 0; }
   .bj-stage-t small { display: block; font-size: 11px; font-weight: 800; letter-spacing: .06em; color: var(--jc); text-transform: uppercase; }
   .bj-stage-t b { display: block; font-size: 16px; line-height: 1.25; }
@@ -837,14 +853,26 @@
       <span class="identity-badge">${state.persona === "ADMIN" ? "Admin" : "Peserta"}</span></span>`;
     if (isAdm) {
       el("tabbar").innerHTML = `<button class="tab jtab" style="--jc:var(--accent);" data-goto="results" data-tabnav="1" ${state.page === "results" ? 'aria-current="page"' : ""} aria-label="Dashboard Peserta">
-        <span class="ico">📊</span><span class="lbl">Peserta</span></button>` + DASH_JOURNEYS.map(c => `<button class="tab jtab" style="--jc:${c.color};" data-dashtab="${c.key}" ${state.page === "dashboard" && dashCfg().key === c.key ? 'aria-current="page"' : ""} aria-label="${esc(c.title)}">
-        <span class="ico">${c.icon}</span><span class="lbl">${c.tab}</span></button>`).join("");
+        ${tabIcoHTML("results")}<span class="lbl">Peserta</span></button>` + DASH_JOURNEYS.map(c => `<button class="tab jtab" style="--jc:${c.color};" data-dashtab="${c.key}" ${state.page === "dashboard" && dashCfg().key === c.key ? 'aria-current="page"' : ""} aria-label="${esc(c.title)}">
+        ${tabIcoHTML(c.key, c.classIdx + 1)}<span class="lbl">${c.tab}</span></button>`).join("");
       return;
     }
     el("tabbar").innerHTML = TABS.PESERTA.map(t => { const c = t.k === "journey" ? { color:"var(--accent)", title:"Beranda", icon:"🏠", tab:"Beranda" } : DASH_JOURNEYS.find(x => x.key === t.k);
       return `<button class="tab jtab" style="--jc:${c.color};" data-goto="${t.p}" data-tabnav="1" ${meta.tab === t.p ? 'aria-current="page"' : ""} aria-label="${esc(c.title)}">
-      <span class="ico">${c.icon}</span><span class="lbl">${c.tab}</span></button>`; }).join("");
+      ${tabIcoHTML(t.k, c.classIdx != null ? c.classIdx + 1 : 0)}<span class="lbl">${c.tab}</span></button>`; }).join("");
   }
+
+  // 2026-10-17: ikon nav bar SVG (garis, gaya JB3 HOME) menggantikan emoji — tile berwarna per kelas + nomor tahap.
+  const NAV_IC = {
+    journey:'<path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"/>',
+    results:'<path d="M4 20V10"/><path d="M10 20V4"/><path d="M16 20v-7"/><path d="M22 20H2"/>',
+    rs1:'<path d="M3 20h18"/><path d="M5 20v-5l3-3h8l3 3v5"/><path d="M8 12V8l4-4 4 4v4"/>',
+    rs2:'<path d="M12 21v-9"/><path d="M12 12c0-4 3-7 8-7 0 4-3 7-8 7z"/><path d="M12 14c0-3-2.5-5.5-7-5.5 0 3 2.5 5.5 7 5.5z"/>',
+    rs3:'<path d="M12 2v4"/><path d="M10 4h4"/><path d="M5 21V11l7-5 7 5v10"/><path d="M3 21h18"/><path d="M10 21v-4a2 2 0 0 1 4 0v4"/>',
+    lts1:'<circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/>',
+    lts2:'<circle cx="9" cy="7" r="3"/><path d="M3 21v-1a6 6 0 0 1 12 0v1"/><path d="M16 4.5a3 3 0 0 1 0 5"/><path d="M18 14a5 5 0 0 1 3 4.6V21"/>',
+  };
+  const tabIcoHTML = (k, n) => `<span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${NAV_IC[k] || NAV_IC.journey}</svg>${n ? `<i class="tab-n">${n}</i>` : ""}</span>`;
 
   /* ---------------- RENDER ---------------- */
   const RENDER = {};
@@ -1013,19 +1041,19 @@
   // Link: #p=<page> (diingat lewat sessionStorage kalau harus login dulu).
   // Tanda "sudah kirim" cuma di perangkat (localStorage) — supaya anonim.
   const FB_CLASSES = {
-    rs1:  { title:"Rock Solid 1", badge:"🪨 Rock Solid 1", color:"#5F7F5A", until:"selesai", page:"fbrs1", sentKey:"dj_fb_sent_rs1",
+    rs1:  { title:"Rock Solid 1", badge:"🪨 Rock Solid 1", color:"#5B6B77", until:"selesai", page:"fbrs1", sentKey:"dj_fb_sent_rs1",
             eligible:() => state.rs1AccessStatus === "approved", lockGoto:"rs1", lockBtn:"Ke Post-Test Rock Solid 1",
             lockText:"Form ini hanya untuk peserta yang aksesnya ke post-test Rock Solid 1 sudah disetujui Admin. Ajukan akses lewat tab RS1." },
-    rs2:  { title:"Rock Solid 2", badge:"🌱 Rock Solid 2", color:"#B4822F", until:"selesai", page:"fbrs2", sentKey:"dj_fb_sent_rs2",
+    rs2:  { title:"Rock Solid 2", badge:"🌱 Rock Solid 2", color:"#5B6B77", until:"selesai", page:"fbrs2", sentKey:"dj_fb_sent_rs2",
             eligible:() => state.rs2AccessStatus === "approved", lockGoto:"rs2", lockBtn:"Ke Post-Test Rock Solid 2",
             lockText:"Form ini hanya untuk peserta yang aksesnya ke post-test Rock Solid 2 sudah disetujui Admin. Ajukan akses lewat tab RS2." },
-    rs3:  { title:"Rock Solid 3", badge:"📘 Rock Solid 3 · Firm Local Church", color:"#4472A8", until:"lulus", page:"rs3feedback", sentKey:"dj_rs3fb_sent",
+    rs3:  { title:"Rock Solid 3", badge:"📘 Rock Solid 3 · Firm Local Church", color:"#5B6B77", until:"lulus", page:"rs3feedback", sentKey:"dj_rs3fb_sent",
             eligible:() => state.rs3AccessStatus === "approved", lockGoto:"rs3", lockBtn:"Ke Post-Test Rock Solid 3",
             lockText:"Form ini hanya untuk peserta yang aksesnya ke post-test Rock Solid 3 sudah disetujui Admin. Ajukan akses lewat kartu Rock Solid 3 di beranda." },
-    lts1: { title:"Lead To Serve 1", badge:"🧭 Lead To Serve 1 · Serve Road Map", color:"#4B3F72", until:"selesai", page:"fblts1", sentKey:"dj_fb_sent_lts1",
+    lts1: { title:"Lead To Serve 1", badge:"🧭 Lead To Serve 1 · Serve Road Map", color:"#B5623B", until:"selesai", page:"fblts1", sentKey:"dj_fb_sent_lts1",
             eligible:() => state.accessStatus === "approved", lockGoto:"home", lockBtn:"Ke Serve Road Map",
             lockText:"Form ini hanya untuk peserta yang aksesnya ke Lead To Serve 1 (Serve Road Map) sudah disetujui Admin." },
-    lts2: { title:"Lead To Serve 2", badge:"🤝 Lead To Serve 2 · Servant Leadership", color:"#93683F", until:"lulus", page:"fblts2", sentKey:"dj_fb_sent_lts2",
+    lts2: { title:"Lead To Serve 2", badge:"🤝 Lead To Serve 2 · Servant Leadership", color:"#B5623B", until:"lulus", page:"fblts2", sentKey:"dj_fb_sent_lts2",
             eligible:() => state.lts2AccessStatus === "approved", lockGoto:"lts2", lockBtn:"Ke Post-Test Lead To Serve 2",
             lockText:"Form ini hanya untuk peserta yang aksesnya ke post-test Lead To Serve 2 sudah disetujui Admin. Ajukan akses lewat kartu Lead To Serve 2 di beranda." },
   };
@@ -1173,9 +1201,9 @@
   const BAND_TONE = { Excellent:"ex", Better:"bt", Good:"gd", Underperform:"up" };
   function pjHeroHTML(k, sub, pill) {
     const c = DASH_JOURNEYS.find(x => x.key === k);
-    return `<div class="jd-hero pj-hero" style="--jc:${c.color};">
+    return `<div class="jd-hero pj-hero jd-hero--ph" style="--jc:${c.color};--ph:url(${c.ph});">
         <svg class="jd-hero-deco" viewBox="0 0 120 120" aria-hidden="true"><circle cx="100" cy="18" r="46" fill="#fff" opacity=".08"/><circle cx="18" cy="112" r="34" fill="#fff" opacity=".06"/><path d="M8 92 C 34 70, 52 98, 78 72 S 112 58, 118 34" fill="none" stroke="#fff" stroke-width="1.6" stroke-dasharray="3 5" opacity=".35"/></svg>
-        <div class="jd-hero-top"><span class="jd-hero-ic">${c.icon}</span><div><small>Discipleship Journey · ${esc(c.tab)}</small><b>${esc(c.title)}</b></div></div>
+        <div class="jd-hero-top"><span class="jd-hero-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${NAV_IC[c.key]}</svg></span><div><small>Discipleship Journey · Tahap ${c.classIdx + 1} · ${esc(c.tab)}</small><b>${esc(c.title)}</b></div></div>
         <p class="jd-hero-sub">${sub}</p>
         ${pill ? `<span class="pj-pill">${pill}</span>` : ""}
       </div>`;
@@ -1345,7 +1373,7 @@
       const pill = st === "done" ? "done" : st === "wait" ? "wait" : isCur ? "now" : "todo";
       return `<details class="card bj-stage" style="--jc:${c.color};" data-bj="${k}">
         <summary>
-          <span class="bj-stage-ic">${c.icon}</span>
+          <span class="bj-stage-ic bj-stage-ph"><img src="${c.ph}" alt="" loading="lazy" decoding="async"><i>${n}</i></span>
           <span class="bj-stage-t"><small>Tahap ${n} · ${c.tab}</small><b>${esc(c.title)}</b><em>${esc(d.tag)} ${bjStarsHTML(bjStars(k))}</em></span>
           <span class="bj-st bj-st--${pill}">${ST_LBL[pill]}</span>
           ${BJ_CHEV}
@@ -1669,11 +1697,11 @@
   // JB3 HOME Tracker). RS3/LTS1/LTS2: permintaan akses + kelas selesai.
   // Semua data-attribute tombol Setujui/Tolak/Hapus TETAP SAMA spt dulu.
   const DASH_JOURNEYS = [
-    { key:"rs1", tab:"RS1", title:"Rock Solid 1", sub:"Post-test Firm Foundation · 20 soal", icon:"🪨", color:"#5F7F5A", classIdx:0, stateKey:"rs1AccessRequests", attr:"pt" },
-    { key:"rs2", tab:"RS2", title:"Rock Solid 2", sub:"Post-test Firm Faith, True Knowledge · 40 soal", icon:"🌱", color:"#B4822F", classIdx:1, stateKey:"rs2AccessRequests", attr:"pt" },
-    { key:"rs3", tab:"RS3", title:"Rock Solid 3", sub:"Post-test Firm Local Church · 40 soal", icon:"📘", color:"#4472A8", classIdx:2, stateKey:"rs3AccessRequests", attr:"rs3" },
-    { key:"lts1", tab:"LTS1", title:"Lead To Serve 1", sub:"Serve Road Map · DISC · SSD · Karunia Rohani", icon:"🧭", color:"#4B3F72", classIdx:3, stateKey:"accessRequests", attr:"" },
-    { key:"lts2", tab:"LTS2", title:"Lead To Serve 2", sub:"Post-test Servant Leadership · 25 soal", icon:"🤝", color:"#93683F", classIdx:4, stateKey:"lts2AccessRequests", attr:"lts2" },
+    { key:"rs1", tab:"RS1", ph:"img/dj-rs1.webp", ic:"rs1", title:"Rock Solid 1", sub:"Post-test Firm Foundation · 20 soal", icon:"🪨", color:"#5B6B77", classIdx:0, stateKey:"rs1AccessRequests", attr:"pt" },
+    { key:"rs2", tab:"RS2", ph:"img/dj-rs2.webp", ic:"rs2", title:"Rock Solid 2", sub:"Post-test Firm Faith, True Knowledge · 40 soal", icon:"🌱", color:"#5B6B77", classIdx:1, stateKey:"rs2AccessRequests", attr:"pt" },
+    { key:"rs3", tab:"RS3", ph:"img/dj-rs3.webp", ic:"rs3", title:"Rock Solid 3", sub:"Post-test Firm Local Church · 40 soal", icon:"📘", color:"#5B6B77", classIdx:2, stateKey:"rs3AccessRequests", attr:"rs3" },
+    { key:"lts1", tab:"LTS1", ph:"img/dj-lts1.webp", ic:"lts1", title:"Lead To Serve 1", sub:"Serve Road Map · DISC · SSD · Karunia Rohani", icon:"🧭", color:"#B5623B", classIdx:3, stateKey:"accessRequests", attr:"" },
+    { key:"lts2", tab:"LTS2", ph:"img/dj-lts2.webp", ic:"lts2", title:"Lead To Serve 2", sub:"Post-test Servant Leadership · 25 soal", icon:"🤝", color:"#B5623B", classIdx:4, stateKey:"lts2AccessRequests", attr:"lts2" },
   ];
   const dashCfg = () => DASH_JOURNEYS.find(c => c.key === state.dashKey) || DASH_JOURNEYS[0];
   // Halaman awal Admin: journey pertama yg punya permintaan Menunggu, kalau tak ada → RS1.
@@ -1746,9 +1774,9 @@
         + `<p class="jd-note">Kelas ${esc(cfg.title)} belum punya alur digital di Discipleship Journey — status selesai ditandai lewat JB3 HOME Tracker (detail anggota / profil pengguna).</p>`;
     }
     el("dashboardBody").innerHTML = `
-      <div class="jd-hero" style="--jc:${cfg.color};">
+      <div class="jd-hero jd-hero--ph" style="--jc:${cfg.color};--ph:url(${cfg.ph});">
         <svg class="jd-hero-deco" viewBox="0 0 120 120" aria-hidden="true"><circle cx="100" cy="18" r="46" fill="#fff" opacity=".08"/><circle cx="18" cy="112" r="34" fill="#fff" opacity=".06"/><path d="M8 92 C 34 70, 52 98, 78 72 S 112 58, 118 34" fill="none" stroke="#fff" stroke-width="1.6" stroke-dasharray="3 5" opacity=".35"/></svg>
-        <div class="jd-hero-top"><span class="jd-hero-ic">${cfg.icon}</span><div><small>Discipleship Journey · ${esc(cfg.tab)}</small><b>${esc(cfg.title)}</b></div></div>
+        <div class="jd-hero-top"><span class="jd-hero-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${NAV_IC[cfg.key]}</svg></span><div><small>Discipleship Journey · ${esc(cfg.tab)}</small><b>${esc(cfg.title)}</b></div></div>
         <p class="jd-hero-sub">${esc(cfg.sub)}</p>
         <div class="jd-hero-nums">${nums.map(([n, l, c]) => `<span class="${c}"><b>${n}</b>${l}</span>`).join("")}</div>
         <div class="jd-prog" role="img" aria-label="${done.length} dari ${people.length} akun selesai kelas"><i style="width:${pctDone}%"></i></div>
