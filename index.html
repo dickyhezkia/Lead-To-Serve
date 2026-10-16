@@ -507,8 +507,8 @@
   .dinsight .drow ul { margin:0; padding-left:18px; font-size:13px; line-height:1.5; color:var(--ink); }
   /* 2026-10-15 — Bahan Ajar RS1–3 (RENDER.materi, Admin saja) */
   .mt-lock { font-size:11.5px; font-weight:700; color:var(--ink-soft); background:rgba(0,0,0,.05); border-radius:999px; padding:6px 12px; display:inline-block; margin:4px 0 10px; }
-  .mt-tabs { display:flex; gap:8px; margin-bottom:12px; }
-  .mt-tab { flex:1; border:1.5px solid var(--jc); background:transparent; color:var(--jc); border-radius:12px; padding:9px 6px; font-weight:800; font-size:13px; cursor:pointer; font-family:inherit; }
+  .mt-tabs { display:flex; gap:6px; margin-bottom:12px; }
+  .mt-tab { flex:1; border:1.5px solid var(--jc); background:transparent; color:var(--jc); border-radius:12px; padding:8px 2px; font-weight:800; font-size:12px; white-space:nowrap; cursor:pointer; font-family:inherit; }
   .mt-tab[aria-pressed="true"] { background:var(--jc); color:#fff; }
   .mt-intro { margin-bottom:10px; }
   .mt-h2 { font-family:var(--font-display); font-size:18px; margin:0 0 6px; line-height:1.3; }
@@ -655,7 +655,7 @@
         </button>
         <img class="appbar__logo" src="./logo-mark.png" alt="JB3 Church">
         <div class="appbar__title" id="appbarTitle">Discipleship Journey</div>
-        <button class="appbar__gear" id="materiBtn" hidden aria-label="Bahan Ajar Rock Solid (Admin)" title="Bahan Ajar Rock Solid 1–3 (khusus Admin)">
+        <button class="appbar__gear" id="materiBtn" hidden aria-label="Bahan Ajar Discipleship Journey" title="Bahan Ajar RS1–3 & LTS1–2 (Admin & Senior Pastor)">
           <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2z"/><path d="M22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z"/></svg>
         </button>
         <button class="appbar__gear" id="gearBtn" hidden aria-label="Profil & pengaturan" title="Profil & pengaturan">
@@ -820,7 +820,7 @@
     expansion: { h:"Expansion", back:true },
     hasil: { h:"Hasil Asesmen", back:true },
     dashboard: { h:"Dashboard Admin", tab:"dashboard" },
-    materi: { h:"Bahan Ajar Rock Solid", back:true },
+    materi: { h:"Bahan Ajar", back:true },
     profile: { h:"Profil Saya", tab:"profile" },
   };
 
@@ -857,8 +857,9 @@
     const isAdm = state.persona === "ADMIN";
     el("appbar").setAttribute("data-back", (meta.back || state.page === "profile") ? "true" : "false");
     el("gearBtn").hidden = state.page === "profile";
-    // 2026-10-15: Bahan Ajar RS1–3 — ikon buku di bar atas, HANYA Admin (data juga dikunci RLS dj_materi).
-    el("materiBtn").hidden = !isAdm || state.page === "materi";
+    // 2026-10-15: Bahan Ajar — ikon buku di bar atas, HANYA Admin (data juga dikunci RLS dj_materi).
+    // 2026-10-17: + Senior Pastor (profiles.is_sp; RLS v_dj_materi_sp.sql), + LTS1/LTS2.
+    el("materiBtn").hidden = !canMateri() || state.page === "materi";
     el("appbarTitle").textContent = meta.h || "Discipleship Journey";
     const idb = el("identityBar");
     idb.innerHTML = `<span class="ib-ava">${esc(initials(state.myProfile && state.myProfile.name))}</span>
@@ -1865,8 +1866,9 @@
       return `<details class="card mt-sec"><summary>${mdInline(head)}</summary><div class="mt-body">${mdBlocks(lines.slice(1))}</div></details>`;
     }).join("");
   }
+  const canMateri = () => state.persona === "ADMIN" || !!(state.myProfile && state.myProfile.is_sp);
   RENDER.materi = function () {
-    if (state.persona !== "ADMIN") { show("home", { replace:true }); return; }
+    if (!canMateri()) { show(state.persona === "ADMIN" ? "home" : "journey", { replace:true }); return; }
     const box = el("materiBody");
     if (state.materi === null) {
       state.materi = undefined;
@@ -1878,9 +1880,9 @@
     if (state.materi === undefined) return;
     const rows = state.materi || [];
     const cur = rows.find(r => r.key === state.materiKey) || rows[0];
-    const tabs = ["rs1", "rs2", "rs3"].map(k => { const c = DASH_JOURNEYS.find(x => x.key === k);
+    const tabs = ["rs1", "rs2", "rs3", "lts1", "lts2"].map(k => { const c = DASH_JOURNEYS.find(x => x.key === k);
       return `<button type="button" class="mt-tab" style="--jc:${c.color};" data-materitab="${k}" aria-pressed="${!!cur && cur.key === k}">${c.icon} ${c.tab}</button>`; }).join("");
-    box.innerHTML = `<div class="mt-lock">🔒 Khusus Admin · tidak terlihat oleh peserta</div>
+    box.innerHTML = `<div class="mt-lock">🔒 Khusus Admin & Senior Pastor · tidak terlihat oleh peserta</div>
       <div class="mt-tabs">${tabs}</div>
       ${cur ? mdDoc(cur.body) + `<p class="jd-note">Diperbarui ${esc(new Date(cur.updated_at).toLocaleDateString("id-ID", { day:"numeric", month:"long", year:"numeric" }))}</p>`
         : `<div class="card pad"><p class="sub">Belum ada bahan untuk kelas ini.</p></div>`}`;

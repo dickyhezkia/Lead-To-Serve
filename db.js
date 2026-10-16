@@ -71,7 +71,7 @@ window.makeDB = function makeDB(sb) {
     async myProfile() {
       const s = await this.session();
       if (!s) return null;
-      const { data, error } = await sb.from("profiles").select("id,name,phone,role,created_at,classes").eq("id", s.user.id).maybeSingle();
+      const { data, error } = await sb.from("profiles").select("id,name,phone,role,created_at,classes,is_sp").eq("id", s.user.id).maybeSingle();
       if (error) throw error;
       return data ? inProfile(data) : null;
     },
