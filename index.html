@@ -356,22 +356,20 @@
   .jd-chips span { font-size: 12px; font-weight: 600; padding: 5px 10px; border-radius: 999px; background: var(--surface-2); color: var(--ink-soft); border: 1px solid var(--line); }
   .jd-empty { margin: 12px 0 0; font-size: 12px; color: var(--ink-faint); }
   .jd-note { margin: 4px 4px 12px; font-size: 11.5px; line-height: 1.5; color: var(--ink-faint); }
-  /* 2026-10-17 v2: nav bar — foto kelas bulat (realistis) + Beranda ikon; aktif = cincin warna kelas, terangkat */
+  /* 2026-10-17: nav bar — ikon SVG dlm tile berwarna kelas (palet kartu Discipleship di JB3 HOME); v2 foto bulat dibatalkan user */
   .tab.jtab { gap: 4px; padding-top: 2px; }
-  .tab.jtab .ico { position: relative; width: 34px; height: 34px; border-radius: 50%; color: var(--ink-faint); background: transparent; transition: transform .25s cubic-bezier(.3,1.4,.5,1), box-shadow .2s, filter .2s; }
-  .tab.jtab .ico svg { width: 22px; height: 22px; stroke: currentColor; }
-  .tab.jtab .ico--ph { overflow: hidden; background: var(--jc); box-shadow: 0 0 0 1.5px var(--paper), 0 0 0 2.5px color-mix(in srgb, var(--line-strong) 80%, transparent), 0 2px 5px rgba(40,30,15,.18); filter: saturate(.75) brightness(.97); }
-  .tab.jtab .ico--ph img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .tab.jtab .lbl { font-size: 10.5px; letter-spacing: .02em; }
+  .tab.jtab .ico { position: relative; width: 38px; height: 32px; border-radius: 12px; color: color-mix(in srgb, var(--jc) 78%, var(--ink-faint)); background: color-mix(in srgb, var(--jc) 11%, transparent); transition: transform .22s cubic-bezier(.3,1.4,.5,1), background .2s, box-shadow .2s; }
+  .tab.jtab .ico svg { width: 19px; height: 19px; stroke: currentColor; }
+  .tab.jtab .tab-n { position: absolute; top: -4px; right: -5px; min-width: 15px; height: 15px; padding: 0 3px; border-radius: 999px; display: grid; place-items: center; font-family: var(--font-display); font-style: normal; font-size: 9.5px; font-weight: 700; line-height: 1; color: #fff; background: var(--jc); border: 1.5px solid var(--paper); }
+  .tab.jtab .lbl { font-size: 10.5px; letter-spacing: .01em; }
   .tab.jtab[aria-current="page"] { color: var(--jc); }
-  .tab.jtab[aria-current="page"] .ico { transform: translateY(-4px) scale(1.12); }
-  .tab.jtab[aria-current="page"] .ico:not(.ico--ph) { color: #fff; background: linear-gradient(150deg, color-mix(in srgb, var(--jc) 78%, #fff), var(--jc) 55%, color-mix(in srgb, var(--jc) 72%, #000)); box-shadow: 0 6px 14px color-mix(in srgb, var(--jc) 40%, transparent), inset 0 1px 0 rgba(255,255,255,.35); }
-  .tab.jtab[aria-current="page"] .ico svg { stroke: #fff; width: 19px; height: 19px; }
-  .tab.jtab[aria-current="page"] .ico--ph { filter: none; box-shadow: 0 0 0 2px var(--paper), 0 0 0 4px var(--jc), 0 7px 14px color-mix(in srgb, var(--jc) 45%, transparent); }
-  .tab.jtab[aria-current="page"] .lbl { font-weight: 800; }
+  .tab.jtab[aria-current="page"] .ico { color: #fff; transform: translateY(-3px); background: linear-gradient(145deg, color-mix(in srgb, var(--jc) 82%, #fff), var(--jc) 55%, color-mix(in srgb, var(--jc) 70%, #000)); box-shadow: 0 6px 14px color-mix(in srgb, var(--jc) 42%, transparent), inset 0 1px 0 rgba(255,255,255,.35); }
+  .tab.jtab[aria-current="page"] .ico svg { stroke: #fff; }
+  .tab.jtab[aria-current="page"] .tab-n { color: var(--jc); background: #fff; border-color: var(--jc); }
   .tab.jtab:active .ico { transform: scale(.92); }
   :root[data-theme="dark"] .tab.jtab[aria-current="page"] { color: var(--ink); }
-  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .tab.jtab[aria-current="page"] { color: var(--ink); } }
+  :root[data-theme="dark"] .tab.jtab:not([aria-current]) .ico { background: color-mix(in srgb, var(--jc) 20%, transparent); color: color-mix(in srgb, var(--jc) 45%, var(--ink)); }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .tab.jtab[aria-current="page"] { color: var(--ink); } :root:not([data-theme="light"]) .tab.jtab:not([aria-current]) .ico { background: color-mix(in srgb, var(--jc) 20%, transparent); color: color-mix(in srgb, var(--jc) 45%, var(--ink)); } }
   @media (prefers-reduced-motion: reduce) { .tab.jtab .ico { transition: none; } }
   .appbar__gear { flex: none; border: none; background: none; padding: 6px; margin: -6px -2px -6px 0; color: var(--ink-soft); cursor: pointer; border-radius: 8px; display: inline-flex; }
   @media (prefers-reduced-motion: reduce) { .jd-hero-nums span.hot { animation: none; } .jd-chev { transition: none; } }
@@ -868,12 +866,12 @@
     if (isAdm) {
       el("tabbar").innerHTML = `<button class="tab jtab" style="--jc:var(--accent);" data-goto="results" data-tabnav="1" ${state.page === "results" ? 'aria-current="page"' : ""} aria-label="Dashboard Peserta">
         ${tabIcoHTML("results")}<span class="lbl">Peserta</span></button>` + DASH_JOURNEYS.map(c => `<button class="tab jtab" style="--jc:${c.color};" data-dashtab="${c.key}" ${state.page === "dashboard" && dashCfg().key === c.key ? 'aria-current="page"' : ""} aria-label="${esc(c.title)}">
-        ${tabIcoHTML(c.key, c.ph)}<span class="lbl">${c.tab}</span></button>`).join("");
+        ${tabIcoHTML(c.key, c.classIdx + 1)}<span class="lbl">${c.tab}</span></button>`).join("");
       return;
     }
     el("tabbar").innerHTML = TABS.PESERTA.map(t => { const c = t.k === "journey" ? { color:"var(--accent)", title:"Beranda", icon:"🏠", tab:"Beranda" } : DASH_JOURNEYS.find(x => x.key === t.k);
       return `<button class="tab jtab" style="--jc:${c.color};" data-goto="${t.p}" data-tabnav="1" ${meta.tab === t.p ? 'aria-current="page"' : ""} aria-label="${esc(c.title)}">
-      ${tabIcoHTML(t.k, c.ph)}<span class="lbl">${c.tab}</span></button>`; }).join("");
+      ${tabIcoHTML(t.k, c.classIdx != null ? c.classIdx + 1 : 0)}<span class="lbl">${c.tab}</span></button>`; }).join("");
   }
 
   // 2026-10-17: ikon nav bar SVG (garis, gaya JB3 HOME) menggantikan emoji — tile berwarna per kelas + nomor tahap.
@@ -886,10 +884,7 @@
     lts1:'<circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/>',
     lts2:'<circle cx="9" cy="7" r="3"/><path d="M3 21v-1a6 6 0 0 1 12 0v1"/><path d="M16 4.5a3 3 0 0 1 0 5"/><path d="M18 14a5 5 0 0 1 3 4.6V21"/>',
   };
-  // v2 (user: "buat estetik dan visual realistik"): tab kelas = foto kelas bulat (sama dgn kartu JB3 HOME); Beranda/Peserta tetap ikon.
-  const tabIcoHTML = (k, ph) => ph
-    ? `<span class="ico ico--ph"><img src="${ph}" alt="" decoding="async"></span>`
-    : `<span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${NAV_IC[k] || NAV_IC.journey}</svg></span>`;
+  const tabIcoHTML = (k, n) => `<span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${NAV_IC[k] || NAV_IC.journey}</svg>${n ? `<i class="tab-n">${n}</i>` : ""}</span>`;
 
   /* ---------------- RENDER ---------------- */
   const RENDER = {};
@@ -1355,7 +1350,9 @@
     const curPh = BJ_PHASES.find(ph => ph.keys.includes(cur));
     const segs = BJ_PHASES.map((ph, i) => {
       const done = ph.keys.every(k => bjStatus(k) === "done"), isCur = ph === curPh;
-      const col = done ? "#7A3F22" : isCur ? "#B5623B" : "#C98F72";
+      // 2026-10-17: Grow & Plant (RS1–3) = slate, sama dgn warna kelas RS; Serve & Lead tetap terracotta.
+      const rs = ph.key === "grow" || ph.key === "plant";
+      const col = rs ? (done ? "#3F4B55" : isCur ? "#5B6B77" : "#8E9CA6") : (done ? "#7A3F22" : isCur ? "#B5623B" : "#C98F72");
       const c = ph.ang, d1 = c - 38, d2 = c + 30, rev = ph.key === "grow";
       const head = `M ${pt(R - W / 2 - 6, d2)} L ${pt(R + W / 2 + 6, d2)} L ${pt(R, d2 + 13)} Z`;
       return `<g data-stage="${ph.keys[0]}" class="${isCur ? "cur" : ""}">
@@ -1365,12 +1362,12 @@
         <path d="${head}" fill="${col}"/>
         <text class="w"><textPath href="#bjw${i}" startOffset="50%">${ph.word}${done ? " ✓" : ""}</textPath></text>
         <text class="l"><textPath href="#bjl${i}" startOffset="50%">${esc(ph.cls.toUpperCase())}</textPath></text>
-        <text class="r${isCur ? " rc" : ""}"><textPath href="#bjr${i}" startOffset="50%">${esc(ph.role)}</textPath></text>
+        <text class="r${isCur ? " rc" : ""}"${isCur ? ` style="fill:${col}"` : ""}><textPath href="#bjr${i}" startOffset="50%">${esc(ph.role)}</textPath></text>
       </g>`;
     }).join("");
     const doneN = order.filter(k => bjStatus(k) === "done").length;
     const centre = curPh
-      ? `<text class="c1" x="${C}" y="${C - 30}">KAMU DI TAHAP</text><text class="c2" x="${C}" y="${C + 4}">${curPh.word}</text><text class="c3" x="${C}" y="${C + 28}">${esc(curPh.role)}</text><text class="c4" x="${C}" y="${C + 48}">${doneN}/5 kelas · ★ ${order.reduce((a, k) => a + bjStars(k), 0)} bintang</text>`
+      ? `<text class="c1" x="${C}" y="${C - 30}">KAMU DI TAHAP</text><text class="c2" x="${C}" y="${C + 4}"${curPh.key === "grow" || curPh.key === "plant" ? ' style="fill:#5B6B77"' : ""}>${curPh.word}</text><text class="c3" x="${C}" y="${C + 28}">${esc(curPh.role)}</text><text class="c4" x="${C}" y="${C + 48}">${doneN}/5 kelas · ★ ${order.reduce((a, k) => a + bjStars(k), 0)} bintang</text>`
       : `<text class="c1" x="${C}" y="${C - 22}">SIKLUS LENGKAP</text><text class="c2" x="${C}" y="${C + 10}">🎉</text><text class="c3" x="${C}" y="${C + 36}">Kini muridkan orang lain</text>`;
     return `<svg viewBox="0 0 340 340" role="img" aria-label="Siklus Discipleship Journey: Grow (Rock Solid 1–2), Plant (Rock Solid 3), Serve (Lead To Serve 1), Lead (Lead To Serve 2)">
       <circle cx="${C}" cy="${C}" r="168" class="disc"/><circle cx="${C}" cy="${C}" r="88" class="core"/>
