@@ -60,7 +60,10 @@ window.makeDB = function makeDB(sb) {
   };
   const wrap = ({ data, error }) => { if (error) throw error; return data; };
 
-  const inProfile = r => ({ id:r.id, name:r.name || "", phone:r.phone || "", role:r.role || "jemaat", createdAt:r.created_at || null });
+  // 2026-10-16 (user: "Dicky sudah lulus LTS2, perbaiki juga setiap koneksi pengguna"): classes DULU
+  // DIBUANG di sini → state.myProfile.classes selalu kosong utk SEMUA peserta (Beranda 0/5, "Belum
+  // ditandai selesai" di tab kelas) walau di DB sudah [true×5]. Sekarang ikut dibawa, dinormalisasi.
+  const inProfile = r => ({ id:r.id, name:r.name || "", phone:r.phone || "", role:r.role || "jemaat", createdAt:r.created_at || null, classes:normClasses(r.classes) });
 
   return {
     async session() { const { data } = await sb.auth.getSession(); return data.session; },
