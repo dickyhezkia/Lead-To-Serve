@@ -748,7 +748,7 @@
      viewport spt sebelumnya (tak ada DOM yg direndernya ke kanvas, tak ada
      breakpoint CSS yg bisa salah kebaca). Lihat buildRoadMapPdf()/
      buildHasilPdf() di bawah. Versi dipatok (bukan @latest) spy stabil. -->
-<script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<!-- 2026-10-17 (user: "masih lama"): jsPDF dimuat SETELAH halaman pertama tampil (loadPdfLib), tak lagi ikut boot -->
 <script src="./config.js"></script>
 <script src="./common.js"></script>
 <script src="./db.js"></script>
@@ -2371,7 +2371,13 @@
   // dihapus dari HTML/CSS — sisa `.printsheet` (base style) TETAP dipakai,
   // krn itu jg dipakai halaman "Lihat" (RENDER.serveview/hasilview, render
   // HTML biasa, tak pernah py masalah ini).
-  function pdfReady() { return !!(window.jspdf && window.jspdf.jsPDF); }
+  function pdfReady() { if (!(window.jspdf && window.jspdf.jsPDF)) loadPdfLib(); return !!(window.jspdf && window.jspdf.jsPDF); }
+  let pdfLibP = null;
+  function loadPdfLib() {
+    if (window.jspdf && window.jspdf.jsPDF) return Promise.resolve();
+    if (!pdfLibP) pdfLibP = new Promise((ok, no) => { const sc = document.createElement("script"); sc.src = "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"; sc.onload = ok; sc.onerror = () => { pdfLibP = null; no(new Error("jsPDF gagal dimuat")); }; document.head.appendChild(sc); });
+    return pdfLibP;
+  }
   // Alur teks vertikal (dipakai buildHasilPdf) — otomatis pindah halaman
   // (doc.addPage()) kalau blok berikutnya tak muat lagi, JADI TAK PERNAH
   // ada teks terpotong: kalau tak muat, digeser UTUH ke halaman baru.
@@ -2990,6 +2996,23 @@
   // 2026-10-17 (user: "saat buka discipleship journey lama"): dulu 3 tahap berurutan (profil → 13 query → 3 query).
   // Kini SATU tahap: peran ditebak dari kunjungan terakhir (localStorage dj_persona) supaya semua query jalan
   // bersamaan dgn myProfile; kalau tebakan salah, diulang sekali. Feedback RS3 (hanya halaman feedback) dimuat di latar.
+  // 2026-10-17 (user: "masih lama"): BUKA INSTAN — data terakhir disimpan di HP (localStorage dj_snap_v1, per akun).
+  // Saat dibuka lagi, halaman langsung tampil dari simpanan ini, lalu loadAll() memperbarui diam-diam & menggambar ulang.
+  const SNAP_KEY = "dj_snap_v1";
+  const SNAP_FIELDS = ["myProfile", "meId", "persona", "accessRequests", "rs3AccessRequests", "lts2AccessRequests", "classProgress", "postTestBest",
+    "accessStatus", "rs3AccessStatus", "lts2AccessStatus", "rs1AccessRequests", "rs2AccessRequests", "rs1AccessStatus", "rs2AccessStatus",
+    "rs1Result", "rs2Result", "rs3Result", "lts2Result", "myDisc", "myRoadmap", "mySsd", "myGifts"];
+  function snapSave() { try { const o = { t: Date.now() }; SNAP_FIELDS.forEach(k => { o[k] = state[k] === undefined ? null : state[k]; }); localStorage.setItem(SNAP_KEY, JSON.stringify(o)); } catch (e) {} }
+  function snapLoad(uid) {
+    try { const o = JSON.parse(localStorage.getItem(SNAP_KEY) || "null"); if (!o || !o.meId || o.meId !== uid || Date.now() - o.t > 14 * 864e5) return false;
+      SNAP_FIELDS.forEach(k => { state[k] = o[k]; });
+      state.draft.discPicks = (o.myDisc && o.myDisc.picks) ? o.myDisc.picks.slice() : [];
+      state.draft.roadmapData = (o.myRoadmap && o.myRoadmap.data) ? { ...o.myRoadmap.data } : {};
+      state.draft.ssdAnswers = (o.mySsd && o.mySsd.answers) ? { ...o.mySsd.answers } : {};
+      state.draft.giftsAnswers = (o.myGifts && o.myGifts.answers) ? { ...o.myGifts.answers } : {};
+      return true; } catch (e) { return false; }
+  }
+  function snapClear() { try { localStorage.removeItem(SNAP_KEY); } catch (e) {} }
   async function loadAll() {
     let guess = "PESERTA"; try { guess = localStorage.getItem("dj_persona") || "PESERTA"; } catch (e) {}
     const soft = (pr, fb) => pr.catch(e => { console.error(e); return fb; });
@@ -3033,19 +3056,20 @@
     // v_rs12_posttest.sql belum dijalankan, app tetap jalan, RS1/RS2 terkunci).
     if (isAdm) Object.assign(state, { rs1AccessRequests:pt.rs1, rs2AccessRequests:pt.rs2 });
     else Object.assign(state, { rs1AccessStatus:pt[0], rs2AccessStatus:pt[1] });
-    state.rs1Result = rs1Res; state.rs2Result = rs2Res; state.draft.rs1Answers = {}; state.draft.rs2Answers = {};
-    state.rs3Result = rs3Res; state.draft.rs3Answers = {};
-    state.lts2Result = lts2Res; state.draft.lts2Answers = {};
+    const keep = loadAll.keepDraft;   // segarkan di latar → jawaban yg sedang diisi tak dihapus
+    state.rs1Result = rs1Res; state.rs2Result = rs2Res; if (!keep) { state.draft.rs1Answers = {}; state.draft.rs2Answers = {}; }
+    state.rs3Result = rs3Res; if (!keep) state.draft.rs3Answers = {};
+    state.lts2Result = lts2Res; if (!keep) state.draft.lts2Answers = {};
     if (isAdm || state.accessStatus === "approved") {
-      state.myDisc = disc;
-      state.draft.discPicks = (disc && disc.picks && disc.picks.length) ? disc.picks : [];
-      state.myRoadmap = roadmap;
-      state.draft.roadmapData = (roadmap && roadmap.data) ? { ...roadmap.data } : {};
-      state.mySsd = ssd;
-      state.draft.ssdAnswers = (ssd && ssd.answers) ? { ...ssd.answers } : {};
-      state.myGifts = gifts;
-      state.draft.giftsAnswers = (gifts && gifts.answers) ? { ...gifts.answers } : {};
+      state.myDisc = disc; state.myRoadmap = roadmap; state.mySsd = ssd; state.myGifts = gifts;
+      if (!keep) {
+        state.draft.discPicks = (disc && disc.picks && disc.picks.length) ? disc.picks : [];
+        state.draft.roadmapData = (roadmap && roadmap.data) ? { ...roadmap.data } : {};
+        state.draft.ssdAnswers = (ssd && ssd.answers) ? { ...ssd.answers } : {};
+        state.draft.giftsAnswers = (gifts && gifts.answers) ? { ...gifts.answers } : {};
+      }
     }
+    snapSave();
   }
 
   // 2026-09-22 (permintaan user, "tombol mulai" di kartu Lead To Serve 1 di
@@ -3096,8 +3120,27 @@
     const handoff = await claimHandoffSession();
     const sess = await DB.session();
     if (!sess) { show("login", { replace:true }); return; }
+    // 2026-10-17: buka instan dari simpanan (bila ada & akun sama), lalu segarkan di latar
+    if (snapLoad(sess.user && sess.user.id)) {
+      let pend0 = null; try { pend0 = sessionStorage.getItem("dj_pending_page"); sessionStorage.removeItem("dj_pending_page"); } catch (e) {}
+      pend0 = handoff.page || pend0;
+      const fb0 = pend0 && (FB_PAGE[pend0] || pend0 === "feedback");
+      if (state.persona === "ADMIN") { state.participantResults = null; state.participantResultsP = null; }
+      show(state.persona === "ADMIN" ? ((pend0 && META[pend0]) ? pend0 : "home") : (fb0 ? pend0 : "journey"), { replace:true });
+      setTimeout(loadPdfLib, 2500);
+      loadAll.keepDraft = true;
+      try {
+        await loadAll();
+        if (!state.myProfile) { snapClear(); Object.assign(state, { persona:null, myProfile:null }); show("login", { replace:true }); return; }
+        if (RENDER[state.page]) RENDER[state.page]();
+        if (typeof renderChrome === "function") renderChrome();
+      } catch (e) { console.error(e); }
+      finally { loadAll.keepDraft = false; }
+      return;
+    }
     try {
       await loadAll();
+      setTimeout(loadPdfLib, 2500);
       if (!state.myProfile) { Object.assign(state, { persona:null, myProfile:null }); show("login", { replace:true }); return; }
       let pend = null;
       try { pend = sessionStorage.getItem("dj_pending_page"); sessionStorage.removeItem("dj_pending_page"); } catch (e) {}
@@ -3136,6 +3179,7 @@
     }
     if (T.closest("#pfLogout") || T.closest("#rolePill")) {
       await DB.logout().catch(() => {});
+      snapClear();   // 2026-10-17: data tersimpan (buka instan) ikut dihapus saat Keluar
       Object.assign(state, { page:"login", stack:[], persona:null, meId:null, myProfile:null, accessStatus:null, accessRequests:[], myDisc:null, myRoadmap:null, mySsd:null, myGifts:null, rs3AccessStatus:null, rs3AccessRequests:[], rs3Result:null, lts2AccessStatus:null, lts2AccessRequests:[], lts2Result:null, rs1AccessStatus:null, rs1AccessRequests:[], rs1Result:null, rs2AccessStatus:null, rs2AccessRequests:[], rs2Result:null, materi:null, materiKey:"rs1", participantResults:null, participantResultsP:null, viewProfileId:null, resultsFilter:"all", dashKey:null, dashOpen:{}, classProgress:null, rs3Feedback:null, rs3FbBatches:null, fbDraft:{}, fbAgain:false, draft:{ discPicks:[], roadmapData:{}, ssdAnswers:{}, giftsAnswers:{}, rs3Answers:{}, lts2Answers:{}, rs1Answers:{}, rs2Answers:{} } });
       show("login", { replace:true });
       return;
