@@ -735,7 +735,9 @@
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<!-- 2026-10-17 (user: "saat buka discipleship journey lama"): versi dipatok (sama dgn JB3) → tak perlu resolusi "@2" di CDN; preconnect ke Supabase -->
+<link rel="preconnect" href="https://rnyycigmtqeakryqrrip.supabase.co" crossorigin>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <!-- 2026-09-23 (bug "masih tetap sama" — foto user membuktikan 4 percobaan
      berturut2 di atas html2canvas/html2pdf.js SEMUA gagal, 2x kosong + 2x
      terpotong, akar masalah selalu soal bagaimana html2canvas "memotret" DOM
@@ -2985,20 +2987,13 @@
   // SEMUA query jalan BERSAMAAN (Promise.all) → waktu muat ≈ 2 bolak-balik.
   // Data asesmen pribadi (DISC/Roadmap/SSD/Gifts) ikut diambil paralel lalu
   // dipakai hanya kalau aksesnya approved (RLS memang cuma baris milik sendiri).
+  // 2026-10-17 (user: "saat buka discipleship journey lama"): dulu 3 tahap berurutan (profil → 13 query → 3 query).
+  // Kini SATU tahap: peran ditebak dari kunjungan terakhir (localStorage dj_persona) supaya semua query jalan
+  // bersamaan dgn myProfile; kalau tebakan salah, diulang sekali. Feedback RS3 (hanya halaman feedback) dimuat di latar.
   async function loadAll() {
-    state.myProfile = await DB.myProfile();
-    if (!state.myProfile) return;
-    state.meId = state.myProfile.id;
-    state.persona = state.myProfile.role === "admin" ? "ADMIN" : "PESERTA";
-    const isAdm = state.persona === "ADMIN";
+    let guess = "PESERTA"; try { guess = localStorage.getItem("dj_persona") || "PESERTA"; } catch (e) {}
     const soft = (pr, fb) => pr.catch(e => { console.error(e); return fb; });
-    if (isAdm) {
-      // Roster tab "Peserta" mulai dimuat di latar (tak ditunggu) — dipakai RENDER.results.
-      state.participantResults = null;
-      state.participantResultsP = DB.listParticipantResults(CURRENT_YEAR);
-      state.participantResultsP.catch(() => {});
-    }
-    const [acc, rs3Acc, lts2Acc, rs3Res, lts2Res, disc, roadmap, ssd, gifts, classProgress, postTestBest, rs3Feedback, rs3FbBatches] = await Promise.all([
+    const batch = isAdm => Promise.all([
       isAdm ? DB.listAllAccessRequests() : DB.myAccessStatus(),
       isAdm ? DB.listAllRs3AccessRequests() : DB.myRs3Status(),
       isAdm ? DB.listAllLts2AccessRequests() : DB.myLts2Status(),
@@ -3010,17 +3005,32 @@
       DB.myGifts(CURRENT_YEAR),
       isAdm ? soft(DB.listClassProgress(), []) : null,
       isAdm ? soft(DB.listPostTestBest(), {}) : null,
-      isAdm ? soft(DB.listRs3Feedback(), []) : null,
-      isAdm ? soft(DB.listRs3FbBatches(), []) : null,
-    ]);
-    if (isAdm) Object.assign(state, { accessRequests:acc, rs3AccessRequests:rs3Acc, lts2AccessRequests:lts2Acc, classProgress, postTestBest, rs3Feedback, rs3FbBatches });
-    else Object.assign(state, { accessStatus:acc, rs3AccessStatus:rs3Acc, lts2AccessStatus:lts2Acc });
-    // 2026-10-15: RS1/RS2 post-test (tabel baru rs12_* — soft: kalau migrasi
-    // v_rs12_posttest.sql belum dijalankan, app tetap jalan, RS1/RS2 terkunci).
-    const [pt, rs1Res, rs2Res] = await Promise.all([
       isAdm ? soft(DB.listAllPtAccessRequests(), { rs1:[], rs2:[] }) : Promise.all([soft(DB.myPtStatus("rs1"), null), soft(DB.myPtStatus("rs2"), null)]),
       soft(DB.myPtLatest("rs1"), null), soft(DB.myPtLatest("rs2"), null),
     ]);
+    let pending = batch(guess === "ADMIN");
+    pending.catch(() => {});
+    state.myProfile = await DB.myProfile();
+    if (!state.myProfile) return;
+    state.meId = state.myProfile.id;
+    state.persona = state.myProfile.role === "admin" ? "ADMIN" : "PESERTA";
+    try { localStorage.setItem("dj_persona", state.persona); } catch (e) {}
+    const isAdm = state.persona === "ADMIN";
+    if (isAdm) {
+      // Roster tab "Peserta" mulai dimuat di latar (tak ditunggu) — dipakai RENDER.results.
+      state.participantResults = null;
+      state.participantResultsP = DB.listParticipantResults(CURRENT_YEAR);
+      state.participantResultsP.catch(() => {});
+      // feedback kelas: hanya dipakai di halaman feedback dashboard → latar
+      Promise.all([soft(DB.listRs3Feedback(), []), soft(DB.listRs3FbBatches(), [])]).then(([f, b]) => {
+        state.rs3Feedback = f; state.rs3FbBatches = b; if (state.page === "dashboard" && RENDER.dashboard) RENDER.dashboard(); });
+    }
+    if ((guess === "ADMIN") !== isAdm) pending = batch(isAdm);
+    const [acc, rs3Acc, lts2Acc, rs3Res, lts2Res, disc, roadmap, ssd, gifts, classProgress, postTestBest, pt, rs1Res, rs2Res] = await pending;
+    if (isAdm) Object.assign(state, { accessRequests:acc, rs3AccessRequests:rs3Acc, lts2AccessRequests:lts2Acc, classProgress, postTestBest });
+    else Object.assign(state, { accessStatus:acc, rs3AccessStatus:rs3Acc, lts2AccessStatus:lts2Acc });
+    // 2026-10-15: RS1/RS2 post-test (tabel baru rs12_* — soft: kalau migrasi
+    // v_rs12_posttest.sql belum dijalankan, app tetap jalan, RS1/RS2 terkunci).
     if (isAdm) Object.assign(state, { rs1AccessRequests:pt.rs1, rs2AccessRequests:pt.rs2 });
     else Object.assign(state, { rs1AccessStatus:pt[0], rs2AccessStatus:pt[1] });
     state.rs1Result = rs1Res; state.rs2Result = rs2Res; state.draft.rs1Answers = {}; state.draft.rs2Answers = {};
