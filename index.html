@@ -531,6 +531,30 @@
   .mt-memo { margin:12px 0 6px; padding:8px 12px; border-radius:10px; background:rgba(0,0,0,.05); font-weight:800; font-size:13px; }
   .mt-note ul { margin:4px 0 0; padding-left:18px; }
   .mt-note li { margin:2px 0; }
+  .mt-acts { padding:0 16px 8px; }
+  .mt-teach { border:0; background:var(--accent); color:#fff; border-radius:999px; padding:7px 14px; font-size:12.5px; font-weight:800; font-family:inherit; cursor:pointer; }
+  .tc { position:fixed; inset:0; z-index:9999; background:#1F1B16; color:#F6F0E6; display:flex; flex-direction:column; padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom); }
+  .tc[hidden] { display:none; }
+  body.tc-on { overflow:hidden; }
+  .tc-top { display:flex; align-items:center; gap:12px; padding:14px 18px 10px; }
+  .tc-top b { flex:1; min-width:0; font-family:var(--font-display); font-size:15px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; opacity:.85; }
+  .tc-top span { font-size:13px; font-weight:800; opacity:.6; }
+  .tc-x { border:0; background:rgba(255,255,255,.1); color:inherit; width:38px; height:38px; border-radius:50%; font-size:16px; cursor:pointer; }
+  .tc-bar { height:4px; background:rgba(255,255,255,.1); margin:0 18px; border-radius:9px; overflow:hidden; } .tc-bar i { display:block; height:100%; background:#E9B949; transition:width .25s; }
+  .tc .tc-body { flex:1; max-height:none; overflow-y:auto; border:0; padding:22px max(22px, calc((100vw - 900px) / 2)) 30px; font-size:clamp(18px, 2.6vw, 30px); }
+  .tc-h { font-family:var(--font-display); font-size:1.45em; line-height:1.2; margin:0 0 .6em; color:#F3D98B; }
+  .tc .mt-p, .tc .mt-ul, .tc .mt-h4 { font-size:1em; line-height:1.55; color:#F6F0E6; }
+  .tc .mt-h3 { font-size:.75em; color:#E9B949; } .tc .mt-h4 { color:#F3D98B; }
+  .tc .mt-q { font-size:1em; background:rgba(255,255,255,.07); color:#FFF; border-left-color:#E9B949; padding:.6em .9em; }
+  .tc .mt-ref, .tc .mt-iref, .tc .mt-ol li::marker, .tc .mt-ul li::marker { color:#E9B949; }
+  .tc .mt-note { font-size:.8em; background:rgba(233,185,73,.14); color:#F6E7C1; }
+  .tc .mt-memo { background:rgba(233,185,73,.2); color:#FFF; font-size:.9em; }
+  .tc .mt-top { display:none; }
+  .tc-nav { display:flex; gap:10px; padding:10px 18px 16px; }
+  .tc-nav button { flex:1; min-height:52px; border-radius:14px; border:1px solid rgba(255,255,255,.18); background:transparent; color:inherit; font:inherit; font-size:16px; font-weight:800; cursor:pointer; }
+  .tc-nav button[data-tcfs] { flex:none; width:52px; font-size:20px; }
+  .tc-nav button.pri { background:#E9B949; color:#1F1B16; border-color:#E9B949; }
+  .tc-nav button:disabled { opacity:.3; }
   .mt-top { display:block; margin:14px auto 0; border:0; background:transparent; color:var(--accent); font-weight:800; font-size:12.5px; font-family:inherit; cursor:pointer; }
   .mt-h3 { font-size:12.5px; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-soft); margin:14px 0 6px; }
   .mt-h4 { font-size:13.5px; margin:10px 0 4px; }
@@ -1913,6 +1937,66 @@
     close();
     return h;
   }
+  // 2026-10-17 (ide #3 "Mode Mengajar"): satu pelajaran → slide layar penuh (huruf besar, ayat menonjol,
+  // tombol ‹ › / panah keyboard / geser). Slide dipotong per subjudul (## / ###) dan maks ±900 huruf per slide.
+  const MT_LESSONS = {};
+  function mtSlides(L) {
+    const out = []; let cur = { title: "", lines: [], len: 0 };
+    const push = () => { if (cur.lines.some(l => l.trim() && !/^[!\s]*_{6,}\s*$/.test(l))) out.push(cur); };
+    L.lines.forEach(l => {
+      const isH = /^#{2,3} /.test(l) && !/^## AYAT HAFALAN/i.test(l);
+      if (isH) { push(); cur = { title: l.replace(/^#+ /, ""), lines: [], len: 0 }; return; }
+      if (cur.len > 900 && !l.trim()) { push(); cur = { title: cur.title ? cur.title + " (lanjutan)" : "", lines: [], len: 0 }; return; }
+      if (cur.len > 1300 && /^(- |> |! |\d)/.test(l) === false && l.trim()) { push(); cur = { title: cur.title ? cur.title.replace(/ \(lanjutan\)$/, "") + " (lanjutan)" : "", lines: [], len: 0 }; }
+      cur.lines.push(l); cur.len += l.length;
+    });
+    push();
+    return out;
+  }
+  const TEACH = { i: null, n: 0, slides: [] };
+  function teachPaint() {
+    const d = el("mtTeach"); if (!d) return;
+    const L = MT_LESSONS[TEACH.i], sl = TEACH.slides[TEACH.n], last = TEACH.slides.length - 1;
+    d.querySelector(".tc-top b").innerHTML = mdInline(L.head);
+    d.querySelector(".tc-top span").textContent = (TEACH.n + 1) + " / " + TEACH.slides.length;
+    d.querySelector(".tc-bar i").style.width = ((TEACH.n + 1) / TEACH.slides.length * 100) + "%";
+    d.querySelector(".tc-body").innerHTML = (sl.title ? `<h2 class="tc-h">${mdInline(sl.title)}</h2>` : "") + mdBlocks(sl.lines);
+    d.querySelector(".tc-body").scrollTop = 0;
+    d.querySelector("[data-tcgo='-1']").disabled = TEACH.n === 0;
+    d.querySelector("[data-tcgo='1']").textContent = TEACH.n === last ? "Selesai ✓" : "Lanjut ›";
+  }
+  function teachOpen(i) {
+    TEACH.i = i; TEACH.n = 0; TEACH.slides = mtSlides(MT_LESSONS[i]);
+    if (!TEACH.slides.length) return;
+    let d = el("mtTeach");
+    if (!d) {
+      d = document.createElement("div"); d.id = "mtTeach"; d.className = "tc"; d.setAttribute("role", "dialog"); d.setAttribute("aria-label", "Mode Mengajar");
+      d.innerHTML = `<div class="tc-top"><b></b><span></span><button type="button" class="tc-x" data-tcx="1" aria-label="Tutup">✕</button></div><div class="tc-bar"><i></i></div>
+        <div class="tc-body mt-body"></div>
+        <div class="tc-nav"><button type="button" data-tcgo="-1">‹ Kembali</button><button type="button" data-tcfs="1" aria-label="Layar penuh">⛶</button><button type="button" class="pri" data-tcgo="1">Lanjut ›</button></div>`;
+      document.body.appendChild(d);
+      let x0 = null;
+      d.addEventListener("touchstart", e => { x0 = e.touches[0].clientX; }, { passive: true });
+      d.addEventListener("touchend", e => { if (x0 === null) return; const dx = e.changedTouches[0].clientX - x0; x0 = null; if (Math.abs(dx) > 70) teachGo(dx < 0 ? 1 : -1); });
+    }
+    d.hidden = false; document.body.classList.add("tc-on"); teachPaint();
+  }
+  function teachClose() { const d = el("mtTeach"); if (d) d.hidden = true; document.body.classList.remove("tc-on"); TEACH.i = null;
+    if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(() => {}); }
+  function teachGo(k) { if (TEACH.i === null) return; const n = TEACH.n + k;
+    if (n >= TEACH.slides.length) { teachClose(); return; } if (n < 0) return; TEACH.n = n; teachPaint(); }
+  document.addEventListener("click", e => {
+    const t = e.target.closest && e.target.closest("[data-mtteach],[data-tcx],[data-tcgo],[data-tcfs]"); if (!t) return;
+    e.preventDefault();
+    if (t.dataset.mtteach) teachOpen(t.dataset.mtteach);
+    else if (t.dataset.tcx) teachClose();
+    else if (t.dataset.tcgo) teachGo(+t.dataset.tcgo);
+    else if (t.dataset.tcfs) { const d = el("mtTeach"); if (document.fullscreenElement) document.exitFullscreen().catch(() => {}); else if (d.requestFullscreen) d.requestFullscreen().catch(() => {}); }
+  });
+  document.addEventListener("keydown", e => { if (TEACH.i === null) return;
+    if (e.key === "ArrowRight" || e.key === "PageDown" || e.key === " ") { e.preventDefault(); teachGo(1); }
+    else if (e.key === "ArrowLeft" || e.key === "PageUp") { e.preventDefault(); teachGo(-1); }
+    else if (e.key === "Escape") teachClose(); });
   function mdDoc(md) {
     const parts = String(md || "").split(/\n(?=# )/);
     // bagian pertama = judul dokumen + pengantar; sisanya = sesi/bab (buka-tutup, isi digulir di kotaknya sendiri)
@@ -1922,7 +2006,8 @@
       if (i === 0) return `<div class="card pad mt-intro"><h2 class="mt-h2">${mdInline(head)}</h2>${mdBlocks(lines.slice(1))}</div>`;
       const toc = [], body = mdBlocks(lines.slice(1), toc).replace(/ id="mt(\d+)"/g, ` id="mt${i}_$1"`);
       const chips = toc.length > 1 ? `<nav class="mt-toc" aria-label="Isi pelajaran">${toc.map(x => `<button type="button" data-mtjump="mt${i}_${x.id.slice(2)}">${esc(x.t.replace(/\*\*/g, "").replace(/^\d+[.)]?\s*/, "").slice(0, 34))}</button>`).join("")}</nav>` : "";
-      return `<details class="card mt-sec"><summary>${mdInline(head)}</summary>${chips}<div class="mt-body" tabindex="0">${body}<button type="button" class="mt-top" data-mttop="1">↑ Kembali ke awal pelajaran</button></div></details>`;
+      MT_LESSONS[i] = { head, lines: lines.slice(1) };
+      return `<details class="card mt-sec"><summary>${mdInline(head)}</summary><div class="mt-acts"><button type="button" class="mt-teach" data-mtteach="${i}">▶ Mode Mengajar</button></div>${chips}<div class="mt-body" tabindex="0">${body}<button type="button" class="mt-top" data-mttop="1">↑ Kembali ke awal pelajaran</button></div></details>`;
     }).join("");
   }
   document.addEventListener("toggle", e => { const d = e.target;   // 2026-10-17: 1 pelajaran terbuka sekaligus
