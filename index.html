@@ -517,7 +517,21 @@
   .mt-sec > summary::-webkit-details-marker { display:none; }
   .mt-sec > summary::after { content:"▾"; position:absolute; right:16px; top:14px; color:var(--ink-faint); transition:transform .2s; }
   .mt-sec[open] > summary::after { transform:rotate(180deg); }
-  .mt-body { padding:0 16px 14px; }
+  .mt-body { padding:4px 16px 14px; max-height:62vh; max-height:62dvh; overflow-y:auto; overscroll-behavior:contain; -webkit-overflow-scrolling:touch; border-top:1px solid rgba(0,0,0,.06); scroll-behavior:smooth; }
+  .mt-sec[open] { box-shadow:0 6px 22px rgba(0,0,0,.08); }
+  .mt-toc { display:flex; gap:6px; overflow-x:auto; padding:0 16px 10px; scrollbar-width:none; }
+  .mt-toc::-webkit-scrollbar { display:none; }
+  .mt-toc button { flex:none; border:1px solid rgba(0,0,0,.12); background:#fff; color:var(--ink-soft); border-radius:999px; padding:5px 10px; font-size:11.5px; font-weight:700; font-family:inherit; cursor:pointer; white-space:nowrap; }
+  .mt-ol { padding-left:22px; }
+  .mt-ol li::marker { font-weight:800; color:var(--accent); }
+  .mt-ul li::marker { color:var(--accent); }
+  .mt-col { display:block; margin-top:2px; }
+  .mt-ref { display:block; font-style:normal; font-size:12px; letter-spacing:.02em; margin-bottom:2px; color:var(--accent); }
+  .mt-iref { font-weight:700; color:var(--accent); white-space:nowrap; }
+  .mt-memo { margin:12px 0 6px; padding:8px 12px; border-radius:10px; background:rgba(0,0,0,.05); font-weight:800; font-size:13px; }
+  .mt-note ul { margin:4px 0 0; padding-left:18px; }
+  .mt-note li { margin:2px 0; }
+  .mt-top { display:block; margin:14px auto 0; border:0; background:transparent; color:var(--accent); font-weight:800; font-size:12.5px; font-family:inherit; cursor:pointer; }
   .mt-h3 { font-size:12.5px; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-soft); margin:14px 0 6px; }
   .mt-h4 { font-size:13.5px; margin:10px 0 4px; }
   .mt-p { font-size:13.5px; line-height:1.55; margin:6px 0; color:var(--ink); }
@@ -1839,33 +1853,82 @@
   // supabase/v_dj_materi_isi.sql (sumber/materi/build_sql.py).
   // Format markdown sederhana: "# " judul sesi (kartu buka-tutup), "## "/"### "
   // subjudul, "- " poin, "> " ayat, "! " catatan pengajar, **tebal**.
-  function mdInline(s) { return esc(s).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>"); }
-  function mdBlocks(lines) {
-    let h = "", list = false;
-    const close = () => { if (list) { h += "</ul>"; list = false; } };
+  // 2026-10-17 (permintaan user: "setiap pelajaran dapat discroll sehingga tidak panjang ke bawah dan
+  // point-point penting bold atau dot/number sehingga mudah dimengerti"): tiap pelajaran = kotak gulir
+  // sendiri (tinggi maks ±62% layar) + daftar isi chip per subjudul; hanya 1 pelajaran terbuka sekaligus.
+  // Penegasan otomatis (teks sumber tak diubah): baris HURUF BESAR → subjudul, "Label:" di awal paragraf
+  // tebal, frasa ≥3 kata HURUF BESAR tebal, "1. / 1) / 1 — " → daftar bernomor, " • " → poin,
+  // baris ayat (✦ / "> Ref — " / "**Ref :**") → kotak ayat dgn referensi tebal, garis isian "____" dibuang.
+  function mdInline(s) {
+    return esc(s).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>")
+      .replace(/\(((?:[1-3I]{1,3}\s)?[A-Z][a-z]+(?:\s[A-Z][a-z]+){0,3}\s\d+:[\d\-–,\s]+[a-z]?)\)/g, `(<span class="mt-iref">$1</span>)`)   // rujukan ayat dalam kurung
+      .replace(/(^|[\s(“"])((?:[A-Z][A-Z'’\-]{2,}[,!?]?\s+)+[A-Z][A-Z'’\-]{2,}[.!?]?)(?=$|[\s)”".,:;])/g, "$1<b>$2</b>");
+  }
+  const MT_REF = /^((?:[1-3I]{1,3}\s)?[A-Z][A-Za-z]+(?:\s[A-Z][a-z]+){0,3}\s\d+:[\d\-–,\sab]+?)\s*(?:—|:)\s*/;
+  const mtCaps = l => { const t = l.replace(/[^A-Za-z]/g, ""); return t.length >= 6 && l.length <= 90 && t === t.toUpperCase() && !/^AYAT HAFALAN/.test(l); };
+  const mtLabel = s => { const m = s.match(/^([^:.!?“"]{2,38}):\s+(.+)$/); return m && !/<b>/.test(esc(m[1])) && !/\d:\d/.test(m[1]) ? `<b>${mdInline(m[1])}:</b> ${mdInline(m[2])}` : mdInline(s); };
+  function mtVerse(t) {
+    t = t.replace(/^✦\s*/, "");
+    let m = t.match(/^\*\*(.+?)\s*:?\*\*\s*:?\s*(.*)$/);
+    if (m && /\d:\d|\d$/.test(m[1])) return `<blockquote class="mt-q"><b class="mt-ref">${mdInline(m[1].replace(/\s*:$/, ""))}</b>${mdInline(m[2])}</blockquote>`;
+    m = t.match(/^(.+?\d+(?::[\d\-–,\sab]+)?)\s+—\s+(.*)$/);
+    if (m && m[1].length < 48) return `<blockquote class="mt-q"><b class="mt-ref">${mdInline(m[1])}</b>${mdInline(m[2])}</blockquote>`;
+    m = t.match(/^((?:[1-3]\s)?[A-Z][A-Za-z]+(?:\s[A-Z][a-z]+){0,3}\s\d+(?::[\d\-–,\sab]+)?[a-z]?)\s+(.*)$/);
+    if (m && m[1].length < 48) return `<blockquote class="mt-q"><b class="mt-ref">${mdInline(m[1].trim())}</b>${mdInline(m[2])}</blockquote>`;
+    return `<blockquote class="mt-q">${mdInline(t)}</blockquote>`;
+  }
+  function mdBlocks(lines, toc) {
+    let h = "", list = "", n = 0;
+    const close = () => { if (list) { h += `</${list}>`; list = ""; } };
+    const open = tag => { if (list !== tag) { close(); h += `<${tag} class="mt-ul${tag === "ol" ? " mt-ol" : ""}">`; list = tag; } };
+    const head = (cls, txt) => { close(); const id = "mt" + (++n); if (toc) toc.push({ id, t: txt }); h += `<h${cls === "mt-h3" ? 3 : 4} class="${cls}" id="${id}">${mdInline(txt)}</h${cls === "mt-h3" ? 3 : 4}>`; };
+    const item = (t, tag) => { open(tag);
+      const parts = t.split(/\s·\s(?=\*\*)/);   // baris tabel "- **A** · **B:** isi" → tiap kolom baris sendiri
+      h += `<li>${parts.length > 1 ? parts.map((x, i) => i ? `<span class="mt-col">${mtLabel(x)}</span>` : mdInline(x)).join("") : mtLabel(t)}</li>`; };
     lines.forEach(raw => {
-      const l = raw.trimEnd();
+      let l = raw.trimEnd();
+      if (/^[!\s]*_{6,}\s*$/.test(l)) return;                    // garis isian catatan
       if (!l.trim()) { close(); return; }
-      if (l.startsWith("### ")) { close(); h += `<h4 class="mt-h4">${mdInline(l.slice(4))}</h4>`; }
-      else if (l.startsWith("## ")) { close(); h += `<h3 class="mt-h3">${mdInline(l.slice(3))}</h3>`; }
-      else if (l.startsWith("- ")) { if (!list) { h += `<ul class="mt-ul">`; list = true; } h += `<li>${mdInline(l.slice(2))}</li>`; }
-      else if (l.startsWith("> ")) { close(); h += `<blockquote class="mt-q">${mdInline(l.slice(2))}</blockquote>`; }
-      else if (l.startsWith("! ")) { close(); h += `<div class="mt-note">📝 ${mdInline(l.slice(2))}</div>`; }
-      else { close(); h += `<p class="mt-p">${mdInline(l)}</p>`; }
+      if (l.startsWith("### ")) return head("mt-h4", l.slice(4));
+      if (l.startsWith("## ")) { const t = l.slice(3); if (/^AYAT HAFALAN/i.test(t)) { close(); h += `<div class="mt-memo">📌 ${mdInline(t)}</div>`; return; } return head("mt-h3", t); }
+      if (/^AYAT HAFALAN/i.test(l)) { close(); h += `<div class="mt-memo">📌 ${mdInline(l)}</div>`; return; }
+      if (l.startsWith("> ")) { close(); h += mtVerse(l.slice(2)); return; }
+      if (l.startsWith("! ")) {
+        let t = l.slice(2).trim(); close();
+        if (t.startsWith("✦")) { h += mtVerse(t); return; }
+        const bul = t.split(/\s*•\s+/);
+        const lead = bul.shift().replace(/^((?:\d+\.\s)?(?:[A-Z0-9][A-Z0-9'’&/\-]*\s?){2,}(?:\([^)]{2,30}\)\s?)?[:—]?)(?=\s|$)/, m => `<b>${m.trim()}</b> `);
+        h += `<div class="mt-note">📝 ${lead.includes("<b>") ? lead.replace(/^(<b>.*?<\/b>)(.*)$/, (m0, b1, rest) => b1 + mdInline(rest)) : mdInline(lead)}${bul.length ? `<ul>${bul.map(x => `<li>${mdInline(x)}</li>`).join("")}</ul>` : ""}</div>`;
+        return;
+      }
+      const num = l.match(/^(?:-\s+)?(\d{1,2})(?:[.)]|\s—)\s+(.+)$/);
+      if (num) return item(num[2], "ol");
+      if (l.startsWith("- ")) return item(l.slice(2), "ul");
+      if (/^\*\*[^*]+\d[^*]*:?\*\*\s*:?\s*[“"]/.test(l)) { close(); h += mtVerse(l); return; }
+      if (mtCaps(l)) return head("mt-h4", l.charAt(0) + l.slice(1).toLowerCase().replace(/(^|\s)(allah|yesus|kristus|tuhan|roh kudus|alkitab|firman)/g, (m0, sp, w) => sp + w.replace(/\b\w/g, c => c.toUpperCase())));
+      close();
+      if (/\s•\s/.test(l)) { const bs = l.split(/\s*•\s+/).filter(Boolean); h += `<ul class="mt-ul">${bs.map(x => `<li>${mtLabel(x)}</li>`).join("")}</ul>`; return; }
+      h += `<p class="mt-p">${mtLabel(l)}</p>`;
     });
     close();
     return h;
   }
   function mdDoc(md) {
     const parts = String(md || "").split(/\n(?=# )/);
-    // bagian pertama = judul dokumen + pengantar; sisanya = sesi/bab (buka-tutup)
+    // bagian pertama = judul dokumen + pengantar; sisanya = sesi/bab (buka-tutup, isi digulir di kotaknya sendiri)
     return parts.map((part, i) => {
       const lines = part.split("\n");
       const head = lines[0].replace(/^# /, "");
       if (i === 0) return `<div class="card pad mt-intro"><h2 class="mt-h2">${mdInline(head)}</h2>${mdBlocks(lines.slice(1))}</div>`;
-      return `<details class="card mt-sec"><summary>${mdInline(head)}</summary><div class="mt-body">${mdBlocks(lines.slice(1))}</div></details>`;
+      const toc = [], body = mdBlocks(lines.slice(1), toc).replace(/ id="mt(\d+)"/g, ` id="mt${i}_$1"`);
+      const chips = toc.length > 1 ? `<nav class="mt-toc" aria-label="Isi pelajaran">${toc.map(x => `<button type="button" data-mtjump="mt${i}_${x.id.slice(2)}">${esc(x.t.replace(/\*\*/g, "").replace(/^\d+[.)]?\s*/, "").slice(0, 34))}</button>`).join("")}</nav>` : "";
+      return `<details class="card mt-sec"><summary>${mdInline(head)}</summary>${chips}<div class="mt-body" tabindex="0">${body}<button type="button" class="mt-top" data-mttop="1">↑ Kembali ke awal pelajaran</button></div></details>`;
     }).join("");
   }
+  document.addEventListener("toggle", e => { const d = e.target;   // 2026-10-17: 1 pelajaran terbuka sekaligus
+    if (!d.classList || !d.classList.contains("mt-sec") || !d.open) return;
+    document.querySelectorAll(".mt-sec[open]").forEach(o => { if (o !== d) o.open = false; });
+    requestAnimationFrame(() => d.scrollIntoView({ block:"start", behavior:"smooth" })); }, true);
   const canMateri = () => state.persona === "ADMIN" || !!(state.myProfile && state.myProfile.is_sp);
   RENDER.materi = function () {
     if (!canMateri()) { show(state.persona === "ADMIN" ? "home" : "journey", { replace:true }); return; }
@@ -3247,6 +3310,10 @@
     if (T.closest("#gearBtn")) { show("profile"); return; }
     if (T.closest("#materiBtn")) { show("materi"); return; }
     const matTab = T.closest("[data-materitab]");
+    const mtJump = T.closest("[data-mtjump],[data-mttop]");
+    if (mtJump) { const sec = mtJump.closest(".mt-sec"), bx = sec && sec.querySelector(".mt-body");
+      const tg = mtJump.dataset.mtjump ? el(mtJump.dataset.mtjump) : null;
+      if (bx) bx.scrollTo({ top: tg ? tg.offsetTop - bx.offsetTop - 6 : 0, behavior:"smooth" }); return; }
     if (matTab) { state.materiKey = matTab.dataset.materitab; RENDER.materi(); const sc = document.querySelector(".scroll"); if (sc) sc.scrollTo({ top:0 }); return; }
 
     // ---- RS1/RS2 post-test (2026-10-15): minta akses, pilih jawaban, kirim. ----
