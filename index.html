@@ -3097,7 +3097,13 @@
     const m = /^#at=([^&]+)&rt=([^&]+)(?:&p=([^&]+))?/.exec(location.hash);
     if (!m) return { ok:false, page:null };
     try {
-      await sb.auth.setSession({ access_token:decodeURIComponent(m[1]), refresh_token:decodeURIComponent(m[2]) });
+      // 2026-10-19 (user: "saat masuk discipleship journey lama"): setSession() selalu memanggil server
+      // (cek token) sebelum apa pun tampil. Kalau DJ sudah memegang token yg PERSIS sama, langkah itu dilewati.
+      // (Hanya token yg sama — token lama dari sesi sebelumnya bisa sudah diganti JB3.)
+      const at = decodeURIComponent(m[1]);
+      const cur = (await sb.auth.getSession()).data.session;
+      if (!(cur && cur.access_token === at))
+        await sb.auth.setSession({ access_token:at, refresh_token:decodeURIComponent(m[2]) });
       history.replaceState(null, "", location.pathname + location.search);
       return { ok:true, page: m[3] ? decodeURIComponent(m[3]) : null };
     } catch (e) { console.error(e); return { ok:false, page:null }; }
@@ -3127,6 +3133,7 @@
       const fb0 = pend0 && (FB_PAGE[pend0] || pend0 === "feedback");
       if (state.persona === "ADMIN") { state.participantResults = null; state.participantResultsP = null; }
       show(state.persona === "ADMIN" ? ((pend0 && META[pend0]) ? pend0 : "home") : (fb0 ? pend0 : "journey"), { replace:true });
+      pingReady();   // layar dari simpanan sudah tampil → JB3 boleh buka lapisannya
       setTimeout(loadPdfLib, 2500);
       loadAll.keepDraft = true;
       try {
@@ -3610,7 +3617,10 @@
     if (e.target.id === "rsSearch") { state.resultsQuery = e.target.value; const l = el("rsList"); if (l) l.innerHTML = resultsListHTML(); }
   });
 
-  boot();
+  // 2026-10-19: dibuka di lapisan (iframe) JB3 → beri tahu JB3 begitu layar pertama tampil (spinner JB3 tak perlu
+  // menunggu foto/huruf selesai dimuat).
+  function pingReady() { if (window.parent !== window && !pingReady.done) { pingReady.done = true; try { window.parent.postMessage({ dj:"ready" }, "*"); } catch (e) {} } }
+  boot().then(pingReady, pingReady);
 })();
 </script>
 </body>
