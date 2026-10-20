@@ -742,7 +742,7 @@
 </div>
 
 <!-- 2026-10-17 (user: "saat buka discipleship journey lama"): versi dipatok (sama dgn JB3) → tak perlu resolusi "@2" di CDN; preconnect ke Supabase -->
-<link rel="preconnect" href="https://rnyycigmtqeakryqrrip.supabase.co" crossorigin>
+<link rel="preconnect" href="https://api.jb3church.com" crossorigin>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <!-- 2026-09-23 (bug "masih tetap sama" — foto user membuktikan 4 percobaan
      berturut2 di atas html2canvas/html2pdf.js SEMUA gagal, 2x kosong + 2x
@@ -785,7 +785,7 @@
   const DJ_EMBED = window.parent !== window;
   if (/^#at=/.test(location.hash)) { try { Object.keys(localStorage).filter(k => k.startsWith("sb-")).forEach(k => localStorage.removeItem(k)); } catch (e) {} }
   const sb = window.supabase.createClient(window.LTS_CONFIG.url, window.LTS_CONFIG.anonKey,
-    DJ_EMBED ? { auth:{ persistSession:false, autoRefreshToken:false, detectSessionInUrl:false } } : undefined);
+    DJ_EMBED ? { auth:{ persistSession:false, autoRefreshToken:false, detectSessionInUrl:false } } : { auth:{ storageKey:"sb-rnyycigmtqeakryqrrip-auth-token" } });
   const DB = window.makeDB(sb);
   // 2026-10-04: di dalam lapisan JB3 HOME Tracker → terima token baru dari JB3
   // (JB3 yg memperbarui token; DJ_EMBED mematikan auto-refresh di sini).

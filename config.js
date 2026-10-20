@@ -8,6 +8,6 @@
  * anon key AMAN dipakai di browser (RLS yang menjaga data).
  */
 window.LTS_CONFIG = {
-  url:     "https://rnyycigmtqeakryqrrip.supabase.co",
+  url:     "https://api.jb3church.com",
   anonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJueXljaWdtdHFlYWtyeXFycmlwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgwMjk0NjYsImV4cCI6MjEwMzYwNTQ2Nn0.vblAzFayuimGKmDylKrKMTb49b8PgP-nmm5qmyn090I",
 };
