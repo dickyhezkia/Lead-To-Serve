@@ -538,6 +538,19 @@
   .mt-note ul { margin:4px 0 0; padding-left:18px; }
   .mt-note li { margin:2px 0; }
   .mt-acts { padding:0 16px 8px; display:flex; flex-wrap:wrap; gap:6px; }
+  .mr { position:fixed; inset:0; z-index:9999; background:var(--paper); color:var(--ink); display:flex; flex-direction:column; }
+  .mr[hidden] { display:none; }
+  .mr-top { flex:none; display:flex; align-items:center; gap:8px; padding:calc(10px + env(safe-area-inset-top, 0px)) 12px 10px; background:var(--surface); border-bottom:1px solid var(--line); }
+  .mr-top b { flex:1; min-width:0; font-family:var(--font-display); font-weight:600; font-size:16px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .mr-top button { flex:none; height:36px; min-width:38px; padding:0 8px; border-radius:10px; border:1px solid var(--line-strong); background:var(--paper); color:var(--ink); font:inherit; font-size:14px; font-weight:800; cursor:pointer; }
+  .mr-toc { flex:none; display:flex; gap:6px; overflow-x:auto; padding:8px 12px; border-bottom:1px solid var(--line); scrollbar-width:none; }
+  .mr-toc[hidden] { display:none; }
+  .mr-toc button { flex:none; height:30px; padding:0 12px; border-radius:99px; border:1px solid var(--line-strong); background:var(--surface); color:var(--ink-soft); font:inherit; font-size:12.5px; font-weight:700; cursor:pointer; }
+  .mr .mr-body { flex:1; max-height:none; overflow-y:auto; border:0; padding:20px max(18px, calc((100vw - 720px) / 2)) calc(48px + env(safe-area-inset-bottom, 0px)); font-size:var(--mrfs, 17px); }
+  .mr-h1 { font-family:var(--font-display); font-weight:600; font-size:1.45em; line-height:1.25; margin:0 0 .6em; color:var(--accent-ink); }
+  .mr-body .mt-p, .mr-body .mt-ul li, .mr-body .mt-q, .mr-body .mt-note, .mr-body .mt-memo { font-size:1em; line-height:1.72; }
+  .mr-body .mt-h3 { font-size:1.22em; margin-top:1.4em; } .mr-body .mt-h4 { font-size:1.08em; margin-top:1.1em; }
+  .mr-body .mt-q { padding:.7em 1em; } .mr-body .mt-ul { padding-left:1.3em; }
   .mt-dlb { border:1px solid var(--line-strong); background:var(--surface); color:var(--ink-soft); border-radius:999px; padding:6px 12px; font-size:12px; font-weight:800; font-family:inherit; cursor:pointer; }
   .mt-dlb:disabled { opacity:.5; }
   .mt-dlall { display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin:0 0 12px; padding:10px 12px; border:1px dashed var(--line-strong); border-radius:14px; }
@@ -2019,9 +2032,55 @@
       const toc = [], body = mdBlocks(lines.slice(1), toc).replace(/ id="mt(\d+)"/g, ` id="mt${i}_$1"`);
       const chips = toc.length > 1 ? `<nav class="mt-toc" aria-label="Isi pelajaran">${toc.map(x => `<button type="button" data-mtjump="mt${i}_${x.id.slice(2)}">${esc(x.t.replace(/\*\*/g, "").replace(/^\d+[.)]?\s*/, "").slice(0, 34))}</button>`).join("")}</nav>` : "";
       MT_LESSONS[i] = { head, lines: lines.slice(1) };
-      return `<details class="card mt-sec"><summary>${mdInline(head)}</summary><div class="mt-acts"><button type="button" class="mt-teach" data-mtteach="${i}">▶ Mode Mengajar</button><button type="button" class="mt-dlb" data-mtdl="pdf:${i}">⬇ PDF</button><button type="button" class="mt-dlb" data-mtdl="doc:${i}">⬇ Word</button></div>${chips}<div class="mt-body" tabindex="0">${body}<button type="button" class="mt-top" data-mttop="1">↑ Kembali ke awal pelajaran</button></div></details>`;
+      return `<details class="card mt-sec"><summary>${mdInline(head)}</summary><div class="mt-acts"><button type="button" class="mt-teach" data-mtread="${i}">⛶ Layar penuh</button><button type="button" class="mt-teach" data-mtteach="${i}">▶ Mode Mengajar</button><button type="button" class="mt-dlb" data-mtdl="pdf:${i}">⬇ PDF</button><button type="button" class="mt-dlb" data-mtdl="doc:${i}">⬇ Word</button></div>${chips}<div class="mt-body" tabindex="0">${body}<button type="button" class="mt-top" data-mttop="1">↑ Kembali ke awal pelajaran</button></div></details>`;
     }).join("");
   }
+  // ---------------------------------------------------------------- Mode Baca (layar penuh)
+  // 2026-10-21 (user: "pada bahan ajar DJ; tambahkan tombol fit to screen (enak dibaca)"): 1 pelajaran utuh layar penuh,
+  // huruf besar & lega (A−/A+ diingat di HP), daftar isi lompat, ✕ / tombol kembali HP menutup. Bukan kotak gulir 62vh.
+  const MR = { el: null, i: null, hist: false };
+  const mrFs = () => { try { return Math.min(26, Math.max(14, +localStorage.getItem("dj_mr_fs") || 17)); } catch (e) { return 17; } };
+  function readOpen(i) {
+    const L = MT_LESSONS[i]; if (!L) return;
+    if (!MR.el) {
+      const d = document.createElement("div"); d.className = "mr"; d.setAttribute("role", "dialog"); d.setAttribute("aria-label", "Mode Baca");
+      d.innerHTML = `<div class="mr-top"><button type="button" data-mr="x" aria-label="Tutup">✕</button><b></b><button type="button" data-mr="-" aria-label="Huruf lebih kecil">A−</button><button type="button" data-mr="+" aria-label="Huruf lebih besar">A+</button></div>
+        <nav class="mr-toc" aria-label="Isi pelajaran"></nav><div class="mr-body mt-body"></div>`;
+      const w = document.createElement("div"); w.className = "djx"; w.appendChild(d); document.body.appendChild(w);
+      d.addEventListener("click", e => {
+        const t = e.target.closest("[data-mr],[data-mrjump],[data-mrtop]"); if (!t) return;
+        if (t.dataset.mr === "x") readClose();
+        else if (t.dataset.mr === "+" || t.dataset.mr === "-") { const f = Math.min(26, Math.max(14, mrFs() + (t.dataset.mr === "+" ? 1 : -1)));
+          try { localStorage.setItem("dj_mr_fs", f); } catch (_) {} d.style.setProperty("--mrfs", f + "px"); }
+        else if (t.dataset.mrjump) { const h = d.querySelector(`[data-mrh="${t.dataset.mrjump}"]`); if (h) h.scrollIntoView({ block: "start", behavior: "smooth" }); }
+        else if (t.dataset.mrtop) d.querySelector(".mr-body").scrollTo({ top: 0, behavior: "smooth" });
+      });
+      MR.el = d;
+    }
+    const d = MR.el, toc = [];
+    const body = mdBlocks(L.lines, toc).replace(/ id="(?:dj_)?mt(\d+)"/g, ' data-mrh="$1"');
+    d.querySelector(".mr-top b").innerHTML = mdInline(L.head);
+    d.querySelector(".mr-toc").innerHTML = toc.length > 1 ? toc.map(x => `<button type="button" data-mrjump="${x.id.replace(/\D/g, "")}">${esc(x.t.replace(/\*\*/g, "").replace(/^\d+[.)]?\s*/, "").slice(0, 34))}</button>`).join("") : "";
+    d.querySelector(".mr-toc").hidden = toc.length < 2;
+    d.querySelector(".mr-body").innerHTML = `<h1 class="mr-h1">${mdInline(L.head)}</h1>${body}<button type="button" class="mt-top" data-mrtop="1">↑ Kembali ke awal</button>`;
+    d.style.setProperty("--mrfs", mrFs() + "px");
+    d.hidden = false; document.body.classList.add("tc-on"); MR.i = i;
+    d.querySelector(".mr-body").scrollTop = 0;
+    if (!MR.hist) { try { history.pushState({ djmr: 1 }, ""); MR.hist = true; } catch (_) {} }
+  }
+  function readClose(fromPop) {
+    if (!MR.el || MR.el.hidden) return;
+    MR.el.hidden = true; document.body.classList.remove("tc-on"); MR.i = null;
+    if (!fromPop && MR.hist) { try { if (history.state && history.state.djmr) history.back(); } catch (_) {} }
+    MR.hist = false;
+  }
+  window.addEventListener("popstate", () => readClose(true));
+  document.addEventListener("keydown", e => { if (MR.i !== null && e.key === "Escape") readClose(); });
+  document.addEventListener("click", e => {
+    const t = e.target.closest && e.target.closest("[data-mtread]"); if (!t) return;
+    e.preventDefault(); readOpen(t.dataset.mtread);
+  });
+
   // ---------------------------------------------------------------- unduh PDF / Word
   // 2026-10-21 (user: "untuk setiap bahan ajar; kamu buatkan tombol download pdf/doc"): per kelas (semua pelajaran)
   // & per pelajaran. Isi = hasil mdBlocks() yg SAMA dgn tampilan layar. Word = .doc (HTML, dibuka Word/Pages/Google Docs);
