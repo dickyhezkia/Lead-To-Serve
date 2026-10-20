@@ -537,7 +537,11 @@
   .mt-memo { margin:12px 0 6px; padding:8px 12px; border-radius:10px; background:rgba(0,0,0,.05); font-weight:800; font-size:13px; }
   .mt-note ul { margin:4px 0 0; padding-left:18px; }
   .mt-note li { margin:2px 0; }
-  .mt-acts { padding:0 16px 8px; }
+  .mt-acts { padding:0 16px 8px; display:flex; flex-wrap:wrap; gap:6px; }
+  .mt-dlb { border:1px solid var(--line-strong); background:var(--surface); color:var(--ink-soft); border-radius:999px; padding:6px 12px; font-size:12px; font-weight:800; font-family:inherit; cursor:pointer; }
+  .mt-dlb:disabled { opacity:.5; }
+  .mt-dlall { display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin:0 0 12px; padding:10px 12px; border:1px dashed var(--line-strong); border-radius:14px; }
+  .mt-dlall span { flex:1; min-width:140px; font-size:12.5px; font-weight:700; color:var(--ink-soft); }
   .mt-teach { border:0; background:var(--accent); color:#fff; border-radius:999px; padding:7px 14px; font-size:12.5px; font-weight:800; font-family:inherit; cursor:pointer; }
   .tc { position:fixed; inset:0; z-index:9999; background:#1F1B16; color:#F6F0E6; display:flex; flex-direction:column; padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom); }
   .tc[hidden] { display:none; }
@@ -2015,9 +2019,135 @@
       const toc = [], body = mdBlocks(lines.slice(1), toc).replace(/ id="mt(\d+)"/g, ` id="mt${i}_$1"`);
       const chips = toc.length > 1 ? `<nav class="mt-toc" aria-label="Isi pelajaran">${toc.map(x => `<button type="button" data-mtjump="mt${i}_${x.id.slice(2)}">${esc(x.t.replace(/\*\*/g, "").replace(/^\d+[.)]?\s*/, "").slice(0, 34))}</button>`).join("")}</nav>` : "";
       MT_LESSONS[i] = { head, lines: lines.slice(1) };
-      return `<details class="card mt-sec"><summary>${mdInline(head)}</summary><div class="mt-acts"><button type="button" class="mt-teach" data-mtteach="${i}">▶ Mode Mengajar</button></div>${chips}<div class="mt-body" tabindex="0">${body}<button type="button" class="mt-top" data-mttop="1">↑ Kembali ke awal pelajaran</button></div></details>`;
+      return `<details class="card mt-sec"><summary>${mdInline(head)}</summary><div class="mt-acts"><button type="button" class="mt-teach" data-mtteach="${i}">▶ Mode Mengajar</button><button type="button" class="mt-dlb" data-mtdl="pdf:${i}">⬇ PDF</button><button type="button" class="mt-dlb" data-mtdl="doc:${i}">⬇ Word</button></div>${chips}<div class="mt-body" tabindex="0">${body}<button type="button" class="mt-top" data-mttop="1">↑ Kembali ke awal pelajaran</button></div></details>`;
     }).join("");
   }
+  // ---------------------------------------------------------------- unduh PDF / Word
+  // 2026-10-21 (user: "untuk setiap bahan ajar; kamu buatkan tombol download pdf/doc"): per kelas (semua pelajaran)
+  // & per pelajaran. Isi = hasil mdBlocks() yg SAMA dgn tampilan layar. Word = .doc (HTML, dibuka Word/Pages/Google Docs);
+  // PDF = jsPDF murni (digambar per baris, bukan "memotret" layar — lihat catatan html2canvas di <head>).
+  const MT_CUR = { key: "", title: "", parts: [] };   // parts: [{head, lines}] (0 = judul dokumen + pengantar)
+  const mtNoEmoji = s => String(s).replace(/[\u{1F000}-\u{1FFFF}\u{2600}-\u{27BF}\u{FE0F}\u{200D}]/gu, "").replace(/\s{2,}/g, " ").trim();
+  const mtSlug = s => mtNoEmoji(s).replace(/\*\*/g, "").replace(/[^A-Za-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60);
+  function mtSel(which) {
+    if (which === "all") return { title: MT_CUR.title, parts: MT_CUR.parts, fname: "Bahan-Ajar-" + mtSlug(MT_CUR.title) };
+    const p = MT_CUR.parts[+which]; if (!p) return null;
+    return { title: mtNoEmoji(p.head).replace(/\*\*/g, ""), sub: MT_CUR.title, parts: [{ head: p.head, lines: p.lines, solo: true }], fname: mtSlug(MT_CUR.title) + "-" + mtSlug(p.head) };
+  }
+  async function mtSave(blob, name) {
+    const file = typeof File === "function" ? new File([blob], name, { type: blob.type }) : null;
+    if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
+      try { await navigator.share({ files: [file], title: name }); return; } catch (e) { if (e && e.name === "AbortError") return; }
+    }
+    const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click();
+    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 4000);
+  }
+  function mtDocBlob(sel) {
+    const body = sel.parts.map((p, i) => (p.solo ? "" : i === 0 ? `<h1>${mdInline(p.head)}</h1>` : `<h2 class="sesi">${mdInline(p.head)}</h2>`) + mdBlocks(p.lines)).join("");
+    const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8"><title>${esc(sel.title)}</title>
+<style>@page{size:A4;margin:2cm} body{font-family:Calibri,Arial,sans-serif;font-size:11pt;line-height:1.45;color:#2E2A23}
+h1{font-family:Georgia,serif;font-size:20pt;color:#7A3F22;margin:0 0 4pt} h2.sesi{font-family:Georgia,serif;font-size:16pt;color:#7A3F22;margin:22pt 0 6pt;border-bottom:1px solid #D3C6AB;page-break-before:always}
+h3{font-size:13pt;color:#2E2A23;margin:14pt 0 4pt} h4{font-size:11.5pt;color:#5E5647;margin:10pt 0 3pt} p{margin:0 0 6pt}
+ul,ol{margin:0 0 6pt 18pt} li{margin:0 0 3pt} .mt-col{display:block} blockquote{margin:6pt 0 8pt;padding:6pt 10pt;border-left:3pt solid #B5623B;background:#F5EFE3;font-style:italic}
+.mt-ref{font-style:normal;margin-right:6pt} .mt-note{margin:6pt 0;padding:6pt 10pt;background:#F0E8D8} .mt-memo{margin:8pt 0;padding:6pt 10pt;background:#E6EBDF;font-weight:bold}
+.sub{color:#877B61;font-size:9.5pt}</style></head><body>
+${sel.sub ? `<p class="sub">${esc(mtNoEmoji(sel.sub))} · Bahan Ajar Discipleship Journey JB3</p><h1>${mdInline(sel.title)}</h1>` : `<p class="sub">Bahan Ajar Discipleship Journey JB3 · ${esc(new Date().toLocaleDateString("id-ID", { day:"numeric", month:"long", year:"numeric" }))}</p>`}
+${body}</body></html>`;
+    return new Blob(["﻿", html], { type: "application/msword" });
+  }
+  async function mtPdfBlob(sel) {
+    await loadPdfLib();
+    const doc = new window.jspdf.jsPDF({ unit: "mm", format: "a4", compress: true });
+    const W = 210, H = 297, M = 18, CW = W - 2 * M, INK = [46, 42, 35], SOFT = [94, 86, 71], ACC = [122, 63, 34], LINE = [211, 198, 171];
+    let y = M;
+    const page = () => { doc.addPage(); y = M; };
+    const need = h => { if (y + h > H - M) page(); };
+    const winAnsi = s => String(s).replace(/[\u{1F000}-\u{1FFFF}\u{2600}-\u{27BF}\u{FE0F}\u{200D}]/gu, "").replace(/[✦★☆•·]/g, m => (m === "·" ? "·" : "•")).replace(/[^\x00-\xFF–—‘’“”…•]/g, "");
+    // isi elemen → potongan teks { t, b }
+    const runs = (node, bold) => { const out = [];
+      node.childNodes.forEach(c => {
+        if (c.nodeType === 3) out.push({ t: c.nodeValue, b: bold });
+        else if (c.nodeType === 1) { const tag = c.tagName; if (tag === "UL" || tag === "OL") return;
+          if (c.classList.contains("mt-col")) out.push({ t: "\n", b: false });   // kolom tabel = baris baru (spt di layar)
+          out.push(...runs(c, bold || tag === "B" || tag === "STRONG" || c.classList.contains("mt-ref")));
+          if (c.classList.contains("mt-ref")) out.push({ t: "  ", b: false }); } });
+      return out; };
+    // tata letak baris dgn huruf tebal di tengah kalimat
+    function para(rs, o) {
+      const size = o.size || 10.5, lh = size * 0.42, x0 = M + (o.indent || 0), maxW = CW - (o.indent || 0) - (o.right || 0);
+      const toks = []; rs.forEach(r => winAnsi(r.t).split(/(\s+)/).forEach(w => { if (w === "") return; toks.push({ w, b: r.b || o.bold, nl: /\n/.test(w) }); }));
+      const lines = []; let cur = [], wd = 0;
+      toks.forEach(t => {
+        if (t.nl) { lines.push(cur); cur = []; wd = 0; return; }
+        if (/^\s+$/.test(t.w)) { if (cur.length) { cur.push({ w: " ", b: t.b }); } return; }
+        doc.setFont("helvetica", t.b ? "bold" : (o.italic ? "italic" : "normal")); doc.setFontSize(size);
+        const tw = doc.getTextWidth(t.w);
+        if (wd + tw > maxW && cur.length) { while (cur.length && cur[cur.length - 1].w === " ") cur.pop(); lines.push(cur); cur = []; wd = 0; }
+        cur.push({ w: t.w, b: t.b });
+        wd = cur.reduce((a, x) => { doc.setFont("helvetica", x.b ? "bold" : (o.italic ? "italic" : "normal")); return a + doc.getTextWidth(x.w); }, 0);
+      });
+      if (cur.length) lines.push(cur);
+      const h = lines.filter(l => l.length).length * lh;
+      lines.filter(l => l.length).forEach((l, li) => {
+        need(lh + 0.5);
+        if (li === 0 && o.marker) { doc.setFont("helvetica", "bold"); doc.setFontSize(size); doc.setTextColor(...(o.markerColor || SOFT)); doc.text(o.marker, x0 - 5, y + lh * 0.78); }
+        let x = x0;
+        l.forEach(t => { doc.setFont("helvetica", t.b ? "bold" : (o.italic ? "italic" : "normal")); doc.setFontSize(size); doc.setTextColor(...(o.color || INK)); doc.text(t.w, x, y + lh * 0.78); x += doc.getTextWidth(t.w); });
+        y += lh;
+      });
+      y += o.after != null ? o.after : 1.6;
+      return h;
+    }
+    function box(el, bg, opts) {   // kotak ayat / catatan: ukur dulu, gambar latar, lalu teks
+      const y0 = y, startPage = doc.getNumberOfPages();
+      const save = y; y += 2.2; para(runs(el, !!opts.bold), Object.assign({ indent: 4, right: 3, after: 0 }, opts)); y += 2.2;
+      if (doc.getNumberOfPages() === startPage) {   // muat di satu halaman → beri latar & garis kiri
+        const hgt = y - y0; doc.setFillColor(...bg); doc.rect(M, y0, CW, hgt, "F"); if (opts.bar) { doc.setFillColor(...opts.bar); doc.rect(M, y0, 1.1, hgt, "F"); }
+        y = save; y += 2.2; para(runs(el, !!opts.bold), Object.assign({ indent: 4, right: 3, after: 0 }, opts)); y += 2.2;
+      }
+      y += 2;
+    }
+    function blocks(html) {
+      const host = document.createElement("div"); host.innerHTML = html;
+      host.childNodes.forEach(n => {
+        if (n.nodeType !== 1) return;
+        const c = n.classList, tag = n.tagName;
+        if (tag === "H3") { need(14); y += 3; para(runs(n, true), { size: 13, color: INK, after: 1.2 }); }
+        else if (tag === "H4") { need(11); y += 2; para(runs(n, true), { size: 11.5, color: SOFT, after: 1 }); }
+        else if (tag === "UL" || tag === "OL") { [...n.children].forEach((li, k) => para(runs(li, false), { indent: 6, marker: tag === "OL" ? (k + 1) + "." : "•", after: 1 })); y += 1; }
+        else if (tag === "BLOCKQUOTE") { need(12); box(n, [245, 239, 227], { italic: true, bar: [181, 98, 59] }); }
+        else if (c.contains("mt-memo")) { need(12); box(n, [230, 235, 223], { bold: true }); }
+        else if (c.contains("mt-note")) { need(12); const ul = n.querySelector("ul"); box(n, [240, 232, 216], {});
+          if (ul) { [...ul.children].forEach(li => para(runs(li, false), { indent: 10, marker: "•", after: 0.8 })); y += 2; } }
+        else para(runs(n, false), {});
+      });
+    }
+    // kepala dokumen
+    doc.setFont("helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(...SOFT);
+    doc.text(winAnsi((sel.sub ? sel.sub + " · " : "") + "Bahan Ajar Discipleship Journey JB3").trim(), M, y + 3); y += 7;
+    sel.parts.forEach((p, i) => {
+      if (p.solo || i === 0) { doc.setFont("helvetica", "bold"); doc.setFontSize(18); doc.setTextColor(...ACC);
+        doc.splitTextToSize(winAnsi(p.solo ? sel.title : p.head.replace(/\*\*/g, "")), CW).forEach(l => { need(9); doc.text(l, M, y + 6); y += 8; });
+        doc.setDrawColor(...LINE); doc.setLineWidth(0.4); doc.line(M, y + 1, W - M, y + 1); y += 5; }
+      else { page(); doc.setFont("helvetica", "bold"); doc.setFontSize(15); doc.setTextColor(...ACC);
+        doc.splitTextToSize(winAnsi(p.head.replace(/\*\*/g, "")), CW).forEach(l => { doc.text(l, M, y + 5); y += 7; });
+        doc.setDrawColor(...LINE); doc.line(M, y + 1, W - M, y + 1); y += 5; }
+      blocks(mdBlocks(p.lines));
+    });
+    const n = doc.getNumberOfPages();
+    for (let i = 1; i <= n; i++) { doc.setPage(i); doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(...SOFT);
+      doc.text(winAnsi(sel.title).trim().slice(0, 90), M, H - 9); doc.text("Hal " + i + " / " + n, W - M, H - 9, { align: "right" }); }
+    return doc.output("blob");
+  }
+  document.addEventListener("click", async e => {
+    const t = e.target.closest && e.target.closest("[data-mtdl]"); if (!t) return;
+    e.preventDefault();
+    const [kind, which] = t.dataset.mtdl.split(":"), sel = mtSel(which); if (!sel) return;
+    const lbl = t.textContent; t.disabled = true; t.textContent = "…";
+    try { await mtSave(kind === "pdf" ? await mtPdfBlob(sel) : mtDocBlob(sel), sel.fname + (kind === "pdf" ? ".pdf" : ".doc")); }
+    catch (err) { toast("Gagal membuat file: " + ((err && err.message) || err)); }
+    t.disabled = false; t.textContent = lbl;
+  });
   document.addEventListener("toggle", e => { const d = e.target;   // 2026-10-17: 1 pelajaran terbuka sekaligus
     if (!d.classList || !d.classList.contains("mt-sec") || !d.open) return;
     document.querySelectorAll(".mt-sec[open]").forEach(o => { if (o !== d) o.open = false; });
@@ -2038,8 +2168,12 @@
     const cur = rows.find(r => r.key === state.materiKey) || rows[0];
     const tabs = ["rs1", "rs2", "rs3", "lts1", "lts2"].map(k => { const c = DASH_JOURNEYS.find(x => x.key === k);
       return `<button type="button" class="mt-tab" style="--jc:${c.color};" data-materitab="${k}" aria-pressed="${!!cur && cur.key === k}">${c.icon} ${c.tab}</button>`; }).join("");
+    if (cur) { const cj = DASH_JOURNEYS.find(x => x.key === cur.key) || {};
+      MT_CUR.key = cur.key; MT_CUR.title = cj.title || cur.title || cur.key;
+      MT_CUR.parts = String(cur.body || "").split(/\n(?=# )/).map(part => { const L = part.split("\n"); return { head: L[0].replace(/^# /, ""), lines: L.slice(1) }; }); }
     box.innerHTML = `<div class="mt-lock">🔒 Khusus Admin & Senior Pastor · tidak terlihat oleh peserta</div>
       <div class="mt-tabs">${tabs}</div>
+      ${cur ? `<div class="mt-dlall"><span>Unduh semua bahan ${esc(MT_CUR.title)}</span><button type="button" class="mt-dlb" data-mtdl="pdf:all">⬇ PDF</button><button type="button" class="mt-dlb" data-mtdl="doc:all">⬇ Word</button></div>` : ""}
       ${cur ? mdDoc(cur.body) + `<p class="jd-note">Diperbarui ${esc(new Date(cur.updated_at).toLocaleDateString("id-ID", { day:"numeric", month:"long", year:"numeric" }))}</p>`
         : `<div class="card pad"><p class="sub">Belum ada bahan untuk kelas ini.</p></div>`}`;
   };
