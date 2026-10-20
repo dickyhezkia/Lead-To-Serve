@@ -63,7 +63,10 @@ window.makeDB = function makeDB(sb) {
   // 2026-10-16 (user: "Dicky sudah lulus LTS2, perbaiki juga setiap koneksi pengguna"): classes DULU
   // DIBUANG di sini → state.myProfile.classes selalu kosong utk SEMUA peserta (Beranda 0/5, "Belum
   // ditandai selesai" di tab kelas) walau di DB sudah [true×5]. Sekarang ikut dibawa, dinormalisasi.
-  const inProfile = r => ({ id:r.id, name:r.name || "", phone:r.phone || "", role:r.role || "jemaat", createdAt:r.created_at || null, classes:normClasses(r.classes) });
+  // 2026-10-21: is_sp dulu diambil tapi tak ikut ke sini (SP tak melihat Bahan Ajar) + content = melayani di
+  // Departemen Content (ministry_roles dept "Content") → boleh baca Bahan Ajar (user: "content ministry, admin, SP").
+  const inProfile = r => ({ id:r.id, name:r.name || "", phone:r.phone || "", role:r.role || "jemaat", createdAt:r.created_at || null, classes:normClasses(r.classes),
+    is_sp:r.is_sp === true, content:Array.isArray(r.ministry_roles) && r.ministry_roles.some(x => x && x.dept === "Content") });
 
   return {
     async session() { const { data } = await sb.auth.getSession(); return data.session; },
@@ -71,7 +74,7 @@ window.makeDB = function makeDB(sb) {
     async myProfile() {
       const s = await this.session();
       if (!s) return null;
-      const { data, error } = await sb.from("profiles").select("id,name,phone,role,created_at,classes,is_sp").eq("id", s.user.id).maybeSingle();
+      const { data, error } = await sb.from("profiles").select("id,name,phone,role,created_at,classes,is_sp,ministry_roles").eq("id", s.user.id).maybeSingle();
       if (error) throw error;
       return data ? inProfile(data) : null;
     },
