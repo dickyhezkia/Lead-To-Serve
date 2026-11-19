@@ -278,32 +278,35 @@ window.LTS = (function () {
   // materi asli, bukan kunci soal resmi yg memang tak ada). Kategorisasi &
   // ambang skor SAMA PERSIS dgn RS3 (Excellent 90-100% / Better 75-89% /
   // Good 50-74% / Underperform <50%, Good ke atas = lulus).
+  // 2026-11-07 (user: "sesuaikan pertanyaan post test LTS2 dengan materi LTS2"): 25 soal disusun ulang
+  // mengikuti Bahan Ajar baru (deck Canva LTS1-2), 5 soal per bagian (1–5 sesuai urutan). Mat 14 (5 roti 2 ikan)
+  // dipindah ke LTS1; soal lama tersimpan di backups/2026-11-07_lts2-posttest/common.js.sebelum.
   const LTS2_QUESTIONS = [
-    { "no": 1, "text": "Apa definisi dari Servant Leadership menurut materi?", "options": { "A": "Pemimpin yang bekerja untuk orang yang dipimpin dan memutuskan segalanya bagi mereka.", "B": "Sebuah proses memimpin / memberikan pengaruh / membantu orang lain untuk mencapai tujuan / visi tertentu.", "C": "Pemimpin yang menghindari tanggung jawab dan menyerahkan semua keputusan kepada bawahan.", "D": "Sebuah gaya manajemen yang berfokus pada efisiensi operasional semata." }, "correct": "B" },
-    { "no": 2, "text": "Apakah dua bagian dalam kepemimpinan pelayan (servant leadership) menurut materi?", "options": { "A": "Peran administratif dan peran finansial.", "B": "Peran pengajaran dan peran pengawasan.", "C": "Peran visioner/arahan (strategis) dan peran implementasi (operasional).", "D": "Peran sosial dan peran teknis." }, "correct": "C" },
-    { "no": 3, "text": "Menurut Filipi 2:6-8, apa yang dilakukan Yesus meski dalam rupa Allah?", "options": { "A": "Ia mempertahankan kesetaraan-Nya dengan Allah.", "B": "Ia mengosongkan diri-Nya, mengambil rupa seorang hamba, dan taat sampai mati di kayu salib.", "C": "Ia menuntut untuk dilayani oleh manusia.", "D": "Ia menghindari penderitaan dengan segala cara." }, "correct": "B" },
-    { "no": 4, "text": "Dalam Matius 4:18-22, siapa yang pertama kali dipanggil Yesus menjadi \"penjala manusia\"?", "options": { "A": "Yusuf dan saudara-saudaranya.", "B": "Simon Petrus dan Andreas.", "C": "Musa dan Harun.", "D": "Paulus dan Timotius." }, "correct": "B" },
-    { "no": 5, "text": "Dalam kisah Matius 14:13-20 (5 roti 2 ikan), apa yang mula-mula tergerak dalam hati Yesus saat melihat orang banyak?", "options": { "A": "Kekecewaan karena kehadiran mereka mengganggu waktu sunyi-Nya.", "B": "Belas kasihan (compassion), sehingga Ia menyembuhkan yang sakit.", "C": "Kemarahan karena mereka tidak membawa bekal.", "D": "Ketidakpedulian karena bukan tanggung jawab-Nya." }, "correct": "B" },
-    { "no": 6, "text": "Apa urutan prinsip pola pelayanan Yesus menurut materi?", "options": { "A": "Melihat kebutuhan -> tergerak belas kasihan -> melakukan sesuatu -> sesuatu/mujizat terjadi.", "B": "Melakukan sesuatu -> mujizat terjadi -> melihat kebutuhan -> belas kasihan.", "C": "Tergerak belas kasihan -> mengontrol hasil -> melihat kebutuhan -> selesai.", "D": "Melihat kebutuhan -> mengintervensi hasil -> mujizat terjadi." }, "correct": "A" },
-    { "no": 7, "text": "Menurut 1 Korintus 3:6, siapa yang memberi pertumbuhan setelah Paulus menanam dan Apolos menyiram?", "options": { "A": "Paulus sendiri, karena dialah yang memulai.", "B": "Apolos, karena dialah yang terakhir menyentuh pekerjaan itu.", "C": "Allah yang memberi pertumbuhan.", "D": "Jemaat itu sendiri, melalui usaha mereka." }, "correct": "C" },
-    { "no": 8, "text": "Apa yang dilakukan Yesus pertama kali setelah bangkit dan semua kekuasaan ada di tangan-Nya, sebagai contoh \"Servant King\"?", "options": { "A": "Mengumpulkan murid-murid untuk memberi perintah baru.", "B": "Membasuh kaki murid-murid-Nya.", "C": "Naik ke sorga tanpa berpamitan.", "D": "Menghukum orang-orang yang menyalibkan-Nya." }, "correct": "B" },
-    { "no": 9, "text": "Apa makna dari ungkapan \"Power is for Service\" dalam materi?", "options": { "A": "Kekuasaan adalah hak untuk memerintah tanpa dipertanyakan.", "B": "Kekuasaan adalah hak istimewa yang diberikan untuk melayani orang lain.", "C": "Kekuasaan hanya boleh dimiliki oleh pemimpin senior.", "D": "Kekuasaan adalah tujuan akhir dari kepemimpinan." }, "correct": "B" },
-    { "no": 10, "text": "Manakah yang TERMASUK ciri fokus kepada orang lain sebagai pemimpin yang melayani?", "options": { "A": "Memanfaatkan orang lain untuk mencapai target pribadi.", "B": "Memberikan nilai, tidak memanfaatkan, dan memperhatikan orang lain.", "C": "Mengontrol setiap keputusan yang diambil pengikut.", "D": "Menuntut loyalitas tanpa memberi apa pun sebagai balasan." }, "correct": "B" },
-    { "no": 11, "text": "Apa perbedaan utama sumber perubahan antara Inspirasi dan Intimidasi menurut materi?", "options": { "A": "Inspirasi dan Intimidasi sebenarnya sama saja, hanya istilah berbeda.", "B": "Pada Inspirasi, pemimpin berubah dahulu baru pengikutnya; pada Intimidasi, pemimpin menuntut pengikut yang berubah.", "C": "Intimidasi selalu lebih efektif dibanding Inspirasi dalam jangka panjang.", "D": "Inspirasi hanya berlaku untuk pemimpin gereja, Intimidasi untuk pemimpin bisnis." }, "correct": "B" },
-    { "no": 12, "text": "Manakah yang BUKAN salah satu cara belajar seorang pemimpin menurut materi?", "options": { "A": "Belajar dengan melakukan (bukan sekadar teori).", "B": "Belajar dengan observing/memperhatikan dan menjadi pendengar yang baik.", "C": "Belajar dari kesalahan diri sendiri atau orang lain.", "D": "Belajar hanya dari pengalaman pribadi tanpa perlu sumber lain." }, "correct": "D" },
-    { "no": 13, "text": "Dalam Matius 18:12-14 (perumpamaan domba yang hilang), apa makna \"pemimpin yang menghampiri\"?", "options": { "A": "Pemimpin yang duduk diam menunggu orang datang kepadanya.", "B": "Pemimpin yang mencari dan mendapatkan orang-orang yang terhilang atau membutuhkan.", "C": "Pemimpin yang hanya fokus pada domba yang sudah ada di dalam kandang.", "D": "Pemimpin yang mengabaikan yang tersesat demi menjaga yang sembilan puluh sembilan." }, "correct": "B" },
-    { "no": 14, "text": "Apa sajakah kelima elemen dalam Kerangka 5F untuk membangun hubungan?", "options": { "A": "Face, Facts, Feelings, Fears, Faith.", "B": "Focus, Faith, Family, Finance, Future.", "C": "Face, Function, Feelings, Freedom, Faith.", "D": "Facts, Fame, Fears, Faith, Function." }, "correct": "A" },
-    { "no": 15, "text": "Elemen 5F manakah yang berkaitan dengan mengetahui kehidupan pribadi seseorang dengan Tuhan, tujuan hidup, dan pergumulannya?", "options": { "A": "Face", "B": "Facts", "C": "Feelings", "D": "Faith" }, "correct": "D" },
-    { "no": 16, "text": "Apa makna dari pernyataan \"Kita tidak memakai orang untuk membangun gereja tetapi kita memakai gereja untuk membangun orang\"?", "options": { "A": "Gereja lebih penting daripada orang-orang di dalamnya.", "B": "Fokus kepemimpinan adalah pertumbuhan dan transformasi orang, bukan sekadar membesarkan organisasi.", "C": "Orang-orang harus dikorbankan demi kepentingan institusi gereja.", "D": "Gereja dan orang adalah dua hal yang tidak saling berkaitan." }, "correct": "B" },
-    { "no": 17, "text": "Menurut John Maxwell, pemimpin diumpamakan sebagai apa jika ia tidak mau bertumbuh?", "options": { "A": "Pintu yang selalu terbuka.", "B": "Tutup botol yang menghentikan pertumbuhan organisasi jika tertutup.", "C": "Jendela yang menerangi ruangan.", "D": "Akar pohon yang menopang segalanya." }, "correct": "B" },
-    { "no": 18, "text": "Berdasarkan 1 Yohanes 2:12-14, apa ciri tahap \"Ignorance\" (ketidaktahuan) dalam pertumbuhan rohani?", "options": { "A": "Seorang Kristen baru lahir secara rohani, belum memiliki banyak pengetahuan Alkitab.", "B": "Seorang Kristen yang sudah dewasa dan aktif memuridkan orang lain.", "C": "Seorang Kristen yang berfokus sepenuhnya kepada Tuhan.", "D": "Seorang Kristen yang sudah mengalahkan yang jahat dan kuat dalam iman." }, "correct": "A" },
-    { "no": 19, "text": "Tahap manakah dalam pertumbuhan rohani yang ditandai dengan fokus pada pemenuhan kebutuhan pribadi, termasuk motivasi doa yang salah (Yakobus 4:3)?", "options": { "A": "Ignorance", "B": "Self-centered", "C": "God-centered", "D": "Other-centered" }, "correct": "B" },
-    { "no": 20, "text": "Tahap pertumbuhan rohani \"Other-centered dan Intentional to Disciple\" ditandai dengan apa?", "options": { "A": "Ketergantungan penuh pada orang lain untuk bertumbuh.", "B": "Fokus pada kebutuhan orang lain dan secara aktif terlibat memuridkan orang lain.", "C": "Berhenti melayani karena sudah merasa cukup dewasa.", "D": "Kembali fokus pada kebutuhan dan kenyamanan pribadi." }, "correct": "B" },
-    { "no": 21, "text": "Menurut Efesus 4:11-13, untuk tujuan apa Tuhan memberikan rasul, nabi, pemberita Injil, gembala, dan pengajar?", "options": { "A": "Untuk memperlengkapi orang-orang kudus bagi pekerjaan pelayanan dan pembangunan tubuh Kristus.", "B": "Untuk menjadi pejabat tetap yang tidak boleh diganti.", "C": "Untuk mengatur keuangan gereja secara eksklusif.", "D": "Untuk membuat peraturan gereja yang kaku." }, "correct": "A" },
-    { "no": 22, "text": "Apa isi Amanat Agung dalam Matius 28:19-20?", "options": { "A": "Membangun gedung gereja yang megah di setiap kota.", "B": "Menjadikan semua bangsa murid, membaptis, dan mengajarkan mereka melakukan segala yang diperintahkan.", "C": "Mengumpulkan persembahan sebanyak-banyaknya.", "D": "Menghindari orang-orang yang belum percaya." }, "correct": "B" },
-    { "no": 23, "text": "Menurut Efesus 4:13, apa tujuan akhir dari proses memperlengkapi dan memuridkan orang percaya?", "options": { "A": "Membawa orang bertumbuh menjadi serupa dengan Kristus (kedewasaan penuh sesuai kepenuhan Kristus).", "B": "Membuat setiap orang menjadi pengkhotbah profesional.", "C": "Menjadikan gereja memiliki jumlah jemaat terbanyak di kotanya.", "D": "Membawa orang untuk menghafal seluruh isi Alkitab." }, "correct": "A" },
-    { "no": 24, "text": "Menurut nasihat Paulus kepada Timotius (2 Timotius 2:2), apa yang seharusnya menjadi hasil akhir dari proses pemuridan seorang pemimpin?", "options": { "A": "Membawa orang bertumbuh menjadi pemimpin bagi orang lain — mampu mengajar & memuridkan orang lain juga.", "B": "Membuat murid selalu bergantung sepenuhnya kepada pemimpinnya.", "C": "Menjadikan murid sekadar pendengar setia tanpa perlu bertindak.", "D": "Membatasi pengajaran hanya untuk kalangan tertentu saja." }, "correct": "A" },
-    { "no": 25, "text": "Dalam kisah Yusuf dan saudara-saudaranya (Kejadian 50:15-21), apa prinsip rohani utama yang diajarkan tentang cara Tuhan bekerja?", "options": { "A": "Tuhan selalu menghukum orang yang berbuat jahat kepada kita.", "B": "Tuhan dapat mengubah hal yang dimaksudkan untuk kejahatan menjadi kebaikan bagi tujuan-Nya.", "C": "Kita harus membalas kejahatan dengan kejahatan agar keadilan tercapai.", "D": "Tuhan tidak ikut campur dalam situasi yang melibatkan kejahatan manusia." }, "correct": "B" },
+    { "no": 1, "text": "Apa definisi servant leadership menurut materi?", "options": {"A": "Pemimpin yang menuruti semua kemauan orang yang dipimpinnya.", "B": "Sebuah proses memimpin — yang membantu orang lain — untuk mencapai tujuan atau visi tertentu.", "C": "Pemimpin yang memutuskan segalanya: apa, kapan, di mana, dan bagaimana.", "D": "Gaya manajemen yang berfokus pada efisiensi operasional semata."}, "correct": "B" },
+    { "no": 2, "text": "Apa dua bagian dalam kepemimpinan pelayan (servant leadership)?", "options": {"A": "Peran administratif dan peran finansial.", "B": "Peran pengajaran dan peran pengawasan.", "C": "Peran visioner/arahan (strategis) dan peran implementasi (operasional).", "D": "Peran sosial dan peran teknis."}, "correct": "C" },
+    { "no": 3, "text": "Menurut materi, apa dua salah paham yang sering muncul tentang \"pemimpin yang melayani\"?", "options": {"A": "Pemimpin menuruti semua kemauan orang yang dipimpin, atau sebaliknya pemimpin memutuskan segalanya bagi mereka.", "B": "Pemimpin harus berpendidikan teologi, atau harus memiliki jabatan resmi.", "C": "Pemimpin tidak boleh punya visi, atau tidak boleh mendelegasikan.", "D": "Pemimpin harus selalu tampil di depan, atau harus selalu di belakang layar."}, "correct": "A" },
+    { "no": 4, "text": "Dalam Matius 4:18-20, bagaimana Yesus menunjukkan bahwa Ia memegang \"arah\" sebagai pemimpin?", "options": {"A": "Ia membiarkan Simon dan Andreas menentukan misi-Nya.", "B": "Ia memberi perintah lalu meninggalkan mereka.", "C": "Ia menunggu mereka siap lebih dahulu sebelum memanggil.", "D": "Ia datang dengan visi yang jelas: menjadikan Simon dan Andreas penjala manusia."}, "correct": "D" },
+    { "no": 5, "text": "Bagaimana visi \"penjala manusia\" tergenapi dalam hidup Petrus menurut materi?", "options": {"A": "Petrus menangkap ikan lebih banyak daripada nelayan lain.", "B": "Petrus menjadi pemilik perahu terbesar di Galilea.", "C": "Kira-kira tiga ribu orang menerima perkataannya dan memberi diri dibaptis (Kis 2:41).", "D": "Petrus berhenti melayani setelah Yesus naik ke surga."}, "correct": "C" },
+    { "no": 6, "text": "Menurut Filipi 2:6-8, apa yang dilakukan Yesus meski Ia dalam rupa Allah?", "options": {"A": "Ia mempertahankan kesetaraan-Nya dengan Allah.", "B": "Ia mengosongkan diri-Nya, mengambil rupa seorang hamba, dan taat sampai mati di kayu salib.", "C": "Ia menuntut untuk dilayani oleh manusia.", "D": "Ia menghindari penderitaan dengan segala cara."}, "correct": "B" },
+    { "no": 7, "text": "Menurut Yohanes 13:3-5, apa yang dilakukan Yesus ketika Ia tahu Bapa telah menyerahkan segala sesuatu kepada-Nya, sebagai teladan \"Servant King\"?", "options": {"A": "Membasuh kaki murid-murid-Nya.", "B": "Memerintahkan murid-murid untuk melayani-Nya.", "C": "Menunjukkan kuasa-Nya dengan mujizat di depan orang banyak.", "D": "Menghukum murid yang akan mengkhianati-Nya."}, "correct": "A" },
+    { "no": 8, "text": "Apa makna \"Power is for service\" menurut materi?", "options": {"A": "Kekuasaan adalah hak untuk memerintah tanpa dipertanyakan.", "B": "Kekuasaan hanya boleh dimiliki pemimpin senior.", "C": "Kekuasaan adalah tujuan akhir kepemimpinan.", "D": "Kekuasaan adalah hak istimewa yang dipercayakan kepada seseorang untuk melayani orang lain."}, "correct": "D" },
+    { "no": 9, "text": "Menurut materi, apa yang terjadi bila pemimpin memperhatikan, memberi nilai, dan tidak memanfaatkan orang yang dipimpinnya?", "options": {"A": "Orang akan patuh karena takut kepada pemimpinnya.", "B": "Pemimpin kehilangan wibawa karena terlihat lemah.", "C": "Ia menanam pengaruh dan menuai otoritas: makin ia melayani, makin besar kepercayaan orang kepadanya.", "D": "Target pribadi pemimpin tercapai lebih cepat."}, "correct": "C" },
+    { "no": 10, "text": "Apa perbedaan sumber perubahan antara inspirasi dan intimidasi/manipulasi?", "options": {"A": "Keduanya sama saja, hanya istilahnya berbeda.", "B": "Pada inspirasi, pemimpin berubah lebih dahulu, lalu pengikutnya; pada intimidasi, pemimpin merasa sudah benar dan menuntut pengikut yang berubah.", "C": "Intimidasi selalu lebih efektif daripada inspirasi dalam jangka panjang.", "D": "Inspirasi hanya untuk pemimpin gereja, intimidasi untuk pemimpin bisnis."}, "correct": "B" },
+    { "no": 11, "text": "Dalam Lukas 5:1-3, bagaimana Yesus menghampiri Simon?", "options": {"A": "Ia menunggu Simon datang ke rumah ibadat untuk mendengar pengajaran-Nya.", "B": "Ia naik ke perahu Simon (tempat Simon bekerja), lalu duduk dan mengajar orang banyak dari sana.", "C": "Ia memanggil Simon dari kejauhan dan menegurnya karena tidak menangkap ikan.", "D": "Ia mengutus murid lain untuk menjemput Simon."}, "correct": "B" },
+    { "no": 12, "text": "Apa urutan tiga langkah Yesus memimpin dalam Lukas 5 menurut materi?", "options": {"A": "Melihat → menghampiri & duduk → berjalan bersama.", "B": "Menghampiri → menegur → meninggalkan.", "C": "Mengajar → menuntut hasil → melihat kebutuhan.", "D": "Menunggu didatangi → menasihati sekali → pergi."}, "correct": "A" },
+    { "no": 13, "text": "Materi memakai perumpamaan domba yang hilang (Matius 18:12-14). Apa artinya bagi pemimpin yang menghampiri?", "options": {"A": "Pemimpin duduk diam menunggu orang datang kepadanya.", "B": "Pemimpin cukup fokus pada domba yang sudah ada di dalam kandang.", "C": "Pemimpin mengabaikan yang tersesat demi menjaga yang sembilan puluh sembilan.", "D": "Pemimpin berinisiatif mencari dan mendapatkan orang yang terhilang atau membutuhkan."}, "correct": "D" },
+    { "no": 14, "text": "Menurut 1 Korintus 3:6 dan materi, bagaimana sikap pemimpin terhadap hasil pelayanannya?", "options": {"A": "Pemimpin bertanggung jawab memastikan setiap orang yang dilayani berubah.", "B": "Kalau melayani dengan benar, Tuhan pasti memberi hasil yang kita harapkan.", "C": "Pemimpin melakukan bagiannya tanpa mengontrol perubahan atau hasil, karena Allah yang memberi pertumbuhan.", "D": "Hasil tidak penting, jadi pelayanan tidak perlu dikerjakan dengan sungguh-sungguh."}, "correct": "C" },
+    { "no": 15, "text": "Apa urutan kerangka 5F, dari pengenalan yang paling dangkal sampai yang paling dalam?", "options": {"A": "Face → Facts → Feelings → Fears → Faith.", "B": "Faith → Fears → Feelings → Facts → Face.", "C": "Facts → Face → Faith → Feelings → Fears.", "D": "Focus → Faith → Family → Finance → Future."}, "correct": "A" },
+    { "no": 16, "text": "Apa makna kalimat \"Kita tidak memakai orang untuk membangun gereja, tetapi memakai gereja untuk membangun orang\"?", "options": {"A": "Gereja lebih penting daripada orang-orang di dalamnya.", "B": "Fokus kepemimpinan adalah pertumbuhan dan transformasi orang, bukan sekadar membesarkan organisasi.", "C": "Orang boleh dikorbankan demi kepentingan institusi gereja.", "D": "Gereja dan orang adalah dua hal yang tidak berkaitan."}, "correct": "B" },
+    { "no": 17, "text": "John Maxwell mengumpamakan pemimpin seperti apa?", "options": {"A": "Pintu yang selalu terbuka bagi siapa saja.", "B": "Jendela yang menerangi seluruh ruangan.", "C": "Akar pohon yang tidak terlihat tetapi menopang segalanya.", "D": "Tutup botol: jika pemimpin tidak mau bertumbuh, pertumbuhan orang yang dipimpinnya ikut tertahan."}, "correct": "D" },
+    { "no": 18, "text": "Apa urutan empat tahap pertumbuhan rohani menurut materi?", "options": {"A": "Fokus pada Tuhan → Ketidaktahuan → Fokus pada orang lain → Fokus pada diri sendiri.", "B": "Fokus pada diri sendiri → Ketidaktahuan → Fokus pada orang lain → Fokus pada Tuhan.", "C": "Ketidaktahuan → Fokus pada diri sendiri → Fokus pada Tuhan → Fokus pada orang lain & memuridkan.", "D": "Ketidaktahuan → Fokus pada orang lain → Fokus pada diri sendiri → Fokus pada Tuhan."}, "correct": "C" },
+    { "no": 19, "text": "Seseorang mulai bertumbuh, tetapi motivasinya, termasuk doanya (Yakobus 4:3), masih berpusat pada diri sendiri. Menurut materi, apa yang paling ia butuhkan?", "options": {"A": "Kebenaran yang disampaikan dengan kasih.", "B": "Diutus sebagai rekan sekerja tanpa didampingi.", "C": "Dibiarkan sampai ia sadar sendiri.", "D": "Ditegur keras di depan umum supaya cepat berubah."}, "correct": "A" },
+    { "no": 20, "text": "Dalam 2 Timotius 2:2 ada empat generasi: Paulus → Timotius → orang-orang yang setia → orang lain. Apa tujuan akhir pemuridan menurut ayat ini?", "options": {"A": "Murid selalu bergantung sepenuhnya kepada pemimpinnya.", "B": "Murid menjadi pendengar setia tanpa perlu bertindak.", "C": "Pengajaran dibatasi hanya untuk kalangan tertentu.", "D": "Orang yang dewasa rohani dan juga cakap mengajar serta memuridkan orang lain."}, "correct": "D" },
+    { "no": 21, "text": "Menurut Nehemia 1:4, apa yang dilakukan Nehemia sebelum bertindak, sebagai gambaran Leading Self?", "options": {"A": "Langsung mengumpulkan rakyat untuk membangun tembok.", "B": "Menyusun anggaran pembangunan bersama para bangsawan.", "C": "Duduk menangis, berkabung, berpuasa, dan berdoa ke hadirat Allah.", "D": "Menunggu raja memerintahkannya pergi ke Yerusalem."}, "correct": "C" },
+    { "no": 22, "text": "Nehemia melakukan survei senyap di malam hari untuk membaca keadaan tembok secara objektif (Neh 2:11-16). Area Leadership Wheel apa yang terlihat di sini?", "options": {"A": "Creating Harmony", "B": "Thinking Strategically", "C": "Developing People", "D": "Communicating"}, "correct": "B" },
+    { "no": 23, "text": "Saat muncul ketimpangan dan keluhan rakyat (Nehemia 5:1-13), Nehemia mendengar, menegakkan keadilan, dan mendamaikan. Area Leadership Wheel apa yang terlihat di sini?", "options": {"A": "Creating Harmony", "B": "Simplifying Things", "C": "Thinking Strategically", "D": "Taking Decision"}, "correct": "A" },
+    { "no": 24, "text": "Nehemia menempatkan Hanani dan Hananya, orang yang dapat dipercaya dan takut akan Allah, untuk memimpin (Neh 7:2). Area Leadership Wheel apa yang terlihat di sini?", "options": {"A": "Solving Problem", "B": "Simplifying Things", "C": "Creating Harmony", "D": "Developing People"}, "correct": "D" },
+    { "no": 25, "text": "Dalam Leadership Wheel, apa yang berada di pusat roda, dan bagaimana menilainya?", "options": {"A": "Building Team, dinilai dengan jumlah anggota tim.", "B": "Thinking Strategically, dinilai dengan skala 1–5.", "C": "Leading Self (roh, jiwa, tubuh), dinilai dengan warna R (merah), Y (kuning), atau G (hijau).", "D": "Communicating, dinilai oleh atasan."}, "correct": "C" },
   ];
   const LTS2_BANDS = [
     { "key": "excellent", "label": "Excellent", "min": 90 },
@@ -323,6 +326,93 @@ window.LTS = (function () {
   function lts2Complete(answers) {
     answers = answers || {};
     return LTS2_QUESTIONS.every(q => !!answers[String(q.no)]);
+  }
+
+  // ---- LTS2 Leadership Wheel (2026-11-03, user: "asesmen berisi 5 pertanyaan untuk masing-masing kategori
+  // dengan hasil akhir menunjukkan leadership wheel"; mockup disetujui). Leading Self = pusat roda (R/Y/G),
+  // 8 area = jari-jari roda searah jarum jam dari atas. Kunci jawaban "<area>:<no 1-5>".
+  // 2026-11-03 (user: "ubah isian asesmen leadership wheel dari 1-5 menjadi angka 1-10"): jawaban 1–10 (LW_MAX).
+  // Skor area = rata-rata 5 jawaban, dibulatkan ke 0,5 (1–10). Leading Self: total 5–50; 40–50 = g (sehat),
+  // 28–39 = y (waspada), 5–27 = r (perlu perhatian) — ambang lama (20/14 dari 25) ×2. Hasil menyimpan scale:10;
+  // riwayat lama (skala 1–5, total /25) tetap ditampilkan dgn scale 5 (kolom lts2_wheel_results.scale).
+  const LW_MAX = 10;
+  const LW_SCALE = Array.from({ length:LW_MAX }, (_, i) => ({ v:i + 1, label:i === 0 ? "Tidak pernah" : i === LW_MAX - 1 ? "Selalu" : String(i + 1) }));
+  const LW_SELF = { key:"self", en:"Leading Self", id:"Roh · Jiwa · Tubuh", q:[
+    "Saya punya waktu teduh pribadi (doa & firman) yang teratur, bukan hanya saat menyiapkan pelayanan.",
+    "Saya peka dan taat ketika Roh Kudus menegur atau mengarahkan saya.",
+    "Saya dapat mengelola emosi (marah, kecewa, cemas) sehingga tidak melukai orang lain.",
+    "Saya punya orang yang saya izinkan menegur dan menanyakan kehidupan pribadi saya.",
+    "Saya menjaga tubuh: cukup istirahat, makan teratur, dan berolahraga, sehingga bertenaga untuk melayani."] };
+  const LW_CATS = [
+    { key:"harmony", en:"Creating Harmony", id:"Menciptakan keharmonisan", lab:["CREATING HARMONY"], q:[
+      "Saat ada ketegangan di tim, saya berani membicarakannya langsung dan tidak membiarkannya berlarut.",
+      "Saya mendengarkan semua pihak sebelum menyimpulkan siapa yang benar.",
+      "Anggota tim merasa aman menyampaikan pendapat yang berbeda di dekat saya.",
+      "Saya cepat meminta maaf dan mengampuni ketika terjadi gesekan.",
+      "Saya menjaga agar perbedaan pendapat tidak berubah menjadi gosip atau kubu-kubuan."],
+      tip:"Minggu ini, temui satu orang di tim yang hubungannya sedang renggang denganmu dan dengarkan dia lebih dulu." },
+    { key:"simplify", en:"Simplifying Things", id:"Menyederhanakan hal", lab:["SIMPLIFYING", "THINGS"], q:[
+      "Saya dapat menjelaskan tujuan pelayanan kami dalam satu-dua kalimat yang mudah dipahami.",
+      "Saya memecah tugas besar menjadi langkah-langkah kecil yang jelas.",
+      "Saya berani menghentikan kegiatan yang tidak lagi efektif.",
+      "Instruksi yang saya berikan jarang membingungkan atau perlu diulang.",
+      "Saya mendahulukan hal yang paling penting dan tidak mengerjakan semuanya sekaligus."],
+      tip:"Tulis tujuan pelayananmu dalam satu kalimat, lalu tanyakan ke 2 anggota tim apakah mereka memahaminya." },
+    { key:"comm", en:"Communicating", id:"Berkomunikasi", lab:["COMMUNI-", "CATING"], q:[
+      "Saya menyampaikan informasi penting kepada tim tepat waktu.",
+      "Saya mendengarkan untuk mengerti, bukan sekadar menunggu giliran bicara.",
+      "Saya dapat menyampaikan teguran dengan jelas namun tetap penuh kasih.",
+      "Saya menyesuaikan cara bicara dengan orang yang saya hadapi (usia, latar belakang, karakter).",
+      "Saya memastikan pesan saya dipahami, misalnya dengan bertanya ulang atau merangkum."],
+      tip:"Setelah memberi instruksi, minta satu orang merangkumnya kembali dengan kata-katanya sendiri." },
+    { key:"develop", en:"Developing People", id:"Mengembangkan orang", lab:["DEVELOPING", "PEOPLE"], q:[
+      "Saya punya minimal satu orang yang sedang saya bimbing secara sengaja.",
+      "Saya memberi kesempatan orang lain mengerjakan tugas, walau hasilnya belum sebaik bila saya kerjakan sendiri.",
+      "Saya rutin memberi apresiasi dan masukan yang membangun.",
+      "Saya mengenali potensi dan karunia orang-orang di tim saya.",
+      "Saya sedang menyiapkan seseorang yang kelak dapat menggantikan peran saya."],
+      tip:"Pilih satu orang di timmu untuk dibimbing, dan serahkan satu tugas yang biasanya kamu kerjakan sendiri." },
+    { key:"strategy", en:"Thinking Strategically", id:"Berpikir strategis", lab:["THINKING STRATEGICALLY"], q:[
+      "Saya punya gambaran jelas ke mana pelayanan saya dibawa dalam 1–3 tahun ke depan.",
+      "Rencana pelayanan saya selaras dengan visi gereja JB3.",
+      "Saya menetapkan target yang terukur dan mengevaluasinya secara berkala.",
+      "Saya memikirkan dampak jangka panjang sebelum memulai program baru.",
+      "Saya mengantisipasi kebutuhan (orang, dana, waktu) sebelum menjadi masalah."],
+      tip:"Tuliskan 1 target pelayanan yang terukur untuk 3 bulan ke depan dan jadwalkan evaluasinya." },
+    { key:"team", en:"Building Team", id:"Membangun tim", lab:["BUILDING", "TEAM"], q:[
+      "Saya aktif mengajak orang baru untuk ikut melayani.",
+      "Saya menempatkan orang sesuai karunia dan kekuatannya.",
+      "Tim saya tahu peran dan tanggung jawabnya masing-masing.",
+      "Saya membangun kebersamaan di luar tugas (doa bersama, makan bersama, saling peduli).",
+      "Tim tetap berjalan baik ketika saya berhalangan hadir."],
+      tip:"Petakan peran tiap anggota tim, lalu cek apakah tugasnya sesuai karunia mereka (lihat hasil Karunia Rohani LTS1)." },
+    { key:"decide", en:"Taking Decision", id:"Mengambil keputusan", lab:["TAKING", "DECISION"], q:[
+      "Saya mengambil keputusan tepat waktu dan tidak menunda-nunda.",
+      "Saya berdoa dan meminta pertimbangan orang yang tepat sebelum memutuskan hal penting.",
+      "Saya mendasarkan keputusan pada firman dan nilai gereja, bukan pada tekanan atau perasaan sesaat.",
+      "Saya bertanggung jawab atas keputusan saya, termasuk ketika hasilnya tidak baik.",
+      "Saya menjelaskan alasan keputusan kepada orang yang terdampak."],
+      tip:"Untuk keputusan yang tertunda: tetapkan tenggat, doakan, minta 1 pertimbangan, lalu putuskan." },
+    { key:"solve", en:"Solving Problem", id:"Menyelesaikan masalah", lab:["SOLVING", "PROBLEM"], q:[
+      "Saat masalah muncul, saya mencari akar penyebabnya, bukan hanya gejalanya.",
+      "Saya tetap tenang dan tidak panik saat menghadapi masalah.",
+      "Saya melibatkan tim untuk mencari jalan keluar.",
+      "Saya fokus pada solusi, bukan mencari siapa yang salah.",
+      "Saya belajar dari masalah yang terjadi agar tidak terulang."],
+      tip:"Pada masalah berikutnya, tanyakan \"mengapa?\" lima kali sebelum mencari solusi." },
+  ];
+  const LW_GROUPS = [LW_SELF].concat(LW_CATS);
+  const LW_TOTAL = LW_GROUPS.length * 5;
+  const lwSum = (answers, key) => [1, 2, 3, 4, 5].reduce((a, i) => a + (Number((answers || {})[key + ":" + i]) || 0), 0);
+  function lwComplete(answers) {
+    answers = answers || {};
+    return LW_GROUPS.every(g => [1, 2, 3, 4, 5].every(i => { const v = Number(answers[g.key + ":" + i]); return v >= 1 && v <= LW_MAX; }));
+  }
+  function computeLwResult(answers) {
+    const scores = {};
+    LW_CATS.forEach(c => { scores[c.key] = Math.round(lwSum(answers, c.key) / 5 * 2) / 2; });
+    const selfTotal = lwSum(answers, "self");
+    return { scores, selfTotal, selfLevel: selfTotal >= 40 ? "g" : selfTotal >= 28 ? "y" : "r", scale: LW_MAX };
   }
 
   // 2026-10-15 (permintaan user: "buat Post test untuk Rock Solid 1 dan 2 di
@@ -396,7 +486,21 @@ window.LTS = (function () {
     {"no": 39, "text": "Apa yang dimaksud dengan kanonisasi Alkitab?", "options": {"A": "Proses menerjemahkan Alkitab ke bahasa Latin.", "B": "Gereja mengakui kitab-kitab yang memang sudah otoritatif — bukan menciptakan otoritasnya.", "C": "Seorang paus menetapkan isi Alkitab dalam satu sidang.", "D": "Gereja memilih kitab-kitab supaya menjadi otoritatif."}, "correct": "B"},
     {"no": 40, "text": "Apa tujuan metoda kritik teks?", "options": {"A": "Menulis ulang Alkitab sesuai zaman modern.", "B": "Menentukan kitab mana yang paling disukai jemaat.", "C": "Membandingkan ribuan manuskrip untuk merekonstruksi teks asli seakurat mungkin.", "D": "Mencari kesalahan dalam Alkitab agar dapat ditolak."}, "correct": "C"}
   ];
-  const PT_QUESTIONS = { rs1: RS1_QUESTIONS, rs2: RS2_QUESTIONS };
+  // 2026-10-28 (user: "post test untuk LTS1 berisi 10 pertanyaan sedang sebagai kelulusan bersama dengan asesmen yg lain"):
+  // satu soal per bagian materi (Landasan ×2, Modul 1, Modul 2 ×2, Modul 3, 4, Modul 5 ×2, Modul 6) — sumber sumber/materi/lts1.md.
+  const LTS1_QUESTIONS = [
+    {"no": 1, "text": "Menurut materi Landasan, mengapa babak keempat cerita Alkitab disebut \"Pemuliaan\" dan bukan sekadar \"Pemulihan\"?", "options": {"A": "Karena Allah akan mengembalikan manusia ke Taman Eden seperti semula.", "B": "Karena pemuliaan hanya berbicara tentang jiwa yang masuk surga setelah mati.", "C": "Karena cerita Alkitab bergerak maju: Eden mencapai tujuannya dalam ciptaan baru, bukan sekadar kembali ke Eden.", "D": "Karena kejatuhan membuat rencana Allah berubah menjadi \"Rencana B\"."}, "correct": "C"},
+    {"no": 2, "text": "Kita hidup di antara Penebusan dan Pemuliaan. Apa artinya bagi pelayanan kita?", "options": {"A": "Kita ditebus untuk ikut dalam karya Allah yang menjadikan segala sesuatu baru — di seluruh bidang hidup, bukan hanya kegiatan \"rohani\".", "B": "Kita cukup menunggu dunia yang akan datang, karena dunia ini akan dibuang.", "C": "Pelayanan adalah tambahan yang boleh dilakukan setelah semua urusan pribadi beres.", "D": "Pelayanan hanya berlaku bagi pendeta dan pengurus gereja."}, "correct": "A"},
+    {"no": 3, "text": "Pola pelayanan Yesus dalam Matius 14:13-14 adalah Melihat → Tergerak oleh belas kasihan → Melakukan sesuatu → Tuhan bekerja. Sikap mana yang paling tepat terhadap langkah terakhir?", "options": {"A": "Kalau kita sudah melayani dengan benar, Tuhan pasti memberi hasil yang kita harapkan.", "B": "Pemimpin bertanggung jawab memastikan setiap orang yang dilayani berubah.", "C": "Hasil tidak penting, jadi tidak perlu dievaluasi sama sekali.", "D": "Kita melakukan bagian kita tanpa mengontrol hasil, karena perubahan seseorang adalah karya Roh Kudus."}, "correct": "D"},
+    {"no": 4, "text": "Apa yang dimaksud dengan holy discontent (kegerahan kudus)?", "options": {"A": "Rasa tidak puas terhadap gereja sehingga ingin pindah pelayanan.", "B": "Beban yang begitu kuat di hati sehingga kita tergerak melakukan sesuatu supaya keadaan berubah, seperti Nehemia yang berdoa, berpuasa, dan merencanakan.", "C": "Kemarahan kepada orang lain yang tidak melayani dengan sungguh-sungguh.", "D": "Perasaan bersalah karena belum cukup sibuk melayani."}, "correct": "B"},
+    {"no": 5, "text": "Menurut Modul Vision, apa perbedaan visi, misi, dan goal?", "options": {"A": "Visi adalah rencana kerja tahunan; misi adalah anggaran; goal adalah slogan.", "B": "Ketiganya sama, hanya istilah yang berbeda.", "C": "Visi = being (akan menjadi seperti apa), misi = doing (apa yang dilakukan); yang berbatas waktu disebut goal.", "D": "Visi berbatas waktu; misi dan goal tidak berbatas waktu."}, "correct": "C"},
+    {"no": 6, "text": "Materi menyebut \"planning is an expression of faith\". Pernyataan mana yang sesuai?", "options": {"A": "Perencanaan adalah wujud hamba yang setia mengelola apa yang Tuhan percayakan — menghindari \"hiper anugerah\" maupun \"mengandalkan diri\".", "B": "Karena Allah berdaulat, kita tidak perlu membuat rencana.", "C": "Visi Tuhan hanya akan berhasil bila rencana kita cukup hebat.", "D": "Perencanaan menunjukkan kurangnya iman kepada Tuhan."}, "correct": "A"},
+    {"no": 7, "text": "Menurut Modul Strength, apa yang dimaksud dengan \"kekuatan\" (strength)?", "options": {"A": "Hal yang paling sering dipuji orang lain dari diri kita.", "B": "Kemampuan yang dimiliki sejak lahir dan tidak perlu dikembangkan.", "C": "Jabatan atau posisi yang kita pegang dalam pelayanan.", "D": "Ability (bisa) + passion (suka): aktivitas yang membuat kita merasa kuat sebelum, selama, dan sesudah melakukannya, sekalipun tanpa ucapan terima kasih."}, "correct": "D"},
+    {"no": 8, "text": "Dalam Modul Experience, \"reframing\" (Roma 12:2) dijelaskan sebagai…", "options": {"A": "Melupakan masa lalu dan tidak pernah membicarakannya lagi.", "B": "Melihat hidup dengan kerangka baru — menerima, mengampuni, dan memaknai apa kata Tuhan — seperti Yusuf: \"bukanlah kamu yang menyuruh aku ke sini, tetapi Allah\".", "C": "Menyalahkan orang lain atas luka masa lalu supaya hati lega.", "D": "Mengejar prestasi agar orang lain mengakui kita."}, "correct": "B"},
+    {"no": 9, "text": "Bagaimana DISC seharusnya dipakai menurut prinsip 3A (Aware, Accept, Adapt)?", "options": {"A": "Untuk memberi label permanen pada orang supaya tahu siapa yang sulit diajak kerja sama.", "B": "Untuk menentukan siapa yang paling layak menjadi pemimpin.", "C": "Sebagai alat berkolaborasi: sadar akan tipe kita, menerima keunikan orang lain, dan menyesuaikan diri — seperti Yesus yang beradaptasi.", "D": "Agar orang lain yang menyesuaikan diri dengan kepribadian kita."}, "correct": "C"},
+    {"no": 10, "text": "Menurut Modul Relationship, apa beda \"masalah\" dan \"ketegangan\" dalam konflik?", "options": {"A": "Masalah (visi, misi, nilai) harus diselesaikan; ketegangan (perspektif, persepsi, metode) perlu dikelola — seperti senar gitar yang berbunyi karena tegang.", "B": "Masalah dan ketegangan sama-sama harus dihindari supaya tim tetap damai.", "C": "Ketegangan selalu tanda tim yang tidak sehat dan harus dihilangkan.", "D": "Masalah cukup dikelola, sedangkan ketegangan harus diselesaikan tuntas."}, "correct": "A"}
+  ];
+  const PT_QUESTIONS = { rs1: RS1_QUESTIONS, rs2: RS2_QUESTIONS, lts1: LTS1_QUESTIONS };
   function computePtResult(k, answers) {
     answers = answers || {};
     const qs = PT_QUESTIONS[k];
@@ -417,6 +521,7 @@ window.LTS = (function () {
     ROADMAP_SECTIONS, HOLY_DISCONTENT_AREAS, DISC_PROFILES, DISC_INTERP, SSD_INSIGHT,
     RS3_QUESTIONS, RS3_BANDS, computeRs3Result, rs3Complete,
     LTS2_QUESTIONS, LTS2_BANDS, computeLts2Result, lts2Complete,
-    RS1_QUESTIONS, RS2_QUESTIONS, PT_QUESTIONS, computePtResult, ptComplete,
+    LW_MAX, LW_SCALE, LW_SELF, LW_CATS, LW_GROUPS, LW_TOTAL, lwComplete, computeLwResult,
+    RS1_QUESTIONS, RS2_QUESTIONS, LTS1_QUESTIONS, PT_QUESTIONS, computePtResult, ptComplete,
   };
 })();
