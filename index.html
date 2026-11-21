@@ -851,6 +851,7 @@
   .bkb-anc { display:block; height:0; }
   .bkb-kick { margin:0 0 .2em; font-size:.75em; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); }
   .bkb-acts { display:flex; flex-wrap:wrap; gap:6px; margin:0 0 1em; padding-bottom:.9em; border-bottom:1px solid var(--line); }
+  .bkb-hint { margin:-.3em 0 .8em; font-size:.78em; font-weight:600; color:var(--ink-faint); }
   .bkb-toc { list-style:none; margin:0; padding:0; }
   .bkb-toc li { break-inside:avoid; }
   .bkb-toc button { width:100%; display:flex; align-items:flex-end; gap:8px; padding:.55em 0; border:0; border-bottom:1px dashed var(--line); background:none; color:var(--ink); font:inherit; font-size:.95em; text-align:left; cursor:pointer; }
@@ -3109,7 +3110,7 @@
     let h = `<div class="bkb-cover" style="--jc:${c.color};--ph:url('${c.ph}');"><i class="mtb-tag">${esc(c.tab || "")}</i>
       <div class="bkb-cv-t"><small>Bahan Ajar Pengajar · Discipleship Journey JB3</small><b>${mdInline(intro[0].replace(/^# /, ""))}</b></div>
       <span class="bkb-cv-f">${les.length} pelajaran${upd ? " · diperbarui " + esc(upd) : ""}</span></div>`;
-    h += `<div class="bkb-sect"><span class="bkb-anc" id="bkbtoc"></span><h1 class="mr-h1">Daftar Isi</h1><ol class="bkb-toc">${tocRow("bkb0", "", "Pengantar")}${les.map((L, i) => { const [k, t] = bkSplitHead(L.head); return tocRow("bkb" + (i + 1), k, t); }).join("")}</ol>
+    h += `<div class="bkb-sect"><span class="bkb-anc" id="bkbtoc"></span><h1 class="mr-h1">Daftar Isi</h1><p class="bkb-hint">Ketuk judul untuk langsung ke bab itu · ☰ di atas kembali ke sini</p><ol class="bkb-toc">${tocRow("bkb0", "", "Pengantar")}${les.map((L, i) => { const [k, t] = bkSplitHead(L.head); return tocRow("bkb" + (i + 1), k, t); }).join("")}</ol>
       <div class="bkb-dl"><span>Unduh seluruh buku</span><button type="button" class="mt-dlb" data-mtdl="pdf:all">⬇ PDF</button><button type="button" class="mt-dlb" data-mtdl="doc:all">⬇ Word</button></div></div>`;
     h += `<div class="bkb-sect"><span class="bkb-anc" id="bkb0"></span><p class="bkb-kick">Pengantar</p>${MT_CUR.edit ? `<div class="bkb-acts"><button type="button" class="mt-teach mt-edb" data-mtedit="0">✎ Ubah</button></div>` : ""}${noId(mdBlocks(intro.slice(1)))}</div>`;
     les.forEach((L, i) => { const [k, t] = bkSplitHead(L.head), n = i + 1;
