@@ -823,15 +823,17 @@
   .mtr::after { content:""; position:absolute; left:0; right:0; bottom:6px; height:12px; background:linear-gradient(#B07A48,#8A5A3C); box-shadow:0 4px 6px rgba(0,0,0,.2); }
   .mtr-shelf { display:flex; gap:12px; overflow-x:auto; padding:16px 16px 18px; scroll-padding-left:16px; scroll-snap-type:x proximity; scrollbar-width:none; }
   .mtr-shelf::-webkit-scrollbar { display:none; }
-  .mtb { flex:0 0 96px; position:relative; z-index:1; display:block; padding:0; border:0; background:none; font:inherit; text-align:left; cursor:pointer; scroll-snap-align:start; -webkit-tap-highlight-color:transparent; }
-  .mtb-cv { position:relative; display:block; aspect-ratio:2/3; border-radius:3px 10px 10px 3px; overflow:hidden; color:#fff;
+  .mtb { flex:0 0 102px; position:relative; z-index:1; display:block; padding:0; border:0; background:none; font:inherit; text-align:left; cursor:pointer; scroll-snap-align:start; -webkit-tap-highlight-color:transparent; }
+  .mtb-cv { position:relative; display:block; aspect-ratio:5/8; border-radius:3px 10px 10px 3px; overflow:hidden; color:#fff;
     background:linear-gradient(180deg, transparent 30%, color-mix(in srgb, var(--jc) 70%, #000) 78%), var(--ph) center 30% / cover no-repeat, var(--jc);
     box-shadow:inset 7px 0 0 rgba(0,0,0,.3), inset 8px 0 0 rgba(255,255,255,.2), 2px 2px 0 #F4EEDF, 4px 4px 0 #E2D8C3, 4px 7px 10px rgba(0,0,0,.22); transition:transform .2s; }
   .mtb:active .mtb-cv { transform:scale(.97); }
   .mtb.on .mtb-cv { transform:translateY(-6px); outline:3px solid #F7C948; outline-offset:2px; }
   .mtb-tag { position:absolute; top:8px; left:13px; padding:2px 7px; border-radius:999px; background:rgba(255,255,255,.94); color:var(--jc); font-style:normal; font-size:10.5px; font-weight:800; letter-spacing:.03em; }
-  .mtb-t { position:absolute; left:13px; right:6px; bottom:22px; font-family:var(--font-display); font-size:13px; font-weight:700; line-height:1.15; text-shadow:0 1px 3px rgba(0,0,0,.45); }
-  .mtb-s { position:absolute; left:13px; right:6px; bottom:7px; font-size:10px; font-weight:700; opacity:.88; }
+  .mtb-txt { position:absolute; left:13px; right:6px; bottom:7px; display:flex; flex-direction:column; gap:2px; }
+  .mtb-t { font-family:var(--font-display); font-size:13px; font-weight:700; line-height:1.15; text-shadow:0 1px 3px rgba(0,0,0,.45); }
+  .mtb-nm { font-style:italic; font-size:10.5px; font-weight:700; line-height:1.2; color:#F7E3A8; text-shadow:0 1px 2px rgba(0,0,0,.5); }
+  .mtb-s { margin-top:2px; font-size:10px; font-weight:700; opacity:.88; }
   .mtb-rib { position:absolute; top:-8px; right:12px; z-index:2; width:14px; height:28px; background:#F7C948; clip-path:polygon(0 0, 100% 0, 100% 100%, 50% 74%, 0 100%); filter:drop-shadow(0 1px 1px rgba(0,0,0,.25)); }
   /* 2026-11-21 (user: "tambahkan logo jb3 di setiap buku ajar"): logo JB3 putih di sampul (rak & buku), berwarna di halaman penutup */
   .mtb-logo { position:absolute; top:34px; left:13px; width:66px; height:auto; filter:brightness(0) invert(1) drop-shadow(0 1px 2px rgba(0,0,0,.5)); opacity:.95; pointer-events:none; }
@@ -850,11 +852,53 @@
   .bkb-cv-t { position:absolute; left:30px; right:20px; bottom:58px; }
   .bkb-cv-t small { display:block; font-size:.72em; font-weight:800; letter-spacing:.06em; text-transform:uppercase; opacity:.85; margin-bottom:.4em; }
   .bkb-cv-t b { display:block; font-family:var(--font-display); font-size:1.75em; font-weight:700; line-height:1.15; text-shadow:0 2px 6px rgba(0,0,0,.35); }
+  .bkb-cv-t em { display:block; margin-top:.2em; font-family:var(--font-display); font-style:italic; font-size:1.3em; font-weight:600; line-height:1.2; color:#F7E3A8; text-shadow:0 2px 6px rgba(0,0,0,.35); }
   .bkb-cv-f { position:absolute; left:30px; right:20px; bottom:22px; font-size:.75em; font-weight:700; opacity:.9; }
   .bkb-sect { break-before:column; -webkit-column-break-before:always; }
   .bkb-anc { display:block; height:0; }
   .bkb-kick { margin:0 0 .2em; font-size:.75em; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); }
   .bkb-acts { display:flex; flex-wrap:wrap; gap:6px; margin:0 0 1em; padding-bottom:.9em; border-bottom:1px solid var(--line); }
+  /* 2026-11-21 — susunan buku standar */
+  .bkb-lead { display:none; }
+  .bk-two .bkb-lead { display:block; height:100%; break-after:column; -webkit-column-break-after:always; }
+  .bkb-blank { height:100%; break-before:column; -webkit-column-break-before:always; }
+  .bk-hd, .bk-ft { display:grid; flex:none; }
+  .bk-hd { min-height:22px; padding:0 0 8px; }
+  .bk-hd span { min-width:0; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; text-align:center; font-size:10.5px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-faint); padding-bottom:5px; }
+  .bk-hd span:not(:empty) { border-bottom:1px solid var(--line); }
+  .bk-ft { min-height:18px; padding-top:8px; }
+  .bk-ft span { text-align:center; font-size:12px; font-weight:800; color:var(--ink-soft); font-variant-numeric:tabular-nums; }
+  .bk-ft.two span:first-child { text-align:left; } .bk-ft.two span:last-child { text-align:right; }
+  .bkb .bk-flow .mt-p { text-align:justify; text-align-last:left; -webkit-hyphens:auto; hyphens:auto; }
+  .bkb-ch .bkb-anc { height:2.4em; }
+  .bkb-ch .mr-h1 { font-size:1.65em; margin:.1em 0 .25em; }
+  .bkb-rule { display:block; width:56px; height:3px; border-radius:3px; background:var(--accent); margin:.3em 0 1.4em; }
+  .bkb-cover .bkb-cv-f { letter-spacing:.04em; }
+  .bkb-tp { height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; }
+  .bkb-tp-logo { width:190px; max-width:62%; height:auto; margin-bottom:2em; }
+  .bkb-tp-k { margin:0; font-size:.72em; font-weight:800; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-faint); }
+  .bkb-tp-t { margin:.35em 0 0; font-family:var(--font-display); font-size:2.05em; font-weight:700; line-height:1.12; color:var(--ink); }
+  .bkb-tp-s { margin:.15em 0 0; font-family:var(--font-display); font-style:italic; font-size:1.35em; font-weight:600; color:var(--accent-ink, var(--accent)); }
+  .bkb-tp-r { display:block; width:64px; height:2px; background:var(--accent); margin:1.4em 0 1.1em; }
+  .bkb-tp-d { margin:0; font-weight:800; }
+  .bkb-tp-e { margin:.25em 0 0; font-size:.9em; color:var(--ink-soft); }
+  .bkb-tp-p { margin:2.6em 0 0; font-size:.85em; font-weight:800; letter-spacing:.16em; text-transform:uppercase; color:var(--ink); }
+  .bkb-cp { height:100%; display:flex; flex-direction:column; justify-content:flex-end; }
+  .bkb-cp-in { font-size:.78em; line-height:1.6; color:var(--ink-soft); }
+  .bkb-cp-in p { margin:0 0 1em; }
+  .bkb-end small { display:block; margin:-.6em 0 1.4em; font-size:.78em; color:var(--ink-faint); }
+  .bkb-back { height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.45em; text-align:center; color:#fff; border-radius:14px 4px 4px 14px;
+    background:linear-gradient(160deg, color-mix(in srgb, var(--jc) 88%, #fff), color-mix(in srgb, var(--jc) 70%, #000)); box-shadow:inset -12px 0 0 rgba(0,0,0,.25); }
+  .bkb-back img { width:170px; max-width:60%; height:auto; margin-bottom:1em; filter:brightness(0) invert(1); }
+  .bkb-back b { font-family:var(--font-display); font-size:1.3em; }
+  .bkb-back span { font-size:.9em; opacity:.92; padding:0 1.5em; }
+  .bkb-back small { margin-top:1.6em; font-size:.75em; font-weight:700; letter-spacing:.08em; text-transform:uppercase; opacity:.8; }
+  .bkb-menu { position:absolute; top:calc(58px + env(safe-area-inset-top, 0px)); right:10px; z-index:5; width:min(300px, calc(100vw - 20px)); padding:8px; border-radius:14px; border:1px solid var(--line-strong); background:var(--surface); box-shadow:0 14px 34px rgba(0,0,0,.22); }
+  .bkb-menu[hidden] { display:none; }
+  .bkb-menu p { margin:4px 8px 8px; font-size:12px; color:var(--ink-faint); line-height:1.4; } .bkb-menu p b { color:var(--ink); font-size:13.5px; }
+  .bkb-menu button { display:block; width:100%; padding:10px; border:0; border-radius:10px; background:none; color:var(--ink); font:inherit; font-size:14px; font-weight:700; text-align:left; cursor:pointer; }
+  .bkb-menu button:hover, .bkb-menu button:focus-visible { background:color-mix(in srgb, var(--accent) 12%, transparent); }
+  .bkb-menu hr { border:0; border-top:1px solid var(--line); margin:6px 0; }
   .bkb-hint { margin:-.3em 0 .8em; font-size:.78em; font-weight:600; color:var(--ink-faint); }
   .bkb-toc { list-style:none; margin:0; padding:0; }
   .bkb-toc li { break-inside:avoid; }
@@ -909,7 +953,7 @@
   .bk-flow .mt-q, .bk-flow .mt-note, .bk-flow .mt-memo, .bk-flow li, .bk-flow .mt-top { break-inside:avoid; }
   .bk-flow .mt-h3, .bk-flow .mt-h4, .bk-flow .mr-h1 { break-after:avoid; break-inside:avoid; }
   .bk-flow .mt-p { orphans:2; widows:2; }
-  .bk-end { display:block; height:1px; }
+  .bk-end { display:block; height:0; }
   .bk-in { border-top:1px solid rgba(0,0,0,.06); padding:12px 16px 0; }
   .bk-in .bk-vp { height:60vh; height:60dvh; min-height:280px; }
   .bk-in.bk-one .bk-vp { height:auto; min-height:0; }
@@ -952,7 +996,7 @@
   .mr-h1 { font-family:var(--font-display); font-weight:600; font-size:1.45em; line-height:1.25; margin:0 0 .6em; color:var(--accent-ink); }
   .mr-body .mt-p, .mr-body .mt-ul li, .mr-body .mt-q, .mr-body .mt-note, .mr-body .mt-memo { font-size:1em; line-height:1.72; }
   .mr-body .mt-h3 { font-size:1.22em; margin-top:1.4em; } .mr-body .mt-h4 { font-size:1.08em; margin-top:1.1em; }
-  .mr-body .mt-q { padding:.7em 1em; } .mr-body .mt-ul { padding-left:1.3em; }
+  .mr-body .mt-q { padding:.7em 1em; } .mr-body .mt-ul { padding-left:1.3em; font-size:1em; }
   .mt-dlb { border:1px solid var(--line-strong); background:var(--surface); color:var(--ink-soft); border-radius:999px; padding:6px 12px; font-size:12px; font-weight:800; font-family:inherit; cursor:pointer; }
   .mt-dlb:disabled { opacity:.5; }
   .mt-dlall { display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin:0 0 12px; padding:10px 12px; border:1px dashed var(--line-strong); border-radius:14px; }
@@ -2971,9 +3015,23 @@
     bk.classList.toggle("bk-two", per > 1);
     fl.style.transition = "none"; fl.style.transform = "none";
     fl.style.columnWidth = cw + "px"; fl.style.columnGap = G + "px";
+    // 2026-11-21 (standar buku): mode 2 halaman → bab (data-recto) selalu mulai di halaman KANAN, sampul belakang
+    // (data-verso) di KIRI; disisipi halaman kosong bila perlu. Mode 1 halaman tanpa halaman kosong.
+    fl.querySelectorAll(".bkb-blank").forEach(e => e.remove());
+    if (per > 1) { const pitch = cw + G;
+      fl.querySelectorAll("[data-recto],[data-verso]").forEach(a => {
+        const c = Math.max(0, Math.floor((a.getBoundingClientRect().left - fl.getBoundingClientRect().left + 2) / pitch));
+        if ((a.hasAttribute("data-recto") && c % 2 === 0) || (a.hasAttribute("data-verso") && c % 2 === 1)) {
+          const sec = a.classList.contains("bkb-sect") ? a : a.parentNode, b = document.createElement("div");
+          b.className = "bkb-blank"; b.dataset.bkpt = "blank"; sec.parentNode.insertBefore(b, sec); } }); }
     const x0 = fl.getBoundingClientRect().left, end = fl.querySelector(".bk-end");
-    const cols = Math.max(1, Math.floor((end.getBoundingClientRect().left - x0 + 2) / (cw + G)) + 1);
-    const st = { per, G, cw, cols, step: (cw + G) * per, pages: Math.ceil(cols / per), n: 0, W, H: vp.clientHeight };
+    // jumlah halaman = kolom tempat elemen terakhir yg terlihat berakhir (penanda .bk-end sendiri bisa terdorong ke kolom
+    // baru setelah halaman setinggi 100% spt sampul belakang → halaman kosong ekstra)
+    let lastEl = end.previousElementSibling; while (lastEl && !lastEl.getClientRects().length) lastEl = lastEl.previousElementSibling;
+    const lastR = lastEl ? lastEl.getBoundingClientRect().right - 1 : end.getBoundingClientRect().left;
+    const cols = Math.max(1, Math.floor((lastR - x0 + 2) / (cw + G)) + 1);
+    const off = per > 1 && fl.querySelector(".bkb-lead") ? 1 : 0;   // halaman kosong di kiri sampul (buku tertutup)
+    const st = { per, G, cw, cols, off, step: (cw + G) * per, pages: Math.ceil(cols / per), n: 0, W, H: vp.clientHeight };
     st.n = Math.min(st.pages - 1, Math.floor(frac * cols / per + 0.01));
     if (mark) st.n = Math.min(st.pages - 1, Math.floor(Math.max(0, Math.floor((mark.getBoundingClientRect().left - x0 + 2) / (cw + G))) / per));
     if (!keep && bk.dataset.pos) { try { const c0 = +localStorage.getItem(bk.dataset.pos) || 0; st.n = Math.min(st.pages - 1, Math.floor(c0 / per)); } catch (_) {} }
@@ -2989,13 +3047,14 @@
     fl.style.transition = anim ? "transform .38s cubic-bezier(.2,.7,.2,1)" : "none";
     fl.style.transform = st.n ? `translateX(${-st.n * st.step}px)` : "none";
     vp.scrollLeft = 0;
-    const a = st.n * st.per + 1, b = Math.min(st.cols, a + st.per - 1);
-    bk.querySelector(".bk-pg").textContent = "Hal " + (b > a ? a + "–" + b : a) + " / " + st.cols;
+    const a = Math.max(1, st.n * st.per + 1 - st.off), b = Math.min(st.cols - st.off, st.n * st.per + st.per - st.off);
+    bk.querySelector(".bk-pg").textContent = "Hal " + (b > a ? a + "–" + b : a) + " / " + (st.cols - st.off);
     const sl = bk.querySelector(".bk-sl");   // 2026-11-21 (user: "bagian ini bisa geser"): garis kemajuan = penggeser halaman
     sl.max = Math.max(0, st.pages - 1); if (+sl.value !== st.n) sl.value = st.n; sl.disabled = st.pages < 2;
     sl.style.setProperty("--p", (st.pages > 1 ? (st.n / (st.pages - 1)) * 100 : 100) + "%");
     bk.querySelector("[data-bk='-1']").disabled = st.n === 0;
     bk.querySelector("[data-bk='1']").disabled = st.n >= st.pages - 1;
+    if (bk._onGo) bk._onGo(st);   // judul berjalan & nomor halaman (buku utuh)
   }
   function bkColOf(bk, target) {   // halaman (kolom, mulai 0) tempat elemen berada
     const st = BK.get(bk), fl = bk.querySelector(".bk-flow");
@@ -3101,9 +3160,17 @@
   // di Rak Bahan Pengajar → buku layar penuh: sampul → Daftar Isi (nomor halaman, ketuk = lompat) → Pengantar → tiap
   // pelajaran mulai di halaman baru (label bab + judul + ✎ Ubah / ▶ Mode Mengajar / ⬇ PDF / Word). Dibalik per halaman
   // (mesin bkLay/bkGo), 2 halaman berdampingan di layar lebar. Halaman terakhir dibaca diingat per buku (dj_bk_pos:<kelas>).
+  // 2026-11-21 (user: "ikuti yg tertulis di DJ, dan pastikan susunan tulisan setiap halaman, pergantian bab, apakah sesuai
+  // dengan standard. tambahkan tahun revisi 2026, Gereja JB3, dll"): susunan buku cetak — sampul depan → (kosong) →
+  // halaman judul → halaman keterangan terbitan → Daftar Isi → Pengantar → bab (halaman baru, judul turun; mode 2 halaman
+  // selalu di halaman kanan) → Selesai → sampul belakang. Judul berjalan di atas (kiri = judul buku, kanan = bab) & nomor
+  // halaman di bawah (tidak di sampul/halaman kosong/halaman judul; halaman pembuka bab tanpa judul berjalan). Paragraf
+  // rata kiri-kanan + pemenggalan kata. ✎ Ubah / ▶ Mode Mengajar / ⬇ Unduh pindah ke menu ⋯ (berlaku utk bab yg dibuka).
   // ⚠️ penanda bab pakai data-bkid (BUKAN id): build-journey.py memberi awalan dj_ pada semua id → di HOME #bkb3 tak ketemu.
-  const BOOK = { el: null, key: null, hist: false };
+  const BOOK = { el: null, key: null, hist: false, types: {}, chs: [], title: "", cur: null };
+  const BK_EDISI = "Edisi Revisi 2026";
   const bkSplitHead = h => { const m = String(h).match(/^((?:Pelajaran|Bagian|Sesi|Bab)\s+\d+)\s*[—–·:\-]\s*(.+)$/i); return m ? [m[1], m[2]] : ["", h]; };
+  const bkTitleParts = t => { const m = String(t).match(/^(.+?)\s[—–-]\s(.+)$/); return m ? [m[1].trim(), m[2].trim()] : [String(t).trim(), ""]; };
   function bookHTML(key) {
     const c = MT_SETS.dj.tabs.find(x => x.key === key) || {}, row = (state.materi || []).find(r => r.key === key);
     if (!row) return "";
@@ -3111,23 +3178,76 @@
     const les = parts.slice(1).map(p => { const L = p.split("\n"); return { head: L[0].replace(/^# /, ""), lines: L.slice(1) }; });
     const noId = s => s.replace(/ id="(?:dj_)?mt\d+"/g, "");   // HOME: build memberi awalan dj_ pada id
     const upd = row.updated_at ? new Date(row.updated_at).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" }) : "";
+    const full = intro[0].replace(/^# /, "").replace(/\*+/g, ""), [tt, tn] = bkTitleParts(full);
+    BOOK.title = full;
     const tocRow = (id, kick, t) => `<li><button type="button" data-bkto="${id}"><span>${kick ? `<small>${esc(kick)}</small>` : ""}${mdInline(t)}</span><i aria-hidden="true"></i><em data-bkpg="${id}"></em></button></li>`;
-    let h = `<div class="bkb-cover" style="--jc:${c.color};--ph:url('${c.ph}');"><i class="mtb-tag">${esc(c.tab || "")}</i><img class="bkb-logo" src="./logo.png?v=1" alt="JB3 Home for All">
-      <div class="bkb-cv-t"><small>Bahan Ajar Pengajar · Discipleship Journey JB3</small><b>${mdInline(intro[0].replace(/^# /, ""))}</b></div>
-      <span class="bkb-cv-f">${les.length} pelajaran${upd ? " · diperbarui " + esc(upd) : ""}</span></div>`;
-    h += `<div class="bkb-sect"><span class="bkb-anc" data-bkid="bkbtoc"></span><h1 class="mr-h1">Daftar Isi</h1><p class="bkb-hint">Ketuk judul untuk langsung ke bab itu · ☰ di atas kembali ke sini</p><ol class="bkb-toc">${tocRow("bkb0", "", "Pengantar")}${les.map((L, i) => { const [k, t] = bkSplitHead(L.head); return tocRow("bkb" + (i + 1), k, t); }).join("")}</ol>
-      <div class="bkb-dl"><span>Unduh seluruh buku</span><button type="button" class="mt-dlb" data-mtdl="pdf:all">⬇ PDF</button><button type="button" class="mt-dlb" data-mtdl="doc:all">⬇ Word</button></div></div>`;
-    h += `<div class="bkb-sect"><span class="bkb-anc" data-bkid="bkb0"></span><p class="bkb-kick">Pengantar</p>${MT_CUR.edit ? `<div class="bkb-acts"><button type="button" class="mt-teach mt-edb" data-mtedit="0">✎ Ubah</button></div>` : ""}${noId(mdBlocks(intro.slice(1)))}</div>`;
-    les.forEach((L, i) => { const [k, t] = bkSplitHead(L.head), n = i + 1;
-      h += `<div class="bkb-sect"><span class="bkb-anc" data-bkid="bkb${n}"></span>${k ? `<p class="bkb-kick">${esc(k)}</p>` : ""}<h1 class="mr-h1">${mdInline(t)}</h1>
-        <div class="bkb-acts">${MT_CUR.edit ? `<button type="button" class="mt-teach mt-edb" data-mtedit="${n}">✎ Ubah</button>` : ""}<button type="button" class="mt-teach" data-mtteach="${n}">▶ Mode Mengajar</button><button type="button" class="mt-dlb" data-mtdl="pdf:${n}">⬇ PDF</button><button type="button" class="mt-dlb" data-mtdl="doc:${n}">⬇ Word</button></div>
+    const anc = (id, extra) => `<span class="bkb-anc" data-bkid="${id}" ${extra || ""}></span>`;
+    // sampul depan (mode 2 halaman: didahului halaman kosong di kiri = buku tertutup)
+    let h = `<div class="bkb-lead" data-bkpt="blank"></div>
+      <div class="bkb-cover" data-bkpt="cover" style="--jc:${c.color};--ph:url('${c.ph}');"><i class="mtb-tag">${esc(c.tab || "")}</i><img class="bkb-logo" src="./logo.png?v=1" alt="JB3 Home for All">
+      <div class="bkb-cv-t"><small>Bahan Ajar Pengajar · Discipleship Journey</small><b>${esc(tt)}</b>${tn ? `<em>${esc(tn)}</em>` : ""}</div>
+      <span class="bkb-cv-f">Gereja JB3 · ${BK_EDISI}</span></div>`;
+    // halaman judul (kanan) + keterangan terbitan (kiri, di baliknya)
+    h += `<div class="bkb-sect bkb-tp">${anc("bkbtp", 'data-recto="1" data-bkpt="title"')}
+      <img class="bkb-tp-logo" src="./logo.png?v=1" alt="JB3 Home for All"><p class="bkb-tp-k">Bahan Ajar Pengajar</p>
+      <h1 class="bkb-tp-t">${esc(tt)}</h1>${tn ? `<p class="bkb-tp-s">${esc(tn)}</p>` : ""}<i class="bkb-tp-r" aria-hidden="true"></i>
+      <p class="bkb-tp-d">Discipleship Journey</p><p class="bkb-tp-e">${BK_EDISI}</p><p class="bkb-tp-p">Gereja JB3</p></div>`;
+    h += `<div class="bkb-sect bkb-cp">${anc("bkbcp", 'data-bkpt="copy"')}<div class="bkb-cp-in">
+      <p><b>${esc(full)}</b><br>Bahan Ajar Pengajar · Discipleship Journey</p>
+      <p>${BK_EDISI}${upd ? `<br>Terakhir diperbarui ${esc(upd)}` : ""}<br>${les.length} pelajaran</p>
+      <p>Gereja JB3<br>Untuk kalangan sendiri — dipakai oleh pengajar kelas Discipleship Journey. Tidak untuk diperjualbelikan.</p></div></div>`;
+    // Daftar Isi
+    h += `<div class="bkb-sect">${anc("bkbtoc", 'data-recto="1" data-bkpt="open" data-bkch="toc" data-bkt="Daftar Isi"')}<h1 class="mr-h1 bkb-toc-h">Daftar Isi</h1><p class="bkb-hint">Ketuk judul untuk langsung ke bab itu · ☰ di atas kembali ke sini</p>
+      <ol class="bkb-toc">${tocRow("bkb0", "", "Pengantar")}${les.map((L, i) => { const [k, t] = bkSplitHead(L.head); return tocRow("bkb" + (i + 1), k, t); }).join("")}</ol></div>`;
+    // Pengantar + bab
+    h += `<div class="bkb-sect bkb-ch">${anc("bkb0", 'data-recto="1" data-bkpt="open" data-bkch="0" data-bkt="Pengantar"')}<p class="bkb-kick">Pengantar</p><h1 class="mr-h1">${esc(tt)}</h1><i class="bkb-rule" aria-hidden="true"></i>${noId(mdBlocks(intro.slice(1)))}</div>`;
+    les.forEach((L, i) => { const [k, t] = bkSplitHead(L.head), n = i + 1, tPlain = t.replace(/\*+/g, "");
+      h += `<div class="bkb-sect bkb-ch">${anc("bkb" + n, `data-recto="1" data-bkpt="open" data-bkch="${n}" data-bkt="${esc(k ? k + " · " + tPlain : tPlain)}"`)}${k ? `<p class="bkb-kick">${esc(k)}</p>` : ""}<h1 class="mr-h1">${mdInline(t)}</h1><i class="bkb-rule" aria-hidden="true"></i>
         ${noId(mdBlocks(L.lines))}</div>`; });
-    h += `<div class="bkb-sect bkb-end"><img class="bkb-end-logo" src="./logo.png?v=1" alt="JB3 Home for All"><p>— Selesai —</p><b>${mdInline(intro[0].replace(/^# /, ""))}</b><button type="button" class="mt-teach" data-bkto="bkbtoc">☰ Kembali ke Daftar Isi</button></div>`;
+    h += `<div class="bkb-sect bkb-end">${anc("bkbend", 'data-recto="1" data-bkpt="open" data-bkch="end" data-bkt="Selesai"')}<img class="bkb-end-logo" src="./logo.png?v=1" alt="JB3 Home for All"><p>— Selesai —</p><b>${esc(full)}</b><small>${BK_EDISI} · Gereja JB3</small><button type="button" class="mt-teach" data-bkto="bkbtoc">☰ Kembali ke Daftar Isi</button></div>`;
+    // sampul belakang (mode 2 halaman: di halaman kiri)
+    h += `<div class="bkb-sect bkb-back" data-verso="1" data-bkpt="cover" style="--jc:${c.color};"><img src="./logo.png?v=1" alt="JB3 Home for All"><b>Discipleship Journey</b><span>${esc(tt)}${tn ? " · " + esc(tn) : ""}</span><small>Gereja JB3 · ${BK_EDISI}</small></div>`;
     return h;
   }
-  function bookPageNums() {   // nomor halaman di Daftar Isi
-    const bk = BOOK.el && BOOK.el.querySelector(".bk"), st = bk && BK.get(bk); if (!st) return;
-    bk.querySelectorAll("[data-bkpg]").forEach(e => { const a = bk.querySelector(`[data-bkid="${e.dataset.bkpg}"]`); e.textContent = a ? bkColOf(bk, a) + 1 : ""; });
+  const bkVisible = e => e.getClientRects().length > 0;
+  function bookPageNums() {   // nomor halaman Daftar Isi + peta jenis halaman & bab (judul berjalan)
+    const bk = BOOK.el && !BOOK.el.hidden && BOOK.el.querySelector(".bk"), st = bk && BK.get(bk); if (!st) return;
+    const pno = col => col - st.off + 1;
+    bk.querySelectorAll("[data-bkpg]").forEach(e => { const a = bk.querySelector(`[data-bkid="${e.dataset.bkpg}"]`); e.textContent = a ? pno(bkColOf(bk, a)) : ""; });
+    BOOK.types = {}; bk.querySelectorAll("[data-bkpt]").forEach(e => { if (bkVisible(e)) BOOK.types[bkColOf(bk, e)] = e.dataset.bkpt; });
+    BOOK.chs = [...bk.querySelectorAll("[data-bkch]")].map(e => ({ col: bkColOf(bk, e), ch: e.dataset.bkch, t: e.dataset.bkt || "" }));
+    // pemenggalan kata / gambar yg selesai dimuat belakangan bisa menggeser isi → bab jatuh di halaman kiri: hitung ulang sekali
+    if (st.per > 1 && !BOOK.fixing && [...bk.querySelectorAll("[data-recto]")].some(a => bkColOf(bk, a) % 2 === 0)) {
+      BOOK.fixing = true; try { bkLay(bk, true); } finally { BOOK.fixing = false; } return bookPageNums(); }
+    bookHeads(st);
+  }
+  function bookHeads(st) {
+    const bk = BOOK.el && BOOK.el.querySelector(".bk"); if (!bk || !st) return;
+    const hd = bk.querySelector(".bk-hd"), ft = bk.querySelector(".bk-ft"); if (!hd) return;
+    const tmpl = st.per > 1 ? `${st.cw}px ${st.cw}px` : "1fr";
+    [hd, ft].forEach(x => { x.style.gridTemplateColumns = tmpl; x.style.columnGap = st.G + "px"; x.classList.toggle("two", st.per > 1); });
+    const chOf = col => { let r = null; BOOK.chs.forEach(x => { if (x.col <= col) r = x; }); return r; };
+    let hH = "", fH = "", cur = null;
+    for (let k = 0; k < st.per; k++) {
+      const col = st.n * st.per + k, ty = BOOK.types[col], out = col >= st.cols, ch = chOf(col);
+      if (!out && ch && !ty) cur = ch; else if (!out && ty === "open" && ch) cur = ch;
+      const head = out || ty ? "" : st.per > 1 ? (k === 0 ? BOOK.title : (ch ? ch.t : BOOK.title)) : (ch ? ch.t : BOOK.title);
+      const fol = out || ["cover", "blank", "title", "copy"].includes(ty) ? "" : String(col - st.off + 1);
+      hH += `<span>${esc(head)}</span>`; fH += `<span>${fol}</span>`;
+    }
+    hd.innerHTML = hH; ft.innerHTML = fH;
+    BOOK.cur = cur && /^\d+$/.test(cur.ch) ? { n: +cur.ch, t: cur.t } : null;
+  }
+  function bookMenu(open) {
+    const d = BOOK.el, m = d && d.querySelector(".bkb-menu"); if (!m) return;
+    if (!open) { m.hidden = true; return; }
+    const c = BOOK.cur, nm = c ? esc(c.t) : "";
+    m.innerHTML = (c ? `<p>Bab yang sedang dibuka<br><b>${nm}</b></p>
+        ${MT_CUR.edit ? `<button type="button" data-mtedit="${c.n}">✎ Ubah bab ini</button>` : ""}
+        ${c.n > 0 ? `<button type="button" data-mtteach="${c.n}">▶ Mode Mengajar</button><button type="button" data-mtdl="pdf:${c.n}">⬇ Unduh bab ini · PDF</button><button type="button" data-mtdl="doc:${c.n}">⬇ Unduh bab ini · Word</button>` : ""}<hr>`
+      : `<p>Buka sebuah bab untuk mengubah / mengajarkannya.</p><hr>`)
+      + `<button type="button" data-mtdl="pdf:all">⬇ Unduh seluruh buku · PDF</button><button type="button" data-mtdl="doc:all">⬇ Unduh seluruh buku · Word</button>`;
+    m.hidden = false;
   }
   function bookOpen(key) {
     const c = MT_SETS.dj.tabs.find(x => x.key === key); if (!c) return;
@@ -3135,12 +3255,16 @@
     if (state.materiKey !== key || MT_CUR.key !== key) { state.materiKey = key; if (RENDER.materi) RENDER.materi(); }
     if (!BOOK.el) {
       const d = document.createElement("div"); d.className = "mr bkb"; d.setAttribute("role", "dialog"); d.setAttribute("aria-label", "Buku bahan ajar");
-      d.innerHTML = `<div class="mr-top"><button type="button" data-bkx="1" aria-label="Tutup buku">✕</button><b></b><button type="button" data-bkto="bkbtoc" aria-label="Daftar isi" title="Daftar isi">☰</button><button type="button" data-bkfs="-" aria-label="Huruf lebih kecil">A−</button><button type="button" data-bkfs="+" aria-label="Huruf lebih besar">A+</button></div><div class="mr-pg"></div>`;
+      d.innerHTML = `<div class="mr-top"><button type="button" data-bkx="1" aria-label="Tutup buku">✕</button><b></b><button type="button" data-bkto="bkbtoc" aria-label="Daftar isi" title="Daftar isi">☰</button><button type="button" data-bkfs="-" aria-label="Huruf lebih kecil">A−</button><button type="button" data-bkfs="+" aria-label="Huruf lebih besar">A+</button><button type="button" data-bkmenu="1" aria-label="Menu: ubah, mengajar, unduh" title="Ubah · Mengajar · Unduh">⋯</button></div>
+        <div class="bkb-menu" hidden></div><div class="mr-pg"></div>`;
       const w = document.createElement("div"); w.className = "djx"; w.appendChild(d); document.body.appendChild(w);
       d.addEventListener("click", e => {
-        const t = e.target.closest("[data-bkx],[data-bkto],[data-bkfs]"); if (!t) return;
+        const m = d.querySelector(".bkb-menu");
+        if (!m.hidden && !e.target.closest("[data-bkmenu]")) { if (e.target.closest(".bkb-menu button") || !e.target.closest(".bkb-menu")) setTimeout(() => bookMenu(false), 0); }
+        const t = e.target.closest("[data-bkx],[data-bkto],[data-bkfs],[data-bkmenu]"); if (!t) return;
         const bk = d.querySelector(".bk");
         if (t.dataset.bkx) bookClose();
+        else if (t.dataset.bkmenu) bookMenu(m.hidden);
         else if (t.dataset.bkto) bkJump(bk, d.querySelector(`[data-bkid="${t.dataset.bkto}"]`));
         else { const f = Math.min(26, Math.max(14, mrFs() + (t.dataset.bkfs === "+" ? 1 : -1)));
           try { localStorage.setItem("dj_mr_fs", f); } catch (_) {} d.style.setProperty("--mrfs", f + "px"); bkLay(bk, true); bookPageNums(); }
@@ -3148,12 +3272,20 @@
       BOOK.el = d;
     }
     const d = BOOK.el;
+    bookMenu(false);
     d.querySelector(".mr-top b").textContent = c.title;
     d.querySelector(".mr-pg").innerHTML = bkWrap(bookHTML(key), "bk-full");
     const bk = d.querySelector(".bk"); bk.dataset.pos = "dj_bk_pos:" + key;
+    bk.querySelector(".bk-flow").setAttribute("lang", "id");   // pemenggalan kata bahasa Indonesia
+    bk.insertAdjacentHTML("afterbegin", `<div class="bk-hd" aria-hidden="true"></div>`);
+    bk.querySelector(".bk-vp").insertAdjacentHTML("afterend", `<div class="bk-ft" aria-hidden="true"></div>`);
+    bk._onGo = st => bookHeads(st);
     d.style.setProperty("--mrfs", mrFs() + "px");
     d.hidden = false; document.body.classList.add("tc-on"); BOOK.key = key;
     bkLay(bk); bookPageNums();
+    const relay = () => { if (BOOK.key === key && !d.hidden && d.contains(bk)) { bkLay(bk, true); bookPageNums(); } };
+    bk.querySelectorAll("img").forEach(im => { if (!im.complete) im.addEventListener("load", relay, { once: true }); });
+    setTimeout(relay, 350); setTimeout(relay, 1500);   // pemenggalan kata (hyphens) kadang selesai belakangan
     if (!BOOK.hist) { try { history.pushState({ djbk: 1 }, ""); BOOK.hist = true; } catch (_) {} }
   }
   function bookClose(fromPop) {
@@ -3540,9 +3672,13 @@ ${body}</body></html>`;
     // kelas (img/dj-*.webp), ketuk = buka buku di bawah. Rak Peserta: 5 sampul abu-abu "Segera" (belum bisa diketuk) —
     // nanti diisi materi untuk peserta. Family & Gap Kids tetap pakai tombol tab.
     const nLes = r => Math.max(0, String(r.body || "").split(/\n(?=# )/).length - 1);
+    // 2026-11-21 (user: "berikan juga Firm Foundations, … servant leadership. cek DJ"): nama kelas di sampul = dari judul
+    // dokumen Bahan Ajar ("Rock Solid 1 — Firm Foundation"), sama dgn yg dipakai DJ di tempat lain (BJ_STAGES.tag sbg cadangan).
+    const mtName = c => { const r = rows.find(x => x.key === c.key), h = r ? String(r.body || "").split("\n")[0].replace(/^# /, "") : "";
+      const m = h.match(/\s[—–-]\s(.+)$/); return (m ? m[1] : (BJ_STAGES[c.key] || {}).tag || "").replace(/\*+/g, "").trim(); };
     const mtBook = c => { const r = rows.find(x => x.key === c.key), on = !!cur && cur.key === c.key;
-      return `<button type="button" class="mtb${on ? " on" : ""}" style="--jc:${c.color};--ph:url('${c.ph}');" data-mtbook="${c.key}" aria-label="Buka buku ${esc(c.title)}${on ? " (terakhir dibaca)" : ""}">${on ? `<i class="mtb-rib" aria-hidden="true"></i>` : ""}<span class="mtb-cv"><i class="mtb-tag">${esc(c.tab)}</i><img class="mtb-logo" src="./logo.png?v=1" alt="JB3"><b class="mtb-t">${esc(c.title)}</b><small class="mtb-s">${r ? nLes(r) + " pelajaran" : "Belum ada isi"}</small></span></button>`; };
-    const mtSoon = c => `<div class="mtb mtb-soon" style="--jc:${c.color};--ph:url('${c.ph}');" role="img" aria-label="Buku peserta ${esc(c.title)} — isi menyusul"><span class="mtb-cv"><i class="mtb-tag">${esc(c.tab)}</i><i class="mtb-lk">Segera</i><img class="mtb-logo" src="./logo.png?v=1" alt="JB3"><b class="mtb-t">${esc(c.title)}</b><small class="mtb-s">Untuk peserta</small></span></div>`;
+      return `<button type="button" class="mtb${on ? " on" : ""}" style="--jc:${c.color};--ph:url('${c.ph}');" data-mtbook="${c.key}" aria-label="Buka buku ${esc(c.title)}${on ? " (terakhir dibaca)" : ""}">${on ? `<i class="mtb-rib" aria-hidden="true"></i>` : ""}<span class="mtb-cv"><i class="mtb-tag">${esc(c.tab)}</i><img class="mtb-logo" src="./logo.png?v=1" alt="JB3"><span class="mtb-txt"><b class="mtb-t">${esc(c.title)}</b>${mtName(c) ? `<em class="mtb-nm">${esc(mtName(c))}</em>` : ""}<small class="mtb-s">${r ? nLes(r) + " pelajaran · Edisi 2026" : "Belum ada isi"}</small></span></span></button>`; };
+    const mtSoon = c => `<div class="mtb mtb-soon" style="--jc:${c.color};--ph:url('${c.ph}');" role="img" aria-label="Buku peserta ${esc(c.title)} — isi menyusul"><span class="mtb-cv"><i class="mtb-tag">${esc(c.tab)}</i><i class="mtb-lk">Segera</i><img class="mtb-logo" src="./logo.png?v=1" alt="JB3"><span class="mtb-txt"><b class="mtb-t">${esc(c.title)}</b>${mtName(c) ? `<em class="mtb-nm">${esc(mtName(c))}</em>` : ""}<small class="mtb-s">Untuk peserta</small></span></span></div>`;
     const shelves = set === "dj" ? `<div class="mtr-h"><b>📚 Rak Bahan Pengajar</b><small>${S.tabs.length} buku · ketuk untuk membaca</small></div>
       <div class="mtr"><div class="mtr-shelf">${S.tabs.map(mtBook).join("")}</div></div>
       ${MT_RAK_PESERTA ? `<div class="mtr-h"><b>🎒 Rak Peserta</b><small>isi menyusul</small></div>
