@@ -914,8 +914,14 @@
   .bk-nav button:disabled { opacity:.3; cursor:default; }
   .bk-meta { flex:1; min-width:0; display:flex; flex-direction:column; align-items:center; gap:5px; }
   .bk-pg { font-size:12px; font-weight:800; color:var(--ink-soft); letter-spacing:.02em; }
-  .bk-bar { display:block; width:100%; max-width:220px; height:3px; border-radius:9px; background:rgba(0,0,0,.08); overflow:hidden; }
-  .bk-bar b { display:block; height:100%; background:var(--accent); transition:width .3s; }
+  .bk-sl { -webkit-appearance:none; appearance:none; display:block; width:100%; max-width:280px; height:26px; margin:0; padding:0; background:transparent; cursor:pointer; touch-action:none; }
+  .bk-sl:disabled { opacity:.4; cursor:default; }
+  .bk-sl:focus { outline:none; } .bk-sl:focus-visible { outline:2px solid var(--accent); outline-offset:2px; border-radius:9px; }
+  .bk-sl::-webkit-slider-runnable-track { height:5px; border-radius:9px; background:linear-gradient(90deg, var(--accent) var(--p, 0%), rgba(127,127,127,.22) var(--p, 0%)); }
+  .bk-sl::-webkit-slider-thumb { -webkit-appearance:none; width:20px; height:20px; margin-top:-7.5px; border-radius:50%; background:var(--accent); border:3px solid #fff; box-shadow:0 1px 4px rgba(0,0,0,.3); }
+  .bk-sl::-moz-range-track { height:5px; border-radius:9px; background:rgba(127,127,127,.22); }
+  .bk-sl::-moz-range-progress { height:5px; border-radius:9px; background:var(--accent); }
+  .bk-sl::-moz-range-thumb { width:16px; height:16px; border-radius:50%; background:var(--accent); border:3px solid #fff; box-shadow:0 1px 4px rgba(0,0,0,.3); }
   .mr-pg { flex:1; min-height:0; display:flex; padding:18px max(18px, calc((100vw - 760px) / 2)) env(safe-area-inset-bottom, 0px); }
   .mr-pg .bk-full { flex:1; min-width:0; display:flex; flex-direction:column; }
   .bk-full .bk-vp { flex:1; min-height:0; }
@@ -2942,7 +2948,7 @@
   // panah keyboard. Layar penuh di layar lebar (≥ 860px) = 2 halaman berdampingan seperti buku terbuka. Ganti ukuran huruf
   // / putar layar → halaman dihitung ulang, posisi baca tetap. Daftar isi (chip) lompat ke halaman subjudul itu.
   const BK = new WeakMap();
-  const BK_NAV = `<div class="bk-nav"><button type="button" data-bk="-1" aria-label="Halaman sebelumnya">‹</button><div class="bk-meta"><span class="bk-pg"></span><i class="bk-bar"><b></b></i></div><button type="button" data-bk="1" aria-label="Halaman berikutnya">›</button></div>`;
+  const BK_NAV = `<div class="bk-nav"><button type="button" data-bk="-1" aria-label="Halaman sebelumnya">‹</button><div class="bk-meta"><span class="bk-pg"></span><input type="range" class="bk-sl" min="0" max="0" step="1" value="0" aria-label="Geser untuk pindah halaman"></div><button type="button" data-bk="1" aria-label="Halaman berikutnya">›</button></div>`;
   const bkWrap = (inner, cls) => `<div class="bk ${cls || ""}"><div class="bk-vp"><div class="bk-flow mt-body${cls === "bk-full" ? " mr-body" : ""}">${inner}<span class="bk-end"></span></div></div>${BK_NAV}</div>`;
   function bkLay(bk, keep, onResize) {
     const vp = bk && bk.querySelector(".bk-vp"), fl = vp && vp.querySelector(".bk-flow"); if (!fl) return;
@@ -2980,7 +2986,9 @@
     vp.scrollLeft = 0;
     const a = st.n * st.per + 1, b = Math.min(st.cols, a + st.per - 1);
     bk.querySelector(".bk-pg").textContent = "Hal " + (b > a ? a + "–" + b : a) + " / " + st.cols;
-    bk.querySelector(".bk-bar b").style.width = (st.pages > 1 ? (st.n / (st.pages - 1)) * 100 : 100) + "%";
+    const sl = bk.querySelector(".bk-sl");   // 2026-11-21 (user: "bagian ini bisa geser"): garis kemajuan = penggeser halaman
+    sl.max = Math.max(0, st.pages - 1); if (+sl.value !== st.n) sl.value = st.n; sl.disabled = st.pages < 2;
+    sl.style.setProperty("--p", (st.pages > 1 ? (st.n / (st.pages - 1)) * 100 : 100) + "%");
     bk.querySelector("[data-bk='-1']").disabled = st.n === 0;
     bk.querySelector("[data-bk='1']").disabled = st.n >= st.pages - 1;
   }
@@ -3001,6 +3009,8 @@
     const r = vp.getBoundingClientRect(), x = (e.clientX - r.left) / r.width;
     if (x < 0.22) bkFlip(vp.closest(".bk"), -1); else if (x > 0.78) bkFlip(vp.closest(".bk"), 1);
   });
+  document.addEventListener("input", e => { const sl = e.target.closest && e.target.closest(".bk-sl"); if (!sl) return;
+    const bk = sl.closest(".bk"), st = BK.get(bk); if (st && +sl.value !== st.n) bkGo(bk, +sl.value, false); });
   let BK_T = null;   // geser jari: halaman ikut jari, lepas > 50px = balik
   document.addEventListener("touchstart", e => { const vp = e.target.closest && e.target.closest(".bk-vp"); if (!vp || e.touches.length > 1) { BK_T = null; return; }
     BK_T = { bk: vp.closest(".bk"), x: e.touches[0].clientX, y: e.touches[0].clientY, h: null }; }, { passive: true });
@@ -3072,7 +3082,7 @@
     MR.hist = false;
   }
   window.addEventListener("popstate", () => readClose(true));
-  document.addEventListener("keydown", e => { if (MR.i === null || TEACH.i !== null || (MTE.el && !MTE.el.hidden)) return;
+  document.addEventListener("keydown", e => { if (MR.i === null || (e.target.closest && e.target.closest("input,textarea,[contenteditable]")) || TEACH.i !== null || (MTE.el && !MTE.el.hidden)) return;
     if (e.key === "Escape") readClose();
     else if (e.key === "ArrowRight" || e.key === "PageDown" || e.key === " ") { e.preventDefault(); bkFlip(MR.el.querySelector(".bk"), 1); }
     else if (e.key === "ArrowLeft" || e.key === "PageUp") { e.preventDefault(); bkFlip(MR.el.querySelector(".bk"), -1); } });
@@ -3147,7 +3157,7 @@
     BOOK.hist = false;
   }
   window.addEventListener("popstate", () => { if (!(history.state && history.state.djbk)) bookClose(true); });   // kembali dari editor = tetap di buku
-  document.addEventListener("keydown", e => { if (!BOOK.key || MR.i !== null || TEACH.i !== null || (MTE.el && !MTE.el.hidden)) return;
+  document.addEventListener("keydown", e => { if (!BOOK.key || (e.target.closest && e.target.closest("input,textarea,[contenteditable]")) || MR.i !== null || TEACH.i !== null || (MTE.el && !MTE.el.hidden)) return;
     const bk = BOOK.el.querySelector(".bk");
     if (e.key === "Escape") bookClose();
     else if (e.key === "ArrowRight" || e.key === "PageDown" || e.key === " ") { e.preventDefault(); bkFlip(bk, 1); }
