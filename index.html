@@ -1525,7 +1525,7 @@
     el("gearBtn").hidden = state.page === "profile";
     // 2026-10-15: Bahan Ajar — ikon buku di bar atas, HANYA Admin (data juga dikunci RLS dj_materi).
     // 2026-10-17: + Senior Pastor (profiles.is_sp; RLS v_dj_materi_sp.sql), + LTS1/LTS2.
-    el("materiBtn").hidden = isAdm || !canMateri() || ["materi", "famateri", "kidsmateri"].includes(state.page);   // 2026-11-21: sempat disembunyikan utk Admin (v74–76, saat ada tab Bahan Ajar); susunan lama dikembalikan → tombol tampil lagi
+    el("materiBtn").hidden = isAdm || !canMateriRead() || ["materi", "famateri", "kidsmateri"].includes(state.page);   // 2026-11-21: sempat disembunyikan utk Admin (v74–76, saat ada tab Bahan Ajar); susunan lama dikembalikan → tombol tampil lagi
     el("absenBtn").hidden = isAdm || !canAbsen() || state.page === "absensi";
     el("aturanBtn").hidden = true;   // 2026-11-21 (user: "aturan dihapus"): tombol Aturan di bar atas disembunyikan
     el("appbarTitle").textContent = meta.h || "Discipleship Journey";
@@ -2011,7 +2011,7 @@
   // 2026-11-21 (user: "buku hanya bisa dibuka oleh peserta yg sdh daftar dan lulus"): Buku Peserta kelas k terbuka bila
   // sudah terdaftar di kelas itu (hadir/scan ≥1 sesi) ATAU sudah lulus kelas itu; Admin/SP/Content selalu. Dijaga juga di
   // server (dj_buku_peserta, v_dj_buku_peserta_akses.sql). Yg belum: kartu terkunci + keterangan.
-  const bkpOK = k => canMateri() || (state.myAtt[k] || []).length > 0 || !!(((state.myProfile || {}).classes || [])[DJ_IDX[k]]);
+  const bkpOK = k => canMateriRead() || (state.myAtt[k] || []).length > 0 || !!(((state.myProfile || {}).classes || [])[DJ_IDX[k]]);
   const pjBookHTML = k => { if (!BKP_KEYS.includes(k)) return ""; const c = DASH_JOURNEYS.find(x => x.key === k) || {};
     if (!bkpOK(k)) return `<div class="pj-book pj-book--lk" style="--jc:${c.color};--cv:url('img/dj-cv-${k}.webp?v=2');"><span class="pj-book-cv" aria-hidden="true"></span><span class="pj-book-t"><b>🔒 Buku Peserta</b><small>Terbuka setelah kamu terdaftar di kelas ${esc(c.title || "")} (scan absensi sesi pertama) atau sudah lulus kelas ini</small></span></div>`;
     return `<button type="button" class="pj-book" data-bkpes="${k}" style="--jc:${c.color};--ph:url('${c.ph}');--cv:url('img/dj-cv-${k}.webp?v=2');"><span class="pj-book-cv" aria-hidden="true"><img src="./logo.png?v=1" alt=""></span><span class="pj-book-t"><b>📖 Buku Peserta</b><small>Baca materi ${esc(c.title || "")} seperti buku &amp; tulis catatan refleksimu di setiap pelajaran</small></span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button>`; };
@@ -4049,6 +4049,8 @@ ${body}</body></html>`;
   // 2026-10-24: sempat dibatasi ke tim Discipleship Journey Ministry, lalu user: "bahan ajar: admin, sp, dept content"
   // (tetap seperti semula; RLS v_dj_materi_kembali.sql). Pencatat absensi = kelompok yg sama (canAbsen / dj_att_staff()).
   const canMateri = () => state.persona === "ADMIN" || !!(state.myProfile && (state.myProfile.is_sp || state.myProfile.content));
+  // 2026-11-21 (user: "Tim Elders juga bisa membaca buku panduan pengajar"): baca saja — mengubah tetap canMateri()
+  const canMateriRead = () => canMateri() || !!(state.myProfile && state.myProfile.is_elder);
   const canAbsen = () => state.persona === "ADMIN" || !!(state.myProfile && (state.myProfile.is_sp || state.myProfile.content));
   // 2026-10-21 (user: "bahan ajar Kelas Pre-Marriage, Marriage (hanya dilihat oleh volunteers dari The Gap Family Ministry)" +
   //   "sertakan download pdf, doc, layar penuh dan mode mengajar … seperti DJ"): set kedua di tabel dj_materi yg sama
@@ -4061,7 +4063,7 @@ ${body}</body></html>`;
   const MT_PAGES = ["materi", "famateri", "kidsmateri"];
   const mtPageCan = p => (p === "famateri" && canFamMateri()) || (p === "kidsmateri" && canKidsMateri());
   const MT_SETS = {
-    dj: { page:"materi", box:"materiBody", can:() => canMateri(), keyState:"materiKey", lock:"🔒 Khusus Admin, Senior Pastor & pelayan Departemen Content · tidak terlihat oleh peserta",
+    dj: { page:"materi", box:"materiBody", can:() => canMateriRead(), keyState:"materiKey", lock:"🔒 Khusus Admin, Senior Pastor, Elders & pelayan Departemen Content · tidak terlihat oleh peserta",
       tabs:["rs1", "rs2", "rs3", "lts1", "lts2"].map(k => DASH_JOURNEYS.find(x => x.key === k)) },
     fam: { page:"famateri", box:"famateriBody", can:() => canFamMateri(), keyState:"famMateriKey", lock:"🔒 Khusus tim The Gap Family Ministry, Admin & Senior Pastor · tidak terlihat oleh peserta kelas",
       tabs:[{ key:"fam_pre", color:"#C9785A", icon:"💍", tab:"Pre-Marriage", title:"Pre-Marriage — Bimbingan Pranikah" },
@@ -4111,11 +4113,14 @@ ${body}</body></html>`;
     // 2026-11-21 (user pilih "B"): rak diganti susunan per fase + pilihan Bahan Pengajar | Buku Peserta
     const shf = MT_RAK_PESERTA && state.mtShelf === "pes" ? "pes" : "guru";
     const shelves = set === "dj" ? `${MT_RAK_PESERTA ? `<div class="djseg"><button type="button" data-mtshelf="guru" aria-pressed="${shf === "guru"}">Bahan Pengajar</button><button type="button" data-mtshelf="pes" aria-pressed="${shf === "pes"}">Buku Peserta</button></div>` : ""}
+      <div class="mt-lock">${shf === "pes"
+        ? "📖 Buku Peserta · untuk peserta yang mengikuti kelasnya atau sudah lulus<br>Hanya dibaca di aplikasi — tidak bisa diunduh, disalin, atau dicetak"
+        : "🔒 Bahan Pengajar · tidak terlihat oleh peserta<br>Baca: Admin, Senior Pastor, Elders &amp; tim Content · Ubah: Admin, Senior Pastor &amp; tim Content"}</div>
       ${djBookFlowHTML(shf)}
       <p class="jd-note mtr-note">Ketuk Baca untuk membuka buku: sampul, daftar isi, lalu balik halaman (geser / ‹ ›). Halaman terakhir dibaca diingat.</p>` : "";
     if (shelves) {   // DJ: hanya rak; isi dibaca di buku layar penuh (bookOpen). mdDoc tetap dipanggil utk MT_LESSONS (Mode Mengajar).
       if (cur) mdDoc(cur.body);
-      box.innerHTML = `<div class="mt-lock">${S.lock}</div>${shelves}`;
+      box.innerHTML = shelves;   // 2026-11-21 (user: "perbaiki ketentuan ini"): keterangan akses ikut pilihan Bahan Pengajar / Buku Peserta
       return;
     }
     box.innerHTML = `<div class="mt-lock">${S.lock}</div>

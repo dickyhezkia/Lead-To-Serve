@@ -81,7 +81,8 @@ window.makeDB = function makeDB(sb) {
   // 2026-10-21: is_sp dulu diambil tapi tak ikut ke sini (SP tak melihat Bahan Ajar) + content = melayani di
   // Departemen Content (ministry_roles dept "Content") → boleh baca Bahan Ajar (user: "content ministry, admin, SP").
   const inProfile = r => ({ id:r.id, name:r.name || "", phone:r.phone || "", role:r.role || "jemaat", createdAt:r.created_at || null, classes:normClasses(r.classes),
-    is_sp:r.is_sp === true, content:Array.isArray(r.ministry_roles) && r.ministry_roles.some(x => x && x.dept === "Content"),
+    is_sp:r.is_sp === true, is_elder:r.is_elder === true,   // 2026-11-21: tim Elders boleh BACA Bahan Ajar DJ (v_dj_materi_elders.sql)
+    content:Array.isArray(r.ministry_roles) && r.ministry_roles.some(x => x && x.dept === "Content"),
     djteam:Array.isArray(r.ministry_roles) && r.ministry_roles.some(x => x && x.team === "Discipleship Journey Ministry"),   // 2026-10-24: Bahan Ajar DJ = Admin + tim ini saja
     // 2026-10-21: fam = tim "The Gap Family Ministry" → Bahan Ajar Pre-Marriage & Marriage
     fam:Array.isArray(r.ministry_roles) && r.ministry_roles.some(x => x && x.team === "The Gap Family Ministry"),
@@ -96,7 +97,7 @@ window.makeDB = function makeDB(sb) {
     async myProfile() {
       const s = await this.session();
       if (!s) return null;
-      const { data, error } = await profRead(q => q.select("id,name,phone,role,created_at,classes,is_sp,ministry_roles").eq("id", s.user.id).maybeSingle());
+      const { data, error } = await profRead(q => q.select("id,name,phone,role,created_at,classes,is_sp,is_elder,ministry_roles").eq("id", s.user.id).maybeSingle());
       if (error) throw error;
       return data ? inProfile(data) : null;
     },
