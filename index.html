@@ -968,7 +968,8 @@
   .mr .mr-body { font-size:var(--mrfs, 17px); }
   /* 2026-11-21 — Mode Buku: isi pelajaran per halaman, dibalik ke samping */
   .bk { position:relative; }
-  .bk-vp { position:relative; overflow:hidden; touch-action:pan-y; }
+  .bk-vp { position:relative; overflow:hidden; touch-action:pan-y; contain:layout paint; }
+  .bk-full .bk-flow { will-change:transform; }   /* 2026-11-21 buku terasa berat: geser = lapisan GPU, teks tidak digambar ulang */
   .bk .bk-flow { height:100%; max-height:none; overflow:visible; padding:0; border:0; column-fill:auto; }
   .bk-flow > :first-child { margin-top:0; }
   .bk-flow .mt-q, .bk-flow .mt-note, .bk-flow .mt-memo, .bk-flow li, .bk-flow .mt-top { break-inside:avoid; }
@@ -3033,6 +3034,10 @@
     const full = bk.classList.contains("bk-full"), old = BK.get(bk);
     // ukuran halaman tak berubah (mis. bilah alamat HP muncul/hilang tanpa beda tinggi) → biarkan, jangan geser halaman
     if (onResize && old && old.W === vp.clientWidth && old.H === vp.clientHeight) return;
+    // 2026-11-21 (user: "membuka dan membaca buku terasa berat"): keyboard HP muncul/hilang saat menulis refleksi = hanya
+    // tinggi layar berubah → dulu SELURUH buku (±270 halaman) disusun ulang 2× tiap kali mengetik. Kini dilewati; tinggi
+    // halaman dikunci dalam px (fl.style.height) supaya browser juga tidak menyusun ulang kolom sendiri.
+    if (onResize && old && old.W === vp.clientWidth && document.activeElement && document.activeElement.matches("textarea,input") && bk.contains(document.activeElement)) return;
     // posisi baca dipertahankan lewat elemen pertama di halaman yg sedang terbuka (bukan perkiraan persen)
     let mark = null;
     if (keep && old && old.n > 0) { const x0 = fl.getBoundingClientRect().left, c0 = old.n * old.per;
@@ -3044,6 +3049,7 @@
     bk.classList.toggle("bk-two", per > 1);
     fl.style.transition = "none"; fl.style.transform = "none";
     fl.style.columnWidth = cw + "px"; fl.style.columnGap = G + "px";
+    if (full) fl.style.height = vp.clientHeight + "px";
     // 2026-11-21 (standar buku): mode 2 halaman → bab (data-recto) selalu mulai di halaman KANAN, sampul belakang
     // (data-verso) di KIRI; disisipi halaman kosong bila perlu. Mode 1 halaman tanpa halaman kosong.
     fl.querySelectorAll(".bkb-blank").forEach(e => e.remove());
@@ -3322,12 +3328,28 @@
     ed = ed || null;
     if (ed) {
       if (!BKP_KEYS.includes(key)) { toast("Buku peserta kelas ini menyusul."); return; }
-      if (!BOOK.pes[key]) {
+      if (!BOOK.pes[key]) {   // 2026-11-21: salinan di HP (dj_bkp_book:<kelas>) → langsung terbuka; versi server dicek di latar
+        let cached = null; try { cached = JSON.parse(localStorage.getItem("dj_bkp_book:" + key) || "null"); } catch (_) {}
+        if (cached && cached.body && bkpOK(key)) {
+          const loc = bkpLocal(key);
+          BOOK.pes[key] = cached; BOOK.isi[key] = (loc && loc.data) || {};
+          bookOpen(key, ed);
+          Promise.all([DB.bukuPeserta(key), DB.getIsian(key).catch(() => null)]).then(([row, isi]) => {
+            if (!row) { delete BOOK.pes[key]; try { localStorage.removeItem("dj_bkp_book:" + key); } catch (_) {} return; }
+            if (row.updated_at !== cached.updated_at) { BOOK.pes[key] = row; try { localStorage.setItem("dj_bkp_book:" + key, JSON.stringify(row)); } catch (_) {} }
+            const l2 = bkpLocal(key);
+            if (isi && !(l2 && l2.dirty)) { BOOK.isi[key] = isi; bkpSetLocal(key, isi, false);
+              if (BOOK.key === key && BOOK.el) BOOK.el.querySelectorAll("textarea[data-bkpf]").forEach(t => { if (document.activeElement !== t) t.value = isi[t.dataset.bkpf] || ""; }); }
+            else if (l2 && l2.dirty) bkpSave(true);
+          }).catch(() => {});
+          return;
+        }
         if (BOOK.loading) return; BOOK.loading = true; toast("Membuka buku…");
         Promise.all([DB.bukuPeserta(key), DB.getIsian(key).catch(() => null)]).then(([row, isi]) => {
           if (!row) { toast("🔒 Buku Peserta hanya untuk peserta yang terdaftar di kelas ini atau sudah lulus."); return; }
           const loc = bkpLocal(key);   // isian yg belum sempat terkirim (sinyal putus) menang atas versi server
           BOOK.pes[key] = row; BOOK.isi[key] = loc && loc.dirty ? Object.assign({}, isi || {}, loc.data) : (isi || (loc && loc.data) || {});
+          try { localStorage.setItem("dj_bkp_book:" + key, JSON.stringify(row)); } catch (_) {}
           bookOpen(key, ed);
           if (loc && loc.dirty) bkpSave(true);
         }).catch(err => toast("Buku belum bisa dibuka: " + (err.message || err))).finally(() => { BOOK.loading = false; });
