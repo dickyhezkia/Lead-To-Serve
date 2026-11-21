@@ -1167,7 +1167,19 @@
   .djf-kb ul { margin:0 0 8px; padding-left:18px; } .djf-kb li { margin:3px 0; } .djf-kb li::marker { color:var(--jc); }
   .djf-out { margin:0 0 6px; } .djf-facts { margin:0 0 10px; font-size:12.5px; color:var(--ink-faint); }
   .djf-go { border:0; background:none; padding:4px 0; font:inherit; font-size:14px; font-weight:700; color:var(--jc); cursor:pointer; }
-  .djb-sub { margin:0 2px 12px; }
+  .djb-sub { margin:0 2px 14px; }
+  .djbf .djf-c { gap:8px; } .djbf .djf-c > small { padding-top:7px; }
+  .djbf-b { display:flex; align-items:center; gap:12px; width:100%; text-align:left; background:var(--surface); border:1px solid var(--line); border-radius:var(--r-md); padding:10px; font:inherit; color:var(--ink); cursor:pointer; }
+  .djbf-b.on { border-color:var(--jc); box-shadow:0 0 0 1px var(--jc); }
+  .djbf-b img { width:48px; height:72px; object-fit:cover; border-radius:2px 6px 6px 2px; flex:none; box-shadow:0 3px 8px rgba(0,0,0,.15); }
+  .djbf-t { flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; }
+  .djbf-t b { font-size:15px; } .djbf-t small { font-size:12.5px; color:var(--ink-soft); }
+  .djbf-t em { font-style:normal; font-size:12.5px; font-weight:700; color:var(--jc); margin-top:2px; }
+  .djbf-go { flex:none; min-height:36px; padding:0 14px; border-radius:10px; background:var(--accent); color:#fff; font-size:14px; font-weight:700; display:inline-flex; align-items:center; }
+  .djbf-b.lk { cursor:default; } .djbf-b.lk img { filter:grayscale(1); opacity:.55; } .djbf-b.lk b { color:var(--ink-soft); } .djbf-b.lk em { color:var(--ink-faint); font-weight:600; }
+  .djseg { display:grid; grid-template-columns:1fr 1fr; background:var(--surface-2); border-radius:12px; padding:4px; margin:0 0 16px; }
+  .djseg button { min-height:38px; border:0; border-radius:9px; background:transparent; color:var(--ink-soft); font:inherit; font-size:14px; font-weight:600; cursor:pointer; }
+  .djseg button[aria-pressed="true"] { background:var(--surface); color:var(--accent); font-weight:800; box-shadow:0 1px 3px rgba(0,0,0,.08); }
   .djb-list { display:flex; flex-direction:column; gap:10px; } .djb-list .pj-book { margin:0; }
   .djh { padding:4px 14px; margin-bottom:14px; }
   .djh-row { display:flex; align-items:center; gap:12px; width:100%; min-height:58px; border:0; border-bottom:1px solid var(--line); background:none; padding:6px 0; font:inherit; color:var(--ink); text-align:left; cursor:pointer; }
@@ -1630,11 +1642,27 @@
         : `<p class="jd-empty">Tidak ada — semua kelas berjalan baik.</p>`}`;
   };
 
+  // 2026-11-21 (user pilih "B" di mockup 3FqCT4Rf4xmoV8jCHV6rBT, ganti sistem rak): buku disusun per fase pemuridan
+  // (garis waktu sama dgn "Perjalanan pemuridan"). mode "pes" = Buku Peserta (bkpOK), "guru" = Bahan Pengajar (mtbook).
+  function djBookFlowHTML(mode) {
+    const pes = mode === "pes", cur = pes ? djCurKey() : null;
+    return `<div class="djf djbf">${BJ_PHASES.map(ph => {
+      const col = ph.key === "grow" || ph.key === "plant" ? "var(--dj-rs)" : "var(--dj-lts)";
+      const items = ph.keys.map(k => {
+        const c = DASH_JOURNEYS.find(x => x.key === k), ok = !pes || bkpOK(k), done = pes && bjStatus(k) === "done";
+        let seen = false; try { seen = !!localStorage.getItem((pes ? "dj_bkp_pos:" : "dj_bk_pos:") + k); } catch (e) {}
+        const sub = !ok ? "Terbuka saat kamu ikut kelasnya" : done ? "✓ Kelas sudah lulus" : seen ? "Lanjutkan dari halaman terakhir" : "Belum dibuka";
+        const inner = `<img src="img/dj-cv-${k}.webp?v=2" alt="" decoding="async"><span class="djbf-t"><b>${esc(c.title)}</b><small>${esc(clsName(k))}</small><em>${sub}</em></span>`;
+        return ok ? `<button type="button" class="djbf-b${k === cur ? " on" : ""}" ${pes ? "data-bkpes" : "data-mtbook"}="${k}" aria-label="Baca ${esc(c.title)}">${inner}<span class="djbf-go">Baca</span></button>`
+          : `<div class="djbf-b lk">${inner}</div>`;
+      }).join("");
+      return `<section class="djf-s" style="--jc:${col};"><span class="djf-n" aria-hidden="true">${ph.no}</span><div class="djf-c"><small>${ph.word}</small>${items}</div></section>`;
+    }).join("")}</div>`;
+  }
   // Peserta · Buku: kelima Buku Peserta (terkunci bila belum terdaftar/lulus — bkpOK)
   RENDER.buku = function () {
     attRefresh();
-    el("bukuBody").innerHTML = `<p class="sub djb-sub">Buku Peserta terbuka untuk kelas yang sedang kamu ikuti atau sudah kamu lulusi.</p>`
-      + `<div class="djb-list">${BKP_KEYS.map(pjBookHTML).join("")}</div>`;
+    el("bukuBody").innerHTML = `<p class="sub djb-sub">Buku Peserta terbuka untuk kelas yang sedang kamu ikuti atau sudah kamu lulusi.</p>` + djBookFlowHTML("pes");
   };
 
   // Peserta · Hasil: status tiap kelas (nilai, bintang) + pintu ke hasil asesmen pribadi
@@ -4065,11 +4093,11 @@ ${body}</body></html>`;
       return `<button type="button" class="mtb${on ? " on" : ""}" style="--jc:${c.color};--ph:url('${c.ph}');--cv:url('img/dj-cv-${c.key}.webp?v=2');" data-mtbook="${c.key}" aria-label="Buka buku ${esc(c.title)}${r ? ", " + nLes(r) + " pelajaran" : ""}${on ? " (terakhir dibaca)" : ""}">${on ? `<i class="mtb-rib" aria-hidden="true"></i>` : ""}<span class="mtb-cv"><span class="mtb-txt"><i class="mtb-k">${esc(c.tab)}</i><b class="mtb-t">${esc(c.title)}</b>${mtName(c) ? `<em class="mtb-nm">${esc(mtName(c))}</em>` : ""}<small class="mtb-s">${r ? nLes(r) + " pelajaran · Edisi 2026" : "Belum ada isi"}</small><img class="mtb-logo" src="./logo.png?v=1" alt="JB3"></span></span></button>`; };
     const mtSoon = c => `<div class="mtb mtb-soon" style="--jc:${c.color};--ph:url('${c.ph}');--cv:url('img/dj-cv-${c.key}.webp?v=2');" role="img" aria-label="Buku peserta ${esc(c.title)} — isi menyusul"><span class="mtb-cv"><i class="mtb-lk">Segera</i><span class="mtb-txt"><i class="mtb-k">${esc(c.tab)}</i><b class="mtb-t">${esc(c.title)}</b>${mtName(c) ? `<em class="mtb-nm">${esc(mtName(c))}</em>` : ""}<small class="mtb-s">Untuk peserta</small><img class="mtb-logo" src="./logo.png?v=1" alt="JB3"></span></span></div>`;
     const mtPes = c => `<button type="button" class="mtb" style="--jc:${c.color};--ph:url('${c.ph}');--cv:url('img/dj-cv-${c.key}.webp?v=2');" data-bkpes="${c.key}" aria-label="Buka buku peserta ${esc(c.title)}"><span class="mtb-cv"><span class="mtb-txt"><i class="mtb-k">${esc(c.tab)}</i><b class="mtb-t">${esc(c.title)}</b>${mtName(c) ? `<em class="mtb-nm">${esc(mtName(c))}</em>` : ""}<small class="mtb-s">Buku Peserta</small><img class="mtb-logo" src="./logo.png?v=1" alt="JB3"></span></span></button>`;
-    const shelves = set === "dj" ? `<div class="mtr-h"><b>📚 Rak Bahan Pengajar</b></div>
-      <div class="mtr"><div class="mtr-shelf">${S.tabs.map(mtBook).join("")}</div></div>
-      ${MT_RAK_PESERTA ? `<div class="mtr-h"><b>🎒 Rak Peserta</b></div>
-      <div class="mtr mtr-ps"><div class="mtr-shelf">${S.tabs.map(c => BKP_KEYS.includes(c.key) ? mtPes(c) : mtSoon(c)).join("")}</div></div>` : ""}
-      <p class="jd-note mtr-note">Ketuk sebuah buku untuk membacanya seperti buku: sampul, daftar isi, lalu balik halaman (geser / ‹ ›). Halaman terakhir dibaca diingat.</p>` : "";
+    // 2026-11-21 (user pilih "B"): rak diganti susunan per fase + pilihan Bahan Pengajar | Buku Peserta
+    const shf = MT_RAK_PESERTA && state.mtShelf === "pes" ? "pes" : "guru";
+    const shelves = set === "dj" ? `${MT_RAK_PESERTA ? `<div class="djseg"><button type="button" data-mtshelf="guru" aria-pressed="${shf === "guru"}">Bahan Pengajar</button><button type="button" data-mtshelf="pes" aria-pressed="${shf === "pes"}">Buku Peserta</button></div>` : ""}
+      ${djBookFlowHTML(shf)}
+      <p class="jd-note mtr-note">Ketuk Baca untuk membuka buku: sampul, daftar isi, lalu balik halaman (geser / ‹ ›). Halaman terakhir dibaca diingat.</p>` : "";
     if (shelves) {   // DJ: hanya rak; isi dibaca di buku layar penuh (bookOpen). mdDoc tetap dipanggil utk MT_LESSONS (Mode Mengajar).
       if (cur) mdDoc(cur.body);
       box.innerHTML = `<div class="mt-lock">${S.lock}</div>${shelves}`;
@@ -5801,6 +5829,8 @@ ${body}</body></html>`;
       const cur = state.dashOpen[k] != null ? state.dashOpen[k] : dashTog.dataset.def === "1";
       state.dashOpen[k] = !cur; RENDER.dashboard(); return;
     }
+    const mtSh = T.closest("[data-mtshelf]");
+    if (mtSh) { state.mtShelf = mtSh.dataset.mtshelf; RENDER[state.page] && RENDER[state.page](); return; }
     const kelasGo = T.closest("[data-kelasgo]");
     if (kelasGo) { const [pg, k] = kelasGo.dataset.kelasgo.split(":"); if (pg === "materi") state.materiKey = k; else state.absKey = k; show(pg); return; }
     const dashTab = T.closest("[data-dashtab]");
