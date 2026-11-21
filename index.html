@@ -824,36 +824,39 @@
   .mtr-shelf { display:flex; gap:12px; overflow-x:auto; padding:16px 16px 18px; scroll-padding-left:16px; scroll-snap-type:x proximity; scrollbar-width:none; }
   .mtr-shelf::-webkit-scrollbar { display:none; }
   .mtb { flex:0 0 102px; position:relative; z-index:1; display:block; padding:0; border:0; background:none; font:inherit; text-align:left; cursor:pointer; scroll-snap-align:start; -webkit-tap-highlight-color:transparent; }
-  .mtb-cv { position:relative; display:block; aspect-ratio:5/8; border-radius:3px 10px 10px 3px; overflow:hidden; color:#fff;
-    background:linear-gradient(180deg, transparent 30%, color-mix(in srgb, var(--jc) 70%, #000) 78%), var(--ph) center 30% / cover no-repeat, var(--jc);
-    box-shadow:inset 7px 0 0 rgba(0,0,0,.3), inset 8px 0 0 rgba(255,255,255,.2), 2px 2px 0 #F4EEDF, 4px 4px 0 #E2D8C3, 4px 7px 10px rgba(0,0,0,.22); transition:transform .2s; }
+  /* 2026-11-21 (user: "cover buku ... lebih sederhana dan menarik"): foto di atas, pita warna kelas di bawah (kode · judul · nama · logo) */
+  .mtb-cv { position:relative; display:flex; flex-direction:column; aspect-ratio:2/3; border-radius:3px 10px 10px 3px; overflow:hidden; color:#fff; background:var(--cv) center / cover no-repeat, var(--jc);
+    box-shadow:2px 2px 0 #F4EEDF, 4px 4px 0 #E2D8C3, 4px 7px 10px rgba(0,0,0,.22); transition:transform .2s; }
+  .mtb-cv::after { content:""; position:absolute; left:0; top:0; bottom:0; width:6px; background:linear-gradient(90deg, rgba(0,0,0,.3), rgba(0,0,0,.1) 75%, rgba(255,255,255,.28)); pointer-events:none; }
   .mtb:active .mtb-cv { transform:scale(.97); }
   .mtb.on .mtb-cv { transform:translateY(-6px); outline:3px solid #F7C948; outline-offset:2px; }
   .mtb-tag { position:absolute; top:8px; left:13px; padding:2px 7px; border-radius:999px; background:rgba(255,255,255,.94); color:var(--jc); font-style:normal; font-size:10.5px; font-weight:800; letter-spacing:.03em; }
-  .mtb-txt { position:absolute; left:13px; right:6px; bottom:7px; display:flex; flex-direction:column; gap:2px; }
-  .mtb-t { font-family:var(--font-display); font-size:13px; font-weight:700; line-height:1.15; text-shadow:0 1px 3px rgba(0,0,0,.45); }
-  .mtb-nm { font-style:italic; font-size:10.5px; font-weight:700; line-height:1.2; color:#F7E3A8; text-shadow:0 1px 2px rgba(0,0,0,.5); }
-  .mtb-s { margin-top:2px; font-size:10px; font-weight:700; opacity:.88; }
+  .mtb-txt { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); flex:1; min-height:0; display:flex; flex-direction:column; gap:2px; padding:7px 6px 7px 13px; }
+  .mtb-k { font-style:normal; font-size:10px; font-weight:800; letter-spacing:.14em; }
+  .mtb-t { font-family:var(--font-display); font-size:13.5px; font-weight:800; line-height:1.1; }
+  .mtb-nm { font-style:italic; font-size:10.5px; font-weight:600; line-height:1.2; color:#F7E3A8; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+  .mtb-s { display:none; }
   .mtb-rib { position:absolute; top:-8px; right:12px; z-index:2; width:14px; height:28px; background:#F7C948; clip-path:polygon(0 0, 100% 0, 100% 100%, 50% 74%, 0 100%); filter:drop-shadow(0 1px 1px rgba(0,0,0,.25)); }
   /* 2026-11-21 (user: "tambahkan logo jb3 di setiap buku ajar"): logo JB3 putih di sampul (rak & buku), berwarna di halaman penutup */
-  .mtb-logo { position:absolute; top:34px; left:13px; width:66px; height:auto; filter:brightness(0) invert(1) drop-shadow(0 1px 2px rgba(0,0,0,.5)); opacity:.95; pointer-events:none; }
-  .bkb-logo { position:absolute; top:16px; right:20px; width:150px; max-width:40%; height:auto; filter:brightness(0) invert(1) drop-shadow(0 1px 3px rgba(0,0,0,.5)); }
+  .mtb-logo { margin-top:auto; width:38px; height:auto; filter:brightness(0) invert(1); opacity:.9; pointer-events:none; }
+  .bkb-logo { flex:none; width:92px; max-width:34%; height:auto; filter:brightness(0) invert(1); opacity:.92; }
   .bkb-end-logo { display:block; width:150px; max-width:60%; height:auto; margin:0 auto 1.4em; opacity:.8; }
   .mtb-soon { cursor:default; }
   .mtb-soon .mtb-cv { filter:grayscale(.9); opacity:.55; }
-  .mtb-lk { position:absolute; top:60px; left:13px; padding:2px 7px; border-radius:999px; background:rgba(0,0,0,.55); color:#fff; font-style:normal; font-size:9.5px; font-weight:800; letter-spacing:.04em; }
+  .mtb-lk { position:absolute; z-index:1; top:8px; left:13px; padding:2px 7px; border-radius:999px; background:rgba(0,0,0,.55); color:#fff; font-style:normal; font-size:9.5px; font-weight:800; letter-spacing:.04em; }
   .mtr-note { margin:4px 2px 0; }
   .tc { z-index:10000 !important; } .mte { z-index:10001; }
   /* 2026-11-21 — buku utuh layar penuh (bookOpen) */
   .bkb-cover { position:relative; height:100%; break-after:column; -webkit-column-break-after:always; border-radius:4px 14px 14px 4px; overflow:hidden; color:#fff;
-    background:linear-gradient(180deg, rgba(0,0,0,.05) 25%, color-mix(in srgb, var(--jc) 78%, #000) 72%), var(--ph) center 30% / cover no-repeat, var(--jc);
-    box-shadow:inset 12px 0 0 rgba(0,0,0,.28), inset 14px 0 0 rgba(255,255,255,.16), 0 8px 22px rgba(0,0,0,.18); }
-  .bkb-cover .mtb-tag { top:18px; left:30px; font-size:13px; padding:4px 12px; }
-  .bkb-cv-t { position:absolute; left:30px; right:20px; bottom:58px; }
-  .bkb-cv-t small { display:block; font-size:.72em; font-weight:800; letter-spacing:.06em; text-transform:uppercase; opacity:.85; margin-bottom:.4em; }
-  .bkb-cv-t b { display:block; font-family:var(--font-display); font-size:1.75em; font-weight:700; line-height:1.15; text-shadow:0 2px 6px rgba(0,0,0,.35); }
-  .bkb-cv-t em { display:block; margin-top:.2em; font-family:var(--font-display); font-style:italic; font-size:1.3em; font-weight:600; line-height:1.2; color:#F7E3A8; text-shadow:0 2px 6px rgba(0,0,0,.35); }
-  .bkb-cv-f { position:absolute; left:30px; right:20px; bottom:22px; font-size:.75em; font-weight:700; opacity:.9; }
+    display:flex; flex-direction:column; background:var(--cv) center / cover no-repeat, var(--jc); box-shadow:0 8px 22px rgba(0,0,0,.18); }
+  .bkb-cover > .bkb-cv-ph, .bkb-cover > .bkb-cv-t, .bkb-cover > .bkb-cv-f { display:none; }
+  .bkb-cover::after { content:""; position:absolute; left:0; top:0; bottom:0; width:12px; background:linear-gradient(90deg, rgba(0,0,0,.3), rgba(0,0,0,.1) 75%, rgba(255,255,255,.25)); pointer-events:none; }
+  .bkb-cv-ph { flex:0 0 56%; background:var(--ph) center 30% / cover no-repeat; border-bottom:5px solid #F7C948; }
+  .bkb-cv-t { padding:1.4em 20px 0 32px; }
+  .bkb-cv-t small { display:block; font-size:.72em; font-weight:800; letter-spacing:.14em; text-transform:uppercase; margin-bottom:.5em; }
+  .bkb-cv-t b { display:block; font-family:var(--font-display); font-size:1.9em; font-weight:800; line-height:1.1; }
+  .bkb-cv-t em { display:block; margin-top:.25em; font-family:var(--font-display); font-style:italic; font-size:1.2em; font-weight:600; line-height:1.25; color:#F7E3A8; }
+  .bkb-cv-f { margin-top:auto; padding:0 20px 20px 32px; display:flex; align-items:flex-end; justify-content:space-between; gap:12px; font-size:.72em; font-weight:700; line-height:1.4; opacity:.92; }
   .bkb-sect { break-before:column; -webkit-column-break-before:always; }
   .bkb-anc { display:block; height:0; }
   .bkb-kick { margin:0 0 .2em; font-size:.75em; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); }
@@ -873,7 +876,6 @@
   .bkb-ch .bkb-anc { height:2.4em; }
   .bkb-ch .mr-h1 { font-size:1.65em; margin:.1em 0 .25em; }
   .bkb-rule { display:block; width:56px; height:3px; border-radius:3px; background:var(--accent); margin:.3em 0 1.4em; }
-  .bkb-cover .bkb-cv-f { letter-spacing:.04em; }
   .bkb-tp { height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; }
   .bkb-tp-logo { width:190px; max-width:62%; height:auto; margin-bottom:2em; }
   .bkb-tp-k { margin:0; font-size:.72em; font-weight:800; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-faint); }
@@ -895,8 +897,8 @@
   .bkp .mr-top .bkp-st { flex:none; font-size:11.5px; color:var(--ink-faint); max-width:120px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .mr-top .bkp-st:empty { display:none; }
   .pj-book { display:flex; align-items:center; gap:12px; width:100%; margin:0 0 10px; padding:10px 12px; border:1px solid var(--line); border-radius:14px; background:var(--surface); color:var(--ink); font:inherit; text-align:left; cursor:pointer; }
-  .pj-book-cv { flex:none; width:38px; aspect-ratio:5/8; border-radius:2px 6px 6px 2px; background:var(--jc) var(--ph) center/cover; box-shadow:inset 4px 0 0 rgba(0,0,0,.18), 0 2px 5px rgba(0,0,0,.2); display:flex; align-items:center; justify-content:center; }
-  .pj-book-cv img { width:28px; filter:brightness(0) invert(1); opacity:.95; }
+  .pj-book-cv { flex:none; width:38px; aspect-ratio:2/3; border-radius:2px 6px 6px 2px; background:var(--jc) var(--cv) center/cover; box-shadow:inset 4px 0 0 rgba(0,0,0,.18), 0 2px 5px rgba(0,0,0,.2); display:flex; align-items:center; justify-content:center; }
+  .pj-book-cv img { display:none; }
   .pj-book-t { flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; }
   .pj-book-t b { font-size:15px; }
   .pj-book-t small { font-size:12.5px; color:var(--ink-soft); line-height:1.35; }
@@ -1759,7 +1761,7 @@
     return hero + pjBookHTML(k) + attCardHTML(k) + fb + result + pjAssessHTML(k) + work; };
   // 2026-11-21 Buku Peserta: kartu di tab kelas (di bawah kartu DJ) → buku layar penuh (bookOpen edisi peserta)
   const pjBookHTML = k => { if (!BKP_KEYS.includes(k)) return ""; const c = DASH_JOURNEYS.find(x => x.key === k) || {};
-    return `<button type="button" class="pj-book" data-bkpes="${k}" style="--jc:${c.color};--ph:url('${c.ph}');"><span class="pj-book-cv" aria-hidden="true"><img src="./logo.png?v=1" alt=""></span><span class="pj-book-t"><b>📖 Buku Peserta</b><small>Baca materi ${esc(c.title || "")} seperti buku &amp; tulis catatan refleksimu di setiap pelajaran</small></span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button>`; };
+    return `<button type="button" class="pj-book" data-bkpes="${k}" style="--jc:${c.color};--ph:url('${c.ph}');--cv:url('img/dj-cv-${k}.webp?v=1');"><span class="pj-book-cv" aria-hidden="true"><img src="./logo.png?v=1" alt=""></span><span class="pj-book-t"><b>📖 Buku Peserta</b><small>Baca materi ${esc(c.title || "")} seperti buku &amp; tulis catatan refleksimu di setiap pelajaran</small></span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button>`; };
 
   function pjStatusPill(st, res) {
     if (res && res.passed) return `✓ Lulus · ${esc(res.band)}`;
@@ -3244,9 +3246,9 @@
     const anc = (id, extra) => `<span class="bkb-anc" data-bkid="${id}" ${extra || ""}></span>`;
     // sampul depan (mode 2 halaman: didahului halaman kosong di kiri = buku tertutup)
     let h = `<div class="bkb-lead" data-bkpt="blank"></div>
-      <div class="bkb-cover" data-bkpt="cover" style="--jc:${c.color};--ph:url('${c.ph}');"><i class="mtb-tag">${esc(c.tab || "")}</i><img class="bkb-logo" src="./logo.png?v=1" alt="JB3 Home for All">
-      <div class="bkb-cv-t"><small>${LBL} · Discipleship Journey</small><b>${esc(tt)}</b>${tn ? `<em>${esc(tn)}</em>` : ""}</div>
-      <span class="bkb-cv-f">Gereja JB3 · ${BK_EDISI}</span></div>`;
+      <div class="bkb-cover" data-bkpt="cover" style="--jc:${c.color};--ph:url('${c.ph}');--cv:url('img/dj-cv-${c.key}.webp?v=1');"><span class="bkb-cv-ph" aria-hidden="true"></span>
+      <div class="bkb-cv-t"><small>${esc(c.tab || "")} · ${LBL}</small><b>${esc(tt)}</b>${tn ? `<em>${esc(tn)}</em>` : ""}</div>
+      <div class="bkb-cv-f"><span>Discipleship Journey<br>Gereja JB3 · ${BK_EDISI}</span><img class="bkb-logo" src="./logo.png?v=1" alt="JB3 Home for All"></div></div>`;
     // halaman judul (kanan) + keterangan terbitan (kiri, di baliknya)
     h += `<div class="bkb-sect bkb-tp">${anc("bkbtp", 'data-recto="1" data-bkpt="title"')}
       <img class="bkb-tp-logo" src="./logo.png?v=1" alt="JB3 Home for All"><p class="bkb-tp-k">${LBL}</p>
@@ -3765,9 +3767,9 @@ ${body}</body></html>`;
     const mtName = c => { const r = rows.find(x => x.key === c.key), h = r ? String(r.body || "").split("\n")[0].replace(/^# /, "") : "";
       const m = h.match(/\s[—–-]\s(.+)$/); return (m ? m[1] : (BJ_STAGES[c.key] || {}).tag || "").replace(/\*+/g, "").trim(); };
     const mtBook = c => { const r = rows.find(x => x.key === c.key), on = !!cur && cur.key === c.key;
-      return `<button type="button" class="mtb${on ? " on" : ""}" style="--jc:${c.color};--ph:url('${c.ph}');" data-mtbook="${c.key}" aria-label="Buka buku ${esc(c.title)}${on ? " (terakhir dibaca)" : ""}">${on ? `<i class="mtb-rib" aria-hidden="true"></i>` : ""}<span class="mtb-cv"><i class="mtb-tag">${esc(c.tab)}</i><img class="mtb-logo" src="./logo.png?v=1" alt="JB3"><span class="mtb-txt"><b class="mtb-t">${esc(c.title)}</b>${mtName(c) ? `<em class="mtb-nm">${esc(mtName(c))}</em>` : ""}<small class="mtb-s">${r ? nLes(r) + " pelajaran · Edisi 2026" : "Belum ada isi"}</small></span></span></button>`; };
-    const mtSoon = c => `<div class="mtb mtb-soon" style="--jc:${c.color};--ph:url('${c.ph}');" role="img" aria-label="Buku peserta ${esc(c.title)} — isi menyusul"><span class="mtb-cv"><i class="mtb-tag">${esc(c.tab)}</i><i class="mtb-lk">Segera</i><img class="mtb-logo" src="./logo.png?v=1" alt="JB3"><span class="mtb-txt"><b class="mtb-t">${esc(c.title)}</b>${mtName(c) ? `<em class="mtb-nm">${esc(mtName(c))}</em>` : ""}<small class="mtb-s">Untuk peserta</small></span></span></div>`;
-    const mtPes = c => `<button type="button" class="mtb" style="--jc:${c.color};--ph:url('${c.ph}');" data-bkpes="${c.key}" aria-label="Buka buku peserta ${esc(c.title)}"><span class="mtb-cv"><i class="mtb-tag">${esc(c.tab)}</i><img class="mtb-logo" src="./logo.png?v=1" alt="JB3"><span class="mtb-txt"><b class="mtb-t">${esc(c.title)}</b>${mtName(c) ? `<em class="mtb-nm">${esc(mtName(c))}</em>` : ""}<small class="mtb-s">Buku Peserta</small></span></span></button>`;
+      return `<button type="button" class="mtb${on ? " on" : ""}" style="--jc:${c.color};--ph:url('${c.ph}');--cv:url('img/dj-cv-${c.key}.webp?v=1');" data-mtbook="${c.key}" aria-label="Buka buku ${esc(c.title)}${r ? ", " + nLes(r) + " pelajaran" : ""}${on ? " (terakhir dibaca)" : ""}">${on ? `<i class="mtb-rib" aria-hidden="true"></i>` : ""}<span class="mtb-cv"><span class="mtb-txt"><i class="mtb-k">${esc(c.tab)}</i><b class="mtb-t">${esc(c.title)}</b>${mtName(c) ? `<em class="mtb-nm">${esc(mtName(c))}</em>` : ""}<small class="mtb-s">${r ? nLes(r) + " pelajaran · Edisi 2026" : "Belum ada isi"}</small><img class="mtb-logo" src="./logo.png?v=1" alt="JB3"></span></span></button>`; };
+    const mtSoon = c => `<div class="mtb mtb-soon" style="--jc:${c.color};--ph:url('${c.ph}');--cv:url('img/dj-cv-${c.key}.webp?v=1');" role="img" aria-label="Buku peserta ${esc(c.title)} — isi menyusul"><span class="mtb-cv"><i class="mtb-lk">Segera</i><span class="mtb-txt"><i class="mtb-k">${esc(c.tab)}</i><b class="mtb-t">${esc(c.title)}</b>${mtName(c) ? `<em class="mtb-nm">${esc(mtName(c))}</em>` : ""}<small class="mtb-s">Untuk peserta</small><img class="mtb-logo" src="./logo.png?v=1" alt="JB3"></span></span></div>`;
+    const mtPes = c => `<button type="button" class="mtb" style="--jc:${c.color};--ph:url('${c.ph}');--cv:url('img/dj-cv-${c.key}.webp?v=1');" data-bkpes="${c.key}" aria-label="Buka buku peserta ${esc(c.title)}"><span class="mtb-cv"><span class="mtb-txt"><i class="mtb-k">${esc(c.tab)}</i><b class="mtb-t">${esc(c.title)}</b>${mtName(c) ? `<em class="mtb-nm">${esc(mtName(c))}</em>` : ""}<small class="mtb-s">Buku Peserta</small><img class="mtb-logo" src="./logo.png?v=1" alt="JB3"></span></span></button>`;
     const shelves = set === "dj" ? `<div class="mtr-h"><b>📚 Rak Bahan Pengajar</b><small>${S.tabs.length} buku · ketuk untuk membaca</small></div>
       <div class="mtr"><div class="mtr-shelf">${S.tabs.map(mtBook).join("")}</div></div>
       ${MT_RAK_PESERTA ? `<div class="mtr-h"><b>🎒 Rak Peserta</b><small>${BKP_KEYS.length} buku · yang lain menyusul</small></div>
