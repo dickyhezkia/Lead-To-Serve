@@ -887,6 +887,7 @@
   .bkp-rf-h { font-family:var(--font-display); font-size:1.35em; margin:.1em 0 .2em; }
   .bkp-rf-s { font-size:.8em; color:var(--ink-soft); margin:0 0 1em; }
   .bkp-f { display:block; break-inside:avoid; margin:0 0 1em; }
+  .bkp-fi { margin:.2em 0 1em; }
   .bkp-f > span { display:block; font-size:.88em; font-weight:700; margin:0 0 .35em; line-height:1.35; }
   .bkp-f textarea { display:block; width:100%; box-sizing:border-box; resize:none; padding:.5em .7em; border:1px solid var(--line-strong); border-radius:8px;
     font:inherit; font-size:.95em; line-height:1.6; color:var(--ink); background:var(--paper) repeating-linear-gradient(transparent 0 calc(1.6em - 1px), var(--line) calc(1.6em - 1px) 1.6em); background-attachment:local; background-position:0 .5em; }
@@ -3193,13 +3194,20 @@
   // v_dj_buku_peserta.sql) + halaman "Catatan & Refleksi" di akhir tiap pelajaran (kolom isian, tersimpan otomatis per orang
   // di dj_buku_isian). Dibuka dari tab kelas (kartu "Buku Peserta") & Rak Peserta di Bahan Ajar. Kelas lain menyusul:
   // tambahkan key di BKP_KEYS + v_keys di SQL.
-  const BKP_KEYS = ["rs1"];
+  const BKP_KEYS = ["rs1", "rs2", "rs3", "lts1", "lts2"];   // 2026-11-21 (user: "buat yg lainnya"): semua kelas DJ
   const BKP_Q = [["inti", "Hal terpenting yang saya pelajari dari pelajaran ini", 4], ["laku", "Yang akan saya lakukan minggu ini", 3],
     ["tanya", "Pertanyaan yang ingin saya tanyakan di kelas", 3], ["catat", "Catatan bebas", 5]];
-  function bkpRefl(n, L) {
+  // garis isian "____" di naskah (mis. "Catatan dari Diskusi" RS2) → kolom isian di edisi peserta (di buku pengajar dibuang)
+  const bkpBlankLines = lines => { const out = []; lines.forEach(l => { const b = /^[!\s]*_{6,}\s*$/.test(l);
+    if (b) { if (out[out.length - 1] !== "{{isian}}") out.push("{{isian}}"); } else out.push(l); }); return out; };
+  // lembar refleksi di naskah (LTS2 "Lampiran · Lembar Refleksi Peserta") → kolom isian di bawah tiap subjudul
+  const bkpSheetLines = lines => { const out = []; lines.filter(l => !/difotokopi/i.test(l)).forEach(l => {
+    if (/^#{2,3} /.test(l) && out.some(x => /^#{2,3} /.test(x))) out.push("{{isian}}"); out.push(l); }); out.push("{{isian}}"); return out; };
+  const bkpBlankHTML = (html, n) => { let k = 0; return html.replace(/<p class="mt-p">\{\{isian\}\}<\/p>/g, () => `<label class="bkp-f bkp-fi"><textarea data-bkpf="p${n}_g${++k}" rows="3" placeholder="Tulis catatanmu di sini…" aria-label="Kolom catatan"></textarea></label>`); };
+  function bkpRefl(n, L, kick) {
     const memo = L.lines.map(l => l.replace(/^#+\s*/, "").match(/^AYAT(?:-AYAT)?\s+HAFALAN\s*:?\s*(.+)$/i)).find(Boolean);
     const f = (id, q, rows) => `<label class="bkp-f"><span>${q}</span><textarea data-bkpf="p${n}_${id}" rows="${rows}" placeholder="Tulis di sini…"></textarea></label>`;   // tanpa id: build HOME memberi awalan dj_
-    return `<div class="bkp-rf"><span class="bkb-anc" data-bkid="bkrf${n}"></span><p class="bkb-kick">Pelajaran ${n}</p><h3 class="bkp-rf-h">✍️ Catatan &amp; Refleksi</h3>
+    return `<div class="bkp-rf"><span class="bkb-anc" data-bkid="bkrf${n}"></span><p class="bkb-kick">${esc(kick || "Pelajaran " + n)}</p><h3 class="bkp-rf-h">✍️ Catatan &amp; Refleksi</h3>
       <p class="bkp-rf-s">Tulisanmu tersimpan otomatis di akunmu — hanya kamu yang bisa melihatnya.</p>
       ${memo ? f("ayat", `Ayat hafalan: <b>${esc(memo[1].replace(/\*+/g, ""))}</b> — tuliskan ayatnya sambil menghafal`, 3) : ""}
       ${BKP_Q.map(q => f(q[0], q[1], q[2])).join("")}</div>`;
@@ -3220,7 +3228,7 @@
       .finally(() => { BKP_SV.busy = false; if (BKP_SV.again) { BKP_SV.again = false; bkpSave(true); } });
   }
   const BK_EDISI = "Edisi Revisi 2026";
-  const bkSplitHead = h => { const m = String(h).match(/^((?:Pelajaran|Bagian|Sesi|Bab)\s+\d+)\s*[—–·:\-]\s*(.+)$/i); return m ? [m[1], m[2]] : ["", h]; };
+  const bkSplitHead = h => { const m = String(h).match(/^((?:Pelajaran|Bagian|Sesi|Bab|Modul)\s+\d+)\s*[—–·:\-]\s*(.+)$/i); return m ? [m[1], m[2]] : ["", h]; };
   const bkTitleParts = t => { const m = String(t).match(/^(.+?)\s[—–-]\s(.+)$/); return m ? [m[1].trim(), m[2].trim()] : [String(t).trim(), ""]; };
   function bookHTML(key, ed) {
     const c = MT_SETS.dj.tabs.find(x => x.key === key) || {}, row = ed ? BOOK.pes[key] : (state.materi || []).find(r => r.key === key);
@@ -3255,7 +3263,7 @@
     h += `<div class="bkb-sect bkb-ch">${anc("bkb0", 'data-recto="1" data-bkpt="open" data-bkch="0" data-bkt="Pengantar"')}<p class="bkb-kick">Pengantar</p><h1 class="mr-h1">${esc(tt)}</h1><i class="bkb-rule" aria-hidden="true"></i>${ed ? `<h3 class="mt-h3">Cara memakai buku ini</h3><ul class="mt-ul"><li>Baca satu pelajaran sebelum atau sesudah kelas — balik halaman dengan geser atau ‹ ›.</li><li>Di akhir setiap pelajaran ada halaman <b>Catatan &amp; Refleksi</b>. Tulisanmu tersimpan otomatis dan hanya bisa kamu lihat.</li><li>Ketuk ☰ di atas untuk kembali ke Daftar Isi kapan saja.</li></ul>` : ""}${noId(mdBlocks(intro.slice(1)))}</div>`;
     les.forEach((L, i) => { const [k, t] = bkSplitHead(L.head), n = i + 1, tPlain = t.replace(/\*+/g, "");
       h += `<div class="bkb-sect bkb-ch">${anc("bkb" + n, `data-recto="1" data-bkpt="open" data-bkch="${n}" data-bkt="${esc(k ? k + " · " + tPlain : tPlain)}"`)}${k ? `<p class="bkb-kick">${esc(k)}</p>` : ""}<h1 class="mr-h1">${mdInline(t)}</h1><i class="bkb-rule" aria-hidden="true"></i>
-        ${noId(mdBlocks(L.lines))}${ed ? bkpRefl(n, L) : ""}</div>`; });
+        ${ed ? bkpBlankHTML(noId(mdBlocks(bkpBlankLines(/lampiran|lembar refleksi/i.test(L.head) ? bkpSheetLines(L.lines) : L.lines))), n) : noId(mdBlocks(L.lines))}${ed && !/lampiran|lembar refleksi/i.test(L.head) ? bkpRefl(n, L, k || tPlain) : ""}</div>`; });
     h += `<div class="bkb-sect bkb-end">${anc("bkbend", 'data-recto="1" data-bkpt="open" data-bkch="end" data-bkt="Selesai"')}<img class="bkb-end-logo" src="./logo.png?v=1" alt="JB3 Home for All"><p>— Selesai —</p><b>${esc(full)}</b><small>${BK_EDISI} · Gereja JB3</small><button type="button" class="mt-teach" data-bkto="bkbtoc">☰ Kembali ke Daftar Isi</button></div>`;
     // sampul belakang (mode 2 halaman: di halaman kiri)
     h += `<div class="bkb-sect bkb-back" data-verso="1" data-bkpt="cover" style="--jc:${c.color};"><img src="./logo.png?v=1" alt="JB3 Home for All"><b>Discipleship Journey</b><span>${esc(tt)}${tn ? " · " + esc(tn) : ""}</span><small>Gereja JB3 · ${BK_EDISI}</small></div>`;
