@@ -1453,7 +1453,7 @@
     el("gearBtn").hidden = state.page === "profile";
     // 2026-10-15: Bahan Ajar — ikon buku di bar atas, HANYA Admin (data juga dikunci RLS dj_materi).
     // 2026-10-17: + Senior Pastor (profiles.is_sp; RLS v_dj_materi_sp.sql), + LTS1/LTS2.
-    el("materiBtn").hidden = !canMateri() || ["materi", "famateri", "kidsmateri"].includes(state.page);
+    el("materiBtn").hidden = isAdm || !canMateri() || ["materi", "famateri", "kidsmateri"].includes(state.page);   // 2026-11-21 (user: "hapus" tombol Bahan Ajar): Admin buka lewat tab Bahan Ajar
     el("absenBtn").hidden = !canAbsen() || state.page === "absensi";
     el("aturanBtn").hidden = true;   // 2026-11-21 (user: "aturan dihapus"): tombol Aturan di bar atas disembunyikan
     el("appbarTitle").textContent = meta.h || "Discipleship Journey";
