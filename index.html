@@ -3105,7 +3105,12 @@
     fl.style.transform = st.n ? `translateX(${-st.n * st.step}px)` : "none";
     vp.scrollLeft = 0;
     const a = Math.max(1, st.n * st.per + 1 - st.off), b = Math.min(st.cols - st.off, st.n * st.per + st.per - st.off);
-    bk.querySelector(".bk-pg").textContent = "Hal " + (b > a ? a + "–" + b : a) + " / " + (st.cols - st.off);
+    // 2026-11-21 (user: "rs2 hal mjd sedikit"): di HP (per bagian) nomor halaman dihitung per bab → tulis nama bagiannya
+    // juga, mis. "Sesi 2 · Hal 3 / 47", spy tak terkesan bukunya tinggal sedikit.
+    let segL = "";
+    if (bk._segN != null) { const ch = bk.querySelector(`.bk-flow > [data-seg="${bk._seg}"] [data-bkch]`), t = ch ? ch.dataset.bkt || "" : "";
+      segL = bk._seg === 0 ? "Daftar Isi · " : ch && ch.dataset.bkch === "end" ? "Penutup · " : (t.split(" · ")[0] || "Bab " + bk._seg) + " · "; }
+    bk.querySelector(".bk-pg").textContent = segL + "Hal " + (b > a ? a + "–" + b : a) + " / " + (st.cols - st.off);
     const sl = bk.querySelector(".bk-sl");   // 2026-11-21 (user: "bagian ini bisa geser"): garis kemajuan = penggeser halaman
     sl.max = Math.max(0, st.pages - 1); if (+sl.value !== st.n) sl.value = st.n; sl.disabled = st.pages < 2;
     sl.style.setProperty("--p", (st.pages > 1 ? (st.n / (st.pages - 1)) * 100 : 100) + "%");
