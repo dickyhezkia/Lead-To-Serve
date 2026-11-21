@@ -1177,6 +1177,10 @@
   .djbf-t em { font-style:normal; font-size:12.5px; font-weight:700; color:var(--jc); margin-top:2px; }
   .djbf-go { flex:none; min-height:36px; padding:0 14px; border-radius:10px; background:var(--accent); color:#fff; font-size:14px; font-weight:700; display:inline-flex; align-items:center; }
   .djbf-b.lk { cursor:default; } .djbf-b.lk img { filter:grayscale(1); opacity:.55; } .djbf-b.lk b { color:var(--ink-soft); } .djbf-b.lk em { color:var(--ink-faint); font-weight:600; }
+  .bkb.bkp .bk-vp, .bkb.bkp .bk-flow, .bkb.bkp .mr-top { -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; }
+  .bkb.bkp textarea { -webkit-user-select:text; user-select:text; -webkit-touch-callout:default; }
+  .bkb.bkp img { -webkit-user-drag:none; pointer-events:none; }
+  @media print { body.tc-on.bkp-on { display:none !important; } }
   .djseg { display:grid; grid-template-columns:1fr 1fr; background:var(--surface-2); border-radius:12px; padding:4px; margin:0 0 16px; }
   .djseg button { min-height:38px; border:0; border-radius:9px; background:transparent; color:var(--ink-soft); font:inherit; font-size:14px; font-weight:600; cursor:pointer; }
   .djseg button[aria-pressed="true"] { background:var(--surface); color:var(--accent); font-weight:800; box-shadow:0 1px 3px rgba(0,0,0,.08); }
@@ -3621,13 +3625,13 @@
       if (!BKP_KEYS.includes(key)) { toast("Buku peserta kelas ini menyusul."); return; }
       if (!BOOK.pes[key]) {   // 2026-11-21: salinan di HP (dj_bkp_book:<kelas>) → langsung terbuka; versi server dicek di latar
         let cached = null; try { cached = JSON.parse(localStorage.getItem("dj_bkp_book:" + key) || "null"); } catch (_) {}
-        if (cached && cached.body && bkpOK(key)) {
+        if (cached && cached.body && cached.uid === state.meId && bkpOK(key)) {   // 2026-11-21: salinan hanya milik akun ini
           const loc = bkpLocal(key);
           BOOK.pes[key] = cached; BOOK.isi[key] = (loc && loc.data) || {};
           bookOpen(key, ed);
           Promise.all([DB.bukuPeserta(key), DB.getIsian(key).catch(() => null)]).then(([row, isi]) => {
             if (!row) { delete BOOK.pes[key]; try { localStorage.removeItem("dj_bkp_book:" + key); } catch (_) {} return; }
-            if (row.updated_at !== cached.updated_at) { BOOK.pes[key] = row; try { localStorage.setItem("dj_bkp_book:" + key, JSON.stringify(row)); } catch (_) {} }
+            if (row.updated_at !== cached.updated_at) { BOOK.pes[key] = row; try { localStorage.setItem("dj_bkp_book:" + key, JSON.stringify(Object.assign({ uid:state.meId }, row))); } catch (_) {} }
             const l2 = bkpLocal(key);
             if (isi && !(l2 && l2.dirty)) { BOOK.isi[key] = isi; bkpSetLocal(key, isi, false);
               if (BOOK.key === key && BOOK.el) BOOK.el.querySelectorAll("textarea[data-bkpf]").forEach(t => { if (document.activeElement !== t) t.value = isi[t.dataset.bkpf] || ""; }); }
@@ -3640,7 +3644,7 @@
           if (!row) { toast("🔒 Buku Peserta hanya untuk peserta yang terdaftar di kelas ini atau sudah lulus."); return; }
           const loc = bkpLocal(key);   // isian yg belum sempat terkirim (sinyal putus) menang atas versi server
           BOOK.pes[key] = row; BOOK.isi[key] = loc && loc.dirty ? Object.assign({}, isi || {}, loc.data) : (isi || (loc && loc.data) || {});
-          try { localStorage.setItem("dj_bkp_book:" + key, JSON.stringify(row)); } catch (_) {}
+          try { localStorage.setItem("dj_bkp_book:" + key, JSON.stringify(Object.assign({ uid:state.meId }, row))); } catch (_) {}
           bookOpen(key, ed);
           if (loc && loc.dirty) bkpSave(true);
         }).catch(err => toast("Buku belum bisa dibuka: " + (err.message || err))).finally(() => { BOOK.loading = false; });
@@ -3672,6 +3676,9 @@
         bkpSetLocal(BOOK.key, m, true); bkpStatus("…"); bkpSave(); });
       d.addEventListener("focusout", e => { if (e.target.matches && e.target.matches("textarea[data-bkpf]") && BKP_SV.t) bkpSave(true); });
       d.addEventListener("focusin", e => { const vp = e.target.closest && e.target.closest(".bk-vp"); if (vp) requestAnimationFrame(() => { vp.scrollLeft = 0; vp.scrollTop = 0; }); });
+      ["copy", "cut", "contextmenu", "dragstart", "selectstart"].forEach(ev => d.addEventListener(ev, e => {
+        if (!BOOK.ed || (e.target.closest && e.target.closest("textarea"))) return;
+        e.preventDefault(); if (ev === "copy" || ev === "cut" || ev === "contextmenu") BKP_NO(); }));
       BOOK.el = d;
     }
     const d = BOOK.el;
@@ -3693,17 +3700,25 @@
     bk.querySelector(".bk-vp").insertAdjacentHTML("afterend", `<div class="bk-ft" aria-hidden="true"></div>`);
     bk._onGo = st => bookHeads(st);
     d.style.setProperty("--mrfs", mrFs() + "px");
-    d.hidden = false; document.body.classList.add("tc-on"); BOOK.key = key;
+    d.hidden = false; document.body.classList.add("tc-on"); document.body.classList.toggle("bkp-on", !!ed); BOOK.key = key;
     bkLay(bk); bookPageNums();
     const relay = () => { if (BOOK.key === key && !d.hidden && d.contains(bk)) { bkLay(bk, true); bookPageNums(); } };
     bk.querySelectorAll("img").forEach(im => { if (!im.complete) im.addEventListener("load", relay, { once: true }); });
     setTimeout(relay, 350); setTimeout(relay, 1500);   // pemenggalan kata (hyphens) kadang selesai belakangan
     if (!BOOK.hist) { try { history.pushState({ djbk: 1 }, ""); BOOK.hist = true; } catch (_) {} }
   }
+  // 2026-11-21 (user: "pastikan buku peserta hanya bisa dibaca oleh yang telah lulus dan mengikuti kelas saja dan tidak bisa
+  // didownload"): salinan buku di HP dihapus saat keluar akun; di dalam buku peserta tidak ada menu unduh, teks tak bisa
+  // disalin/diseleksi, klik kanan/tahan-lama, Ctrl/⌘+P/S/C & cetak diblok. (Tangkapan layar HP tetap tak bisa dicegah aplikasi web.)
+  function bkpCacheClear() { try { Object.keys(localStorage).filter(k => k.indexOf("dj_bkp_book:") === 0).forEach(k => localStorage.removeItem(k)); } catch (_) {} if (typeof BOOK !== "undefined") BOOK.pes = {}; }
+  const BKP_NO = () => toast("🔒 Buku Peserta hanya untuk dibaca di aplikasi — tidak bisa disalin, dicetak, atau diunduh.");
+  document.addEventListener("keydown", e => { if (!BOOK.el || BOOK.el.hidden || !BOOK.ed || !(e.ctrlKey || e.metaKey)) return;
+    const k = String(e.key || "").toLowerCase(), inTa = e.target.closest && e.target.closest("textarea");
+    if (k === "p" || k === "s" || ((k === "c" || k === "x" || k === "a") && !inTa)) { e.preventDefault(); e.stopPropagation(); BKP_NO(); } }, true);
   function bookClose(fromPop) {
     if (!BOOK.el || BOOK.el.hidden) return;
     if (BOOK.ed && BKP_SV.t) bkpSave(true);
-    BOOK.el.hidden = true; BOOK.key = null; document.body.classList.remove("tc-on");
+    BOOK.el.hidden = true; BOOK.key = null; document.body.classList.remove("tc-on", "bkp-on");
     if (!fromPop && BOOK.hist) { try { if (history.state && history.state.djbk) history.back(); } catch (_) {} }
     BOOK.hist = false;
   }
@@ -5565,6 +5580,7 @@ ${body}</body></html>`;
     if (T.closest("#pfLogout") || T.closest("#rolePill")) {
       await DB.logout().catch(() => {});
       snapClear();   // 2026-10-17: data tersimpan (buka instan) ikut dihapus saat Keluar
+      bkpCacheClear();
       Object.assign(state, { lts1Batch:null, batch:{}, page:"login", stack:[], persona:null, meId:null, myProfile:null, accessStatus:null, accessRequests:[], myDisc:null, myRoadmap:null, mySsd:null, myGifts:null, rs3AccessStatus:null, rs3AccessRequests:[], rs3Result:null, lts2AccessStatus:null, lts2AccessRequests:[], lts2Result:null, rs1AccessStatus:null, rs1AccessRequests:[], rs1Result:null, lts1Result:null, rs2AccessStatus:null, rs2AccessRequests:[], rs2Result:null, materi:null, materiKey:"rs1", myAtt:{ rs1:[], rs2:[], rs3:[], lts1:[], lts2:[] }, absKey:"lts1", absRoster:null, rosterAll:null, absQuery:"", participantResults:null, participantResultsP:null, viewProfileId:null, resultsFilter:"all", dashKey:null, dashOpen:{}, classProgress:null, rs3Feedback:null, rs3FbBatches:null, fbDraft:{}, fbAgain:false, lwHist:[], lwLast:null, lwEdit:false, draft:{ discPicks:[], roadmapData:{}, ssdAnswers:{}, giftsAnswers:{}, rs3Answers:{}, lts2Answers:{}, rs1Answers:{}, rs2Answers:{}, lwAnswers:{}, lwMinistry:null } });
       show("login", { replace:true });
       return;
