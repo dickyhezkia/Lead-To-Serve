@@ -1402,7 +1402,7 @@
     // 2026-10-17: + Senior Pastor (profiles.is_sp; RLS v_dj_materi_sp.sql), + LTS1/LTS2.
     el("materiBtn").hidden = !canMateri() || ["materi", "famateri", "kidsmateri"].includes(state.page);
     el("absenBtn").hidden = !canAbsen() || state.page === "absensi";
-    el("aturanBtn").hidden = !canAbsen() || state.page === "aturan";
+    el("aturanBtn").hidden = true;   // 2026-11-21 (user: "aturan dihapus"): tombol Aturan di bar atas disembunyikan
     el("appbarTitle").textContent = meta.h || "Discipleship Journey";
     const idb = el("identityBar");
     idb.innerHTML = `<span class="ib-ava">${esc(initials(state.myProfile && state.myProfile.name))}</span>
