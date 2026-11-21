@@ -1143,13 +1143,30 @@
   .djr-leg { display:flex; gap:14px; margin:10px 0 0; font-size:12px; color:var(--ink-soft); }
   .djr-leg span { display:inline-flex; align-items:center; gap:5px; } .djr-leg i { width:10px; height:10px; border-radius:3px; }
   .djr-a > i { width:8px; height:8px; border-radius:50%; background:var(--warn); flex:none; } .djr-a > span { flex:1; font-size:14px; }
-  .djp { padding:4px 14px; margin-bottom:18px; }
-  .djp-r { display:flex; gap:12px; padding:12px 0; border-bottom:1px solid var(--line); }
-  .djp-r:last-child { border-bottom:0; }
-  .djp-w { flex:none; width:62px; height:30px; border-radius:8px; background:var(--jc); color:#fff; font-size:12px; font-weight:800; letter-spacing:.06em; display:flex; align-items:center; justify-content:center; margin-top:2px; }
-  .djp-t { flex:1; min-width:0; display:flex; flex-direction:column; gap:3px; }
-  .djp-t b { font-size:15px; } .djp-t small { font-size:12.5px; color:var(--jc); font-weight:700; }
-  .djp-t > span { font-size:13.5px; line-height:1.5; color:var(--ink-soft); }
+  .djf { margin:2px 0 18px; }
+  .djf-s { position:relative; display:flex; gap:12px; padding-bottom:20px; }
+  .djf-s::before { content:""; position:absolute; left:15px; top:36px; bottom:2px; width:2px; border-radius:1px; background:color-mix(in srgb, var(--jc) 35%, transparent); }
+  .djf-s:last-child { padding-bottom:4px; } .djf-s:last-child::before { display:none; }
+  .djf-n { flex:none; width:32px; height:32px; border-radius:50%; background:var(--jc); color:#fff; font-weight:800; font-size:14px; display:flex; align-items:center; justify-content:center; }
+  .djf-c { flex:1; min-width:0; display:flex; flex-direction:column; gap:3px; }
+  .djf-c > small { font-size:11.5px; font-weight:800; letter-spacing:.08em; color:var(--jc); padding-top:1px; }
+  .djf-c > b { font-size:17px; line-height:1.3; }
+  .djf-c > p { margin:0 0 4px; font-size:14px; line-height:1.55; color:var(--ink-soft); }
+  .djf-c > p i { font-style:normal; font-weight:700; color:var(--jc); }
+  .djf-k { background:var(--surface); border:1px solid var(--line); border-radius:var(--r-md); margin-top:6px; overflow:hidden; }
+  .djf-k > summary { list-style:none; display:flex; align-items:center; gap:10px; padding:10px 12px; cursor:pointer; }
+  .djf-k > summary::-webkit-details-marker { display:none; }
+  .djf-ph { flex:none; width:40px; height:40px; border-radius:10px; overflow:hidden; background:var(--jc); }
+  .djf-ph img { width:100%; height:100%; object-fit:cover; display:block; }
+  .djf-kt { flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; }
+  .djf-kt b { font-size:15px; } .djf-kt b i { font-style:normal; font-weight:600; font-size:13px; color:var(--ink-soft); }
+  .djf-kt small { font-size:13px; line-height:1.4; color:var(--ink-soft); }
+  .djf-k[open] > summary .dj-chev { transform:rotate(90deg); }
+  .djf-kb { padding:2px 14px 14px; font-size:14px; line-height:1.55; color:var(--ink); border-top:1px solid var(--line); }
+  .djf-h { margin:10px 0 4px; font-size:13px; font-weight:700; color:var(--jc); }
+  .djf-kb ul { margin:0 0 8px; padding-left:18px; } .djf-kb li { margin:3px 0; } .djf-kb li::marker { color:var(--jc); }
+  .djf-out { margin:0 0 6px; } .djf-facts { margin:0 0 10px; font-size:12.5px; color:var(--ink-faint); }
+  .djf-go { border:0; background:none; padding:4px 0; font:inherit; font-size:14px; font-weight:700; color:var(--jc); cursor:pointer; }
   .djb-sub { margin:0 2px 12px; }
   .djb-list { display:flex; flex-direction:column; gap:10px; } .djb-list .pj-book { margin:0; }
   .djh { padding:4px 14px; margin-bottom:14px; }
@@ -2307,6 +2324,22 @@
       <circle cx="${C}" cy="${C}" r="168" class="disc"/><circle cx="${C}" cy="${C}" r="88" class="core"/>
       ${segs}${centre}</svg>`;
   }
+  // 2026-11-21 (user: "terlalu kaku dan terlihat terpisah. kamu satukan menjadi sebuah kesatuan informasi"): fase & kelas
+  // jadi satu alur: garis waktu 4 fase (Grow → Plant → Serve → Lead), tiap fase memuat kelasnya (ketuk = apa yang dipelajari).
+  function djFlowHTML() {
+    return `<div class="djf">${BJ_PHASES.map(ph => {
+      const col = ph.key === "grow" || ph.key === "plant" ? "var(--dj-rs)" : "var(--dj-lts)", t = ph.title.split(" — ");
+      const kls = ph.keys.map(k => { const c = DASH_JOURNEYS.find(x => x.key === k), d = BJ_STAGES[k];
+        const facts = d.facts.concat(k === "lts1" ? "Selesai saat S-E-R-V-E lengkap" : "Lulus: nilai Good (≥50%)");
+        return `<details class="djf-k" data-bj="${k}"><summary><span class="djf-ph"><img src="${c.ph}" alt="" loading="lazy" decoding="async"></span>
+          <span class="djf-kt"><b>${esc(c.title)} <i>· ${esc(d.tag)}</i></b><small>${esc(d.def)}</small></span>${DJ_CHEV}</summary>
+          <div class="djf-kb"><p class="djf-h">Yang akan kamu pelajari</p><ul>${d.learn.map(x => `<li>${x}</li>`).join("")}</ul>
+          <p class="djf-out">${d.out}</p><p class="djf-facts">${facts.map(esc).join(" · ")}</p>
+          <button type="button" class="djf-go" data-goto="${d.page}" data-tabnav="1">Buka ${esc(c.title)} →</button></div></details>`; }).join("");
+      return `<section class="djf-s" style="--jc:${col};"><span class="djf-n" aria-hidden="true">${ph.no}</span>
+        <div class="djf-c"><small>${ph.word} · ${esc(ph.cls)}</small><b>${esc((x => x.charAt(0).toUpperCase() + x.slice(1))(t[1] || ph.title))}</b>
+        <p>${esc(ph.desc)} <i>Tujuan: ${esc(ph.role)}.</i></p>${kls}</div></section>`; }).join("")}</div>`;
+  }
   RENDER.journey = function () {
     attRefresh();
     const order = ["rs1", "rs2", "rs3", "lts1", "lts2"];
@@ -2365,16 +2398,12 @@
         <div class="djj-line" style="--p:${Math.min(done, 4) * 25}%;">${strip}</div></div>
       ${nowCard}
       ${todo.length ? pjSecHTML("Perlu dikerjakan") + `<div class="djj-todo">${todo.slice(0, 3).map(x => `<button type="button" class="djj-t djj-t--${x.tone}" data-goto="${x.go}"><span class="djj-ti" aria-hidden="true">${x.tone === "w" ? '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg>' : '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>'}</span><span class="djj-tt"><b>${x.t}</b><small>${x.s}</small></span>${DJ_CHEV}</button>`).join("")}</div>` : ""}
-      <details class="card djj-about"><summary><span><b>Tentang Discipleship Journey</b><small>Empat fase, lima kelas &amp; cara kerja</small></span>${DJ_CHEV}</summary><div class="djj-about-b">
+      <details class="card djj-about"><summary><span><b>Tentang Discipleship Journey</b><small>Perjalanan 4 fase · 5 kelas &amp; cara kerja</small></span>${DJ_CHEV}</summary><div class="djj-about-b">
       ${pjSecHTML("Siklus pemuridan JB3", "ketuk tahap")}
       <div class="card bj-map">${bjMapSVG(order, cur)}</div>
 
-      ${pjSecHTML("Empat fase pemuridan")}
-      <div class="card djp">${BJ_PHASES.map(ph => `<div class="djp-r" style="--jc:${ph.key === "grow" || ph.key === "plant" ? "var(--dj-rs)" : "var(--dj-lts)"};"><span class="djp-w">${ph.word}</span>
-        <span class="djp-t"><b>${esc(ph.title)}</b><small>${esc(ph.cls)} · menjadi <i>${esc(ph.role)}</i></small><span>${esc(ph.desc)}</span></span></div>`).join("")}</div>
-
-      ${pjSecHTML("Lima kelas", "ketuk untuk detail")}
-      <div class="card bj-rows">${fixLts1(order.map(card).join(""))}</div>
+      ${pjSecHTML("Perjalanan pemuridan", "4 fase · 5 kelas")}
+      ${djFlowHTML()}
 
       ${pjSecHTML("Panduan")}
       <details class="card bj-stage" style="--jc:var(--accent);"><summary><span class="bj-stage-ic">🗺️</span><span class="bj-stage-t"><b>Cara kerja & jalur pertumbuhan</b><em>Kelas → absensi → post-test → tercatat · Jemaat → Home Leader</em></span>${BJ_CHEV}</summary>
@@ -4036,9 +4065,9 @@ ${body}</body></html>`;
       return `<button type="button" class="mtb${on ? " on" : ""}" style="--jc:${c.color};--ph:url('${c.ph}');--cv:url('img/dj-cv-${c.key}.webp?v=2');" data-mtbook="${c.key}" aria-label="Buka buku ${esc(c.title)}${r ? ", " + nLes(r) + " pelajaran" : ""}${on ? " (terakhir dibaca)" : ""}">${on ? `<i class="mtb-rib" aria-hidden="true"></i>` : ""}<span class="mtb-cv"><span class="mtb-txt"><i class="mtb-k">${esc(c.tab)}</i><b class="mtb-t">${esc(c.title)}</b>${mtName(c) ? `<em class="mtb-nm">${esc(mtName(c))}</em>` : ""}<small class="mtb-s">${r ? nLes(r) + " pelajaran · Edisi 2026" : "Belum ada isi"}</small><img class="mtb-logo" src="./logo.png?v=1" alt="JB3"></span></span></button>`; };
     const mtSoon = c => `<div class="mtb mtb-soon" style="--jc:${c.color};--ph:url('${c.ph}');--cv:url('img/dj-cv-${c.key}.webp?v=2');" role="img" aria-label="Buku peserta ${esc(c.title)} — isi menyusul"><span class="mtb-cv"><i class="mtb-lk">Segera</i><span class="mtb-txt"><i class="mtb-k">${esc(c.tab)}</i><b class="mtb-t">${esc(c.title)}</b>${mtName(c) ? `<em class="mtb-nm">${esc(mtName(c))}</em>` : ""}<small class="mtb-s">Untuk peserta</small><img class="mtb-logo" src="./logo.png?v=1" alt="JB3"></span></span></div>`;
     const mtPes = c => `<button type="button" class="mtb" style="--jc:${c.color};--ph:url('${c.ph}');--cv:url('img/dj-cv-${c.key}.webp?v=2');" data-bkpes="${c.key}" aria-label="Buka buku peserta ${esc(c.title)}"><span class="mtb-cv"><span class="mtb-txt"><i class="mtb-k">${esc(c.tab)}</i><b class="mtb-t">${esc(c.title)}</b>${mtName(c) ? `<em class="mtb-nm">${esc(mtName(c))}</em>` : ""}<small class="mtb-s">Buku Peserta</small><img class="mtb-logo" src="./logo.png?v=1" alt="JB3"></span></span></button>`;
-    const shelves = set === "dj" ? `<div class="mtr-h"><b>📚 Rak Bahan Pengajar</b><small>${S.tabs.length} buku · ketuk untuk membaca</small></div>
+    const shelves = set === "dj" ? `<div class="mtr-h"><b>📚 Rak Bahan Pengajar</b></div>
       <div class="mtr"><div class="mtr-shelf">${S.tabs.map(mtBook).join("")}</div></div>
-      ${MT_RAK_PESERTA ? `<div class="mtr-h"><b>🎒 Rak Peserta</b><small>${BKP_KEYS.length} buku · yang lain menyusul</small></div>
+      ${MT_RAK_PESERTA ? `<div class="mtr-h"><b>🎒 Rak Peserta</b></div>
       <div class="mtr mtr-ps"><div class="mtr-shelf">${S.tabs.map(c => BKP_KEYS.includes(c.key) ? mtPes(c) : mtSoon(c)).join("")}</div></div>` : ""}
       <p class="jd-note mtr-note">Ketuk sebuah buku untuk membacanya seperti buku: sampul, daftar isi, lalu balik halaman (geser / ‹ ›). Halaman terakhir dibaca diingat.</p>` : "";
     if (shelves) {   // DJ: hanya rak; isi dibaca di buku layar penuh (bookOpen). mdDoc tetap dipanggil utk MT_LESSONS (Mode Mengajar).
