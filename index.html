@@ -56,6 +56,7 @@
     --ink:#2E2A23; --ink-soft:#5E5647; --ink-faint:#877B61;
     --line:#E2D8C3; --line-strong:#D3C6AB;
     --accent:#B5623B; --accent-ink:#7A3F22;
+    --dj-rs:#5B6B77; --dj-rs-d:#3F4B55; --dj-rs-l:#8E9CA6; --dj-lts:#B5623B; --dj-lts-d:#7A3F22; --dj-lts-l:#C98F72;   /* 2026-11-21 warna kelas → variabel; di HOME = palet aplikasi */
     --good:#4C7A54; --warn:#B4822F; --bad:#B2433A; --badge:#B2433A;
     --disc-d:#C0504D; --disc-i:#C99A2E; --disc-s:#4F8F5B; --disc-c:#4472A8;
     --canvas:#1A2B49;
@@ -370,7 +371,7 @@
   /* 2026-11-03 LTS2 Leadership Wheel */
   .lw-svg { width: 100%; height: auto; display: block; }
   .lw-card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; margin-bottom: 14px; }
-  .lw-band { background: #B5623B; color: #fff; padding: 14px 16px 12px; display: flex; flex-direction: column; gap: 8px; }
+  .lw-band { background: var(--dj-lts); color: #fff; padding: 14px 16px 12px; display: flex; flex-direction: column; gap: 8px; }
   .lw-band small { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; opacity: .85; }
   .lw-band > b { font-family: var(--font-display); font-size: 22px; line-height: 1.1; }
   .lw-ids { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
@@ -1072,6 +1073,84 @@
   .bj-next button { border: 0; border-radius: 999px; padding: 8px 14px; background: #fff; color: #7A3F22; font: 700 13px var(--font-body); cursor: pointer; }
   .bj-hero-deco { position: absolute; right: -10px; top: -6px; width: 150px; opacity: .16; pointer-events: none; }
 
+  /* 2026-11-21 tampilan DJ sederhana (mockup 3FqCT4Rf4xmoV8jCHV6rBT) — semua warna dari palet aplikasi (var) */
+  .djj-hi { display:flex; flex-direction:column; gap:2px; margin:2px 2px 12px; }
+  .djj-hi small { font-size:13px; color:var(--ink-soft); }
+  .djj-hi b { font-family:var(--font-display); font-size:24px; font-weight:700; color:var(--accent); }
+  .djj-strip { padding:14px 8px 10px; margin-bottom:12px; }
+  .djj-h { display:flex; justify-content:space-between; align-items:baseline; gap:8px; padding:0 8px 10px; }
+  .djj-h b { font-size:15px; } .djj-h small { font-size:12.5px; color:var(--ink-soft); }
+  .djj-line { position:relative; display:flex; }
+  .djj-line::before { content:""; position:absolute; left:10%; right:10%; top:19px; height:3px; border-radius:2px; background:linear-gradient(90deg, var(--good) 0 var(--p), var(--line) var(--p) 100%); }
+  .djj-n { position:relative; flex:1 1 0; min-width:0; display:flex; flex-direction:column; align-items:center; gap:3px; border:0; background:none; padding:0 0 2px; font:inherit; color:var(--ink-soft); cursor:pointer; }
+  .djj-dot { width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:var(--surface-2); border:2px solid var(--line); box-sizing:border-box; font-size:12.5px; font-weight:800; }
+  .djj-n b { font-size:12px; } .djj-n small { font-size:11.5px; min-height:15px; }
+  .djj-n--done .djj-dot { background:var(--good); border-color:var(--good); color:#fff; }
+  .djj-n--done b { color:var(--ink); } .djj-n--done small { color:var(--warn); }
+  .djj-n--now .djj-dot { background:var(--accent); border-color:var(--accent); color:#fff; box-shadow:0 0 0 5px color-mix(in srgb, var(--accent) 20%, transparent); }
+  .djj-n--now b, .djj-n--now small { color:var(--accent); font-weight:800; }
+  .djj-now { background:var(--accent); color:#fff; border-radius:var(--r-lg); padding:18px; display:flex; flex-direction:column; gap:6px; margin-bottom:14px; }
+  .djj-now small { font-size:11.5px; font-weight:800; letter-spacing:.08em; opacity:.85; }
+  .djj-now > b { font-family:var(--font-display); font-size:21px; font-weight:700; }
+  .djj-now > span { font-size:14px; opacity:.92; line-height:1.4; }
+  .djj-seg { display:grid; gap:5px; margin:6px 0 4px; }
+  .djj-seg i { height:7px; border-radius:4px; background:rgba(255,255,255,.25); } .djj-seg i.on { background:#fff; }
+  .djj-act { display:flex; gap:10px; margin-top:6px; }
+  .djj-act button { flex:1; min-height:46px; border-radius:13px; font:inherit; font-size:15px; font-weight:700; cursor:pointer; }
+  .djj-b1 { border:0; background:#fff; color:var(--accent); }
+  .djj-b2 { border:1.5px solid rgba(255,255,255,.6); background:transparent; color:#fff; }
+  .djj-todo, .djr-al { display:flex; flex-direction:column; gap:8px; margin-bottom:14px; }
+  .djj-t, .djr-a, .djh-asm { display:flex; align-items:center; gap:12px; width:100%; text-align:left; border:1px solid var(--line); background:var(--surface); color:var(--ink); border-radius:var(--r-md); padding:12px 14px; font:inherit; cursor:pointer; }
+  .djj-ti { width:40px; height:40px; flex:none; border-radius:12px; display:flex; align-items:center; justify-content:center; background:color-mix(in srgb, var(--accent) 12%, var(--surface)); color:var(--accent); }
+  .djj-t--w .djj-ti { background:color-mix(in srgb, var(--warn) 14%, var(--surface)); color:var(--warn); }
+  .djj-tt, .djh-t { flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; }
+  .djj-tt b, .djh-t b { font-size:15px; } .djj-tt small, .djh-t small { font-size:13px; color:var(--ink-soft); }
+  .dj-chev { flex:none; color:var(--ink-faint); transition:transform .2s; }
+  .djj-about { padding:0; margin:4px 0 14px; overflow:hidden; }
+  .djj-about > summary { list-style:none; display:flex; align-items:center; gap:10px; padding:14px 16px; cursor:pointer; }
+  .djj-about > summary::-webkit-details-marker { display:none; }
+  .djj-about > summary > span { flex:1; display:flex; flex-direction:column; gap:2px; }
+  .djj-about > summary b { font-size:15px; } .djj-about > summary small { font-size:13px; color:var(--ink-soft); }
+  .djj-about[open] > summary .dj-chev { transform:rotate(90deg); }
+  .djj-about-b { padding:0 12px 12px; }
+  .djc-chips { display:flex; gap:6px; overflow-x:auto; padding:2px 2px 12px; scrollbar-width:none; }
+  .djc-chips::-webkit-scrollbar { display:none; }
+  .djc-chip { flex:none; min-height:40px; padding:0 14px; border-radius:999px; border:1px solid var(--line); background:var(--surface); color:var(--ink-soft); font:inherit; font-size:14px; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:5px; }
+  .djc-chip i { font-style:normal; color:var(--good); }
+  .djc-chip.on { background:var(--accent); border-color:var(--accent); color:#fff; } .djc-chip.on i { color:#fff; }
+  .djk { margin-bottom:14px; display:flex; flex-direction:column; gap:12px; }
+  .djk-h { display:flex; flex-direction:column; gap:2px; } .djk-h b { font-family:var(--font-display); font-size:19px; } .djk-h small { font-size:13px; color:var(--ink-soft); }
+  .djk-nums, .djr-kpi { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; }
+  .djk-nums span, .djr-kpi span { display:flex; flex-direction:column; gap:2px; background:var(--surface-2); border-radius:12px; padding:10px 12px; font-size:12px; color:var(--ink-soft); }
+  .djk-nums b, .djr-kpi b { font-size:22px; font-weight:800; color:var(--accent); line-height:1.1; }
+  .djk-bars { display:grid; gap:5px; align-items:end; }
+  .djk-bars span { display:flex; flex-direction:column; align-items:center; justify-content:flex-end; gap:3px; height:86px; }
+  .djk-bars small { font-size:11.5px; color:var(--ink-soft); } .djk-bars i { display:block; width:100%; border-radius:5px 5px 2px 2px; background:var(--good); }
+  .djk-bars em { font-style:normal; font-size:11.5px; color:var(--ink-faint); }
+  .djk-cap { margin:-4px 0 0; font-size:12px; color:var(--ink-faint); }
+  .djk-act { display:grid; grid-template-columns:1fr 1fr; gap:8px; } .djk-act .btn { margin:0; width:100%; }
+  .djr-kpi { margin-bottom:14px; }
+  .djr-kpi span { background:var(--surface); border:1px solid var(--line); }
+  .djr-kpi .hot { background:color-mix(in srgb, var(--warn) 12%, var(--surface)); border-color:color-mix(in srgb, var(--warn) 35%, var(--line)); }
+  .djr-kpi .hot b { color:var(--warn); }
+  .djr-cls { padding:4px 14px 12px; margin-bottom:14px; }
+  .djr-row { display:grid; grid-template-columns:40px minmax(0,1fr) auto 18px; align-items:center; gap:10px; width:100%; min-height:46px; border:0; border-bottom:1px solid var(--line); background:none; padding:0; font:inherit; color:var(--ink); cursor:pointer; text-align:left; }
+  .djr-row > b { font-size:14px; }
+  .djr-bar { height:12px; border-radius:6px; background:var(--surface-2); display:flex; overflow:hidden; }
+  .djr-bar i, .djr-leg i { display:block; }
+  .djr-bar .g, .djr-leg .g { background:var(--accent); } .djr-bar .a, .djr-leg .a { background:color-mix(in srgb, var(--good) 55%, var(--surface)); }
+  .djr-n { font-size:13px; color:var(--ink-soft); white-space:nowrap; } .djr-n b { color:var(--ink); }
+  .djr-leg { display:flex; gap:14px; margin:10px 0 0; font-size:12px; color:var(--ink-soft); }
+  .djr-leg span { display:inline-flex; align-items:center; gap:5px; } .djr-leg i { width:10px; height:10px; border-radius:3px; }
+  .djr-a > i { width:8px; height:8px; border-radius:50%; background:var(--warn); flex:none; } .djr-a > span { flex:1; font-size:14px; }
+  .djb-sub { margin:0 2px 12px; }
+  .djb-list { display:flex; flex-direction:column; gap:10px; } .djb-list .pj-book { margin:0; }
+  .djh { padding:4px 14px; margin-bottom:14px; }
+  .djh-row { display:flex; align-items:center; gap:12px; width:100%; min-height:58px; border:0; border-bottom:1px solid var(--line); background:none; padding:6px 0; font:inherit; color:var(--ink); text-align:left; cursor:pointer; }
+  .djh-row:last-child { border-bottom:0; }
+  .djh-ic { width:34px; height:34px; flex:none; border-radius:50%; display:flex; align-items:center; justify-content:center; background:var(--surface-2); color:var(--ink-soft); font-weight:800; font-size:13px; }
+  .djh-row.ok .djh-ic { background:var(--good); color:#fff; }
+  .djh-asm { margin-bottom:14px; }
   .bj-map { padding: 12px; margin-bottom: 18px; }
   .bj-map svg { display: block; width: 100%; max-width: 360px; margin: 0 auto; height: auto; overflow: visible; }
   .bj-map .disc { fill: var(--surface-2); stroke: var(--line); }
@@ -1199,6 +1278,9 @@
         <div class="scroll has-tabbar">
           <section class="page" data-page="login"><div id="loginBody"></div></section>
           <section class="page" data-page="journey"><div id="journeyBody"></div></section>
+          <section class="page" data-page="ringkas"><div id="ringkasBody"></div></section>
+          <section class="page" data-page="buku"><div id="bukuBody"></div></section>
+          <section class="page" data-page="capaian"><div id="capaianBody"></div></section>
           <section class="page" data-page="home"><div id="homeBody"></div></section>
           <section class="page" data-page="strength"><div id="strengthBody"></div></section>
           <section class="page" data-page="experience"><div id="experienceBody"></div></section>
@@ -1293,7 +1375,7 @@
   // 2026-09-22 susulan ("bangun assesment DISC dengan hasil masking, real,
   // stress"): myDisc (baris tahun INI, null kalau belum diisi) + draft.discPicks
   // (isian yg sedang dikerjakan, blm disimpan) ditambahkan.
-  const state = { page:"login", stack:[], persona:null, meId:null, myProfile:null, accessStatus:null, accessRequests:[], myDisc:null, myRoadmap:null, mySsd:null, myGifts:null, rs3AccessStatus:null, rs3AccessRequests:[], rs3Result:null, lts2AccessStatus:null, lts2AccessRequests:[], lts2Result:null, rs1AccessStatus:null, rs1AccessRequests:[], rs1Result:null, lts1Result:null, rs2AccessStatus:null, rs2AccessRequests:[], rs2Result:null, materi:null, materiKey:"rs1", myAtt:{ rs1:[], rs2:[], rs3:[], lts1:[], lts2:[] }, absKey:"lts1", absRoster:null, absQuery:"", participantResults:null, viewProfileId:null, resultsFilter:"all", lwHist:[], lwLast:null, lwEdit:false, draft:{ discPicks:[], roadmapData:{}, ssdAnswers:{}, giftsAnswers:{}, rs3Answers:{}, lts2Answers:{}, rs1Answers:{}, rs2Answers:{}, lwAnswers:{}, lwMinistry:null } };
+  const state = { page:"login", stack:[], persona:null, meId:null, myProfile:null, accessStatus:null, accessRequests:[], myDisc:null, myRoadmap:null, mySsd:null, myGifts:null, rs3AccessStatus:null, rs3AccessRequests:[], rs3Result:null, lts2AccessStatus:null, lts2AccessRequests:[], lts2Result:null, rs1AccessStatus:null, rs1AccessRequests:[], rs1Result:null, lts1Result:null, rs2AccessStatus:null, rs2AccessRequests:[], rs2Result:null, materi:null, materiKey:"rs1", myAtt:{ rs1:[], rs2:[], rs3:[], lts1:[], lts2:[] }, absKey:"lts1", absRoster:null, rosterAll:null, absQuery:"", participantResults:null, viewProfileId:null, resultsFilter:"all", lwHist:[], lwLast:null, lwEdit:false, draft:{ discPicks:[], roadmapData:{}, ssdAnswers:{}, giftsAnswers:{}, rs3Answers:{}, lts2Answers:{}, rs1Answers:{}, rs2Answers:{}, lwAnswers:{}, lwMinistry:null } };
   const NOCHROME = ["login"];
 
   function initials(name) { return String(name || "?").trim().split(/\s+/).slice(0, 2).map(w => w[0] || "").join("").toUpperCase() || "?"; }
@@ -1335,6 +1417,7 @@
   ];
   const META = {
     journey: { h:"Discipleship Journey", tab:"journey" },
+    ringkas: { h:"Ringkasan" }, buku: { h:"Buku Peserta" }, capaian: { h:"Hasil Saya" },   // 2026-11-21 tampilan sederhana
     home: { h:"Lead To Serve 1", tab:"home" },
     rs1: { h:"Rock Solid 1", tab:"rs1" },
     rs2: { h:"Rock Solid 2", tab:"rs2" },
@@ -1348,7 +1431,7 @@
     feedback: { h:"Feedback", back:true },
     rs3feedback: { h:"Feedback", back:true }, fbrs1: { h:"Feedback", back:true }, fbrs2: { h:"Feedback", back:true },
     fblts1: { h:"Feedback", back:true }, fblts2: { h:"Feedback", back:true },
-    results: { h:"Dashboard Peserta", tab:"results" },
+    results: { h:"Peserta", tab:"results" },
     resultdetail: { h:"Hasil Peserta", back:true },
     serveview: { h:"LTS 1 Road Map", back:true },
     hasilview: { h:"Hasil Asesmen Lengkap", back:true },
@@ -1359,7 +1442,7 @@
     expansion: { h:"Expansion", back:true },
     hasil: { h:"Hasil Asesmen", back:true },
     lw: { h:"Leadership Wheel", back:true },   // 2026-11-03 asesmen LTS2
-    dashboard: { h:"Dashboard Admin", tab:"dashboard" },
+    dashboard: { h:"Kelas", tab:"dashboard" },
     materi: { h:"Bahan Ajar", back:true },
     famateri: { h:"Bahan Ajar Kelas Family", back:true },   // 2026-10-21: Pre-Marriage & Marriage (tim The Gap Family)
     kidsmateri: { h:"Bahan Ajar Kelas Gap Kids", back:true }, // 2026-10-21: Sea/Rock/Anchor/Light House/Ocean Okt–Des 2026 (tim The Gap Kids)
@@ -1370,19 +1453,17 @@
 
   function show(page, opts) {
     opts = opts || {};
+    // 2026-11-21 tampilan sederhana: tab "Kelas" peserta = kelas terakhir dibuka / kelas yang sedang diikuti; Admin: beranda = Ringkasan
+    if (page === "kelas") page = state.persona === "ADMIN" ? "dashboard" : (state.kelasPg || djPgOf(djCurKey() || "lts2"));
+    if (state.persona === "ADMIN" && page === "home") page = "ringkas";
     if (state.persona && !attOpen(page)) { toast(`🔒 Terbuka otomatis setelah kamu hadir di ${gateNeed(page)}.`); return; }
     // 2026-10-04: Admin tak punya beranda Serve Road Map lagi — "home" (mis.
     // dari goBack/simpan) & "dashboard" tanpa pilihan tab → dashboard journey.
     if (FB_PAGE[page]) { state.fbKey = FB_PAGE[page]; page = "feedback"; }
     // 2026-10-04: tab "Peserta" (halaman results) = dashboard lintas kelas;
     // landing Admin: kelas yg py permintaan Menunggu, kalau tak ada → Peserta.
-    if (state.persona === "ADMIN" && (page === "home" || page === "dashboard")) {
-      if (!state.dashKey) {
-        const k = adminLandingKey();
-        state.dashKey = k || DASH_JOURNEYS[0].key;
-        page = k ? "dashboard" : "results";
-      } else page = "dashboard";
-    }
+    if (state.persona === "ADMIN" && page === "dashboard" && !state.dashKey) state.dashKey = adminLandingKey() || DASH_JOURNEYS[0].key;
+    if (state.persona !== "ADMIN" && DJ_KELAS_PG.includes(page)) state.kelasPg = page;
     const prev = state.page;
     if (!opts.replace && prev !== page && !NOCHROME.includes(prev) && !NOCHROME.includes(page)) state.stack.push(prev);
     state.page = page;
@@ -1400,32 +1481,28 @@
     if (!chromeOn) return;
     const meta = META[state.page] || {};
     const isAdm = state.persona === "ADMIN";
-    el("appbar").setAttribute("data-back", (meta.back || state.page === "profile") ? "true" : "false");
+    el("appbar").setAttribute("data-back", ((meta.back && !djTabOf(state.page)) || state.page === "profile") ? "true" : "false");
     el("gearBtn").hidden = state.page === "profile";
     // 2026-10-15: Bahan Ajar — ikon buku di bar atas, HANYA Admin (data juga dikunci RLS dj_materi).
     // 2026-10-17: + Senior Pastor (profiles.is_sp; RLS v_dj_materi_sp.sql), + LTS1/LTS2.
-    el("materiBtn").hidden = !canMateri() || ["materi", "famateri", "kidsmateri"].includes(state.page);   // 2026-11-21: sempat disembunyikan utk Admin (v74–76, saat ada tab Bahan Ajar); susunan lama dikembalikan → tombol tampil lagi
-    el("absenBtn").hidden = !canAbsen() || state.page === "absensi";
+    el("materiBtn").hidden = isAdm || !canMateri() || ["materi", "famateri", "kidsmateri"].includes(state.page);   // 2026-11-21: sempat disembunyikan utk Admin (v74–76, saat ada tab Bahan Ajar); susunan lama dikembalikan → tombol tampil lagi
+    el("absenBtn").hidden = isAdm || !canAbsen() || state.page === "absensi";
     el("aturanBtn").hidden = true;   // 2026-11-21 (user: "aturan dihapus"): tombol Aturan di bar atas disembunyikan
     el("appbarTitle").textContent = meta.h || "Discipleship Journey";
     const idb = el("identityBar");
     idb.innerHTML = `<span class="ib-ava">${esc(initials(state.myProfile && state.myProfile.name))}</span>
       <span class="ib-main"><span class="ib-name">${esc((state.myProfile || {}).name || "")}</span>
       <span class="identity-badge">${state.persona === "ADMIN" ? "Admin" : "Peserta"}</span></span>`;
-    if (isAdm) {
-      el("tabbar").innerHTML = `<button class="tab jtab" style="--jc:var(--accent);" data-goto="results" data-tabnav="1" ${state.page === "results" ? 'aria-current="page"' : ""} aria-label="Dashboard Peserta">
-        ${tabIcoHTML("results")}<span class="lbl">Peserta</span></button>` + DASH_JOURNEYS.map(c => `<button class="tab jtab" style="--jc:${c.color};" data-dashtab="${c.key}" ${state.page === "dashboard" && dashCfg().key === c.key ? 'aria-current="page"' : ""} aria-label="${esc(c.title)}">
-        ${tabIcoHTML(c.key, c.classIdx + 1)}<span class="lbl">${c.tab}</span></button>`).join("");
-      return;
-    }
-    el("tabbar").innerHTML = TABS.PESERTA.map(t => { const c = t.k === "journey" ? { color:"var(--accent)", title:"Beranda", icon:"🏠", tab:"Beranda" } : DASH_JOURNEYS.find(x => x.key === t.k);
-      return `<button class="tab jtab" style="--jc:${c.color};" data-goto="${t.p}" data-tabnav="1" ${meta.tab === t.p ? 'aria-current="page"' : ""} aria-label="${esc(c.title)}">
-      ${tabIcoHTML(t.k, c.classIdx != null ? c.classIdx + 1 : 0)}<span class="lbl">${c.tab}</span></button>`; }).join("");
+    el("tabbar").innerHTML = djTabsHTML();   // 2026-11-21 tampilan sederhana: 4 tab (lihat DJ_TABS)
   }
 
   // 2026-10-17: ikon nav bar SVG (garis, gaya JB3 HOME) menggantikan emoji — tile berwarna per kelas + nomor tahap.
   const NAV_IC = {
     journey:'<path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"/>',
+    kelas:'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 14h4"/>',
+    buku:'<path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2z"/><path d="M22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z"/>',
+    capaian:'<circle cx="12" cy="9" r="6"/><path d="M8.5 14 7 22l5-3 5 3-1.5-8"/>',
+    peserta:'<circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0"/><path d="M16 4a4 4 0 0 1 0 8"/><path d="M22 21a7 7 0 0 0-4-6.3"/>',
     results:'<path d="M4 20V10"/><path d="M10 20V4"/><path d="M16 20v-7"/><path d="M22 20H2"/>',
     rs1:'<path d="M3 20h18"/><path d="M5 20v-5l3-3h8l3 3v5"/><path d="M8 12V8l4-4 4 4v4"/>',
     rs2:'<path d="M12 21v-9"/><path d="M12 12c0-4 3-7 8-7 0 4-3 7-8 7z"/><path d="M12 14c0-3-2.5-5.5-7-5.5 0 3 2.5 5.5 7 5.5z"/>',
@@ -1437,6 +1514,119 @@
 
   /* ---------------- RENDER ---------------- */
   const RENDER = {};
+
+  // 2026-11-21 (user: "tampilan DJ lebih sederhana, menarik, informatif … kamu bisa ubah tombol-tombol dan navigasinya … big
+  // picture dan detailnya"; mockup https://claude.ai/artifact/3FqCT4Rf4xmoV8jCHV6rBT disetujui "ya"): navigasi baru.
+  //   Peserta: Beranda (gambaran besar) · Kelas (detail per kelas, pilih RS1–LTS2 di atas) · Buku · Hasil
+  //   Admin:   Ringkasan (gambaran besar) · Kelas (detail per kelas + absensi & bahan ajar) · Peserta · Bahan Ajar
+  // Prinsip: satu informasi di satu tempat. Restore: restore-points/pra-dj-sederhana-20261121/
+  const DJ_ORDER = ["rs1", "rs2", "rs3", "lts1", "lts2"];
+  const DJ_KELAS_PG = ["rs1", "rs2", "rs3", "home", "lts2"];
+  const djPgOf = k => k === "lts1" ? "home" : k;
+  const djCurKey = () => DJ_ORDER.find(k => bjStatus(k) !== "done") || null;
+  const DJ_TABS = {
+    PESERTA: [["journey", "Beranda", "journey"], ["kelas", "Kelas", "kelas"], ["buku", "Buku", "buku"], ["capaian", "Hasil", "capaian"]],
+    ADMIN: [["ringkas", "Ringkasan", "results"], ["dashboard", "Kelas", "kelas"], ["results", "Peserta", "peserta"], ["materi", "Bahan Ajar", "buku"]],
+  };
+  function djTabOf(p) {
+    if (state.persona === "ADMIN") return ["ringkas", "dashboard", "results", "materi"].includes(p) ? p : null;
+    return DJ_KELAS_PG.includes(p) ? "kelas" : ["journey", "buku", "capaian"].includes(p) ? p : null;
+  }
+  function djTabsHTML() {
+    const cur = djTabOf(state.page);
+    return DJ_TABS[state.persona === "ADMIN" ? "ADMIN" : "PESERTA"].map(([p, l, ic]) => `<button class="tab jtab" style="--jc:var(--accent);" data-goto="${p}" data-tabnav="1" ${cur === p ? 'aria-current="page"' : ""} aria-label="${l}">
+      ${tabIcoHTML(ic)}<span class="lbl">${l}</span></button>`).join("");
+  }
+  // baris pilihan kelas di atas halaman Kelas (peserta: pindah halaman kelas; admin: ganti kelas dashboard)
+  function djChipsHTML(cur, admin) {
+    return `<div class="djc-chips">${DJ_ORDER.map(k => { const c = DASH_JOURNEYS.find(x => x.key === k), on = k === cur, ok = !admin && bjStatus(k) === "done";
+      return `<button type="button" class="djc-chip${on ? " on" : ""}" ${admin ? `data-dashtab="${k}"` : `data-goto="${djPgOf(k)}" data-tabnav="1"`} aria-pressed="${on}">${esc(c.tab)}${ok ? '<i aria-label="lulus">✓</i>' : ""}</button>`; }).join("")}</div>`;
+  }
+  // absensi semua peserta per kelas (rpc dj_att_roster) — dipakai Ringkasan & kepala halaman Kelas admin
+  function djRoster(k, rerender) {
+    const m = state.rosterAll = state.rosterAll || {};
+    if (m[k] === undefined) { m[k] = null; DB.attRoster(k).then(r => { m[k] = r; }, () => { m[k] = []; }).finally(() => { if (rerender) rerender(); }); }
+    return m[k];
+  }
+  const DJ_CHEV = `<svg class="dj-chev" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>`;
+  const DJ_CHECK = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>`;
+
+  // Admin · Kelas: kepala halaman = pilihan kelas + angka + kehadiran per sesi + tombol Absensi & Bahan ajar
+  function djKelasTopHTML(k) {
+    const c = DASH_JOURNEYS.find(x => x.key === k), N = (DJ_BAB[k] || []).length, u = unitOf(k);
+    const ro = djRoster(k, () => { if (state.page === "dashboard" && dashCfg().key === k) RENDER.dashboard(); });
+    const grad = (state.classProgress || []).filter(p => p.classes[c.classIdx]).length;
+    let body = `<p class="jd-empty">Memuat kehadiran…</p>`;
+    if (ro) {
+      const act = ro.filter(p => !p.done && p.babs.length);
+      const per = (DJ_BAB[k] || []).map((_, i) => act.filter(p => p.babs.includes(i + 1)).length), mx = Math.max(1, act.length);
+      body = `<div class="djk-nums"><span><b>${act.length}</b>sedang ikut</span><span><b>${grad}</b>sudah lulus</span><span><b>${N}</b>${u}</span></div>
+        ${N ? `<div class="djk-bars" style="grid-template-columns:repeat(${N},minmax(0,1fr));">${per.map((n, i) => `<span title="${u} ${i + 1}: ${n} hadir"><small>${n || "–"}</small><i style="height:${Math.max(4, Math.round(n / mx * 52))}px"></i><em>${i + 1}</em></span>`).join("")}</div>
+        <p class="djk-cap">Kehadiran peserta yang sedang ikut, per ${u}</p>` : ""}`;
+    }
+    return djChipsHTML(k, true) + `<div class="card pad djk">
+      <div class="djk-h"><b>${esc(c.title)}</b><small>${esc(clsName(k))}</small></div>${body}
+      <div class="djk-act"><button type="button" class="btn btn--primary" data-kelasgo="absensi:${k}">Absensi &amp; barcode</button><button type="button" class="btn btn--ghost" data-kelasgo="materi:${k}">Bahan ajar</button></div></div>`;
+  }
+
+  // Admin · Ringkasan (gambaran besar): 3 angka · per kelas (lulus / sedang ikut) · perlu perhatian
+  RENDER.ringkas = function () {
+    const people = state.classProgress || [];
+    const re = () => { if (state.page === "ringkas") RENDER.ringkas(); };
+    const ros = DJ_ORDER.map(k => djRoster(k, re)), loading = ros.some(r => !r);
+    const rows = DJ_ORDER.map((k, i) => {
+      const c = DASH_JOURNEYS.find(x => x.key === k), ro = ros[i] || [];
+      const act = ro.filter(p => !p.done && p.babs.length), last = p => Math.max(...p.babs);
+      const top = act.length ? Math.max(...act.map(last)) : 0;
+      return { k, c, grad: people.filter(p => p.classes[c.classIdx]).length, act, late: act.filter(p => top - last(p) >= 2) };
+    });
+    const actN = new Set(rows.flatMap(r => r.act.map(p => p.id))).size;
+    const pend = DASH_JOURNEYS.filter(c => c.stateKey).map(c => ({ c, n: (state[c.stateKey] || []).filter(r => r.status === "pending").length })).filter(x => x.n);
+    const alerts = rows.filter(r => r.late.length).map(r => ({ k:r.k, n:r.late.length, t:`<b>${r.late.length} peserta ${esc(r.c.tab)}</b> tertinggal 2 ${unitOf(r.k)} atau lebih` }))
+      .concat(pend.map(({ c, n }) => ({ k:c.key, n, t:`<b>${n} permintaan akses ${esc(c.tab)}</b> menunggu keputusan` })));
+    const attn = alerts.reduce((a, x) => a + x.n, 0);
+    const allDone = people.filter(p => DASH_JOURNEYS.every(c => p.classes[c.classIdx])).length;
+    const mx = Math.max(1, ...rows.map(r => r.grad + r.act.length));
+    const L = v => loading ? "…" : v;
+    el("ringkasBody").innerHTML = `
+      <div class="djr-kpi">
+        <span><b>${L(actN)}</b>sedang ikut kelas</span>
+        <span><b>${allDone}</b>lulus kelima kelas</span>
+        <span class="${attn ? "hot" : ""}"><b>${L(attn)}</b>perlu perhatian</span>
+      </div>
+      ${pjSecHTML("Per kelas", "ketuk untuk detail")}
+      <div class="card djr-cls">${rows.map(r => `<button type="button" class="djr-row" data-dashtab="${r.k}" aria-label="${esc(r.c.title)}: ${r.grad} lulus, ${r.act.length} sedang ikut">
+          <b>${esc(r.c.tab)}</b>
+          <span class="djr-bar"><i class="g" style="width:${(r.grad / mx * 100).toFixed(1)}%"></i><i class="a" style="width:${(r.act.length / mx * 100).toFixed(1)}%"></i></span>
+          <span class="djr-n"><b>${r.grad}</b> · ${L(r.act.length)}</span>${DJ_CHEV}</button>`).join("")}
+        <p class="djr-leg"><span><i class="g"></i>lulus</span><span><i class="a"></i>sedang ikut</span></p>
+      </div>
+      ${pjSecHTML("Perlu perhatian")}
+      ${loading ? `<p class="jd-empty">Memuat…</p>` : alerts.length ? `<div class="djr-al">${alerts.map(a => `<button type="button" class="djr-a" data-dashtab="${a.k}"><i aria-hidden="true"></i><span>${a.t}</span>${DJ_CHEV}</button>`).join("")}</div>`
+        : `<p class="jd-empty">Tidak ada — semua kelas berjalan baik.</p>`}`;
+  };
+
+  // Peserta · Buku: kelima Buku Peserta (terkunci bila belum terdaftar/lulus — bkpOK)
+  RENDER.buku = function () {
+    attRefresh();
+    el("bukuBody").innerHTML = `<p class="sub djb-sub">Buku Peserta terbuka untuk kelas yang sedang kamu ikuti atau sudah kamu lulusi.</p>`
+      + `<div class="djb-list">${BKP_KEYS.map(pjBookHTML).join("")}</div>`;
+  };
+
+  // Peserta · Hasil: status tiap kelas (nilai, bintang) + pintu ke hasil asesmen pribadi
+  RENDER.capaian = function () {
+    attRefresh();
+    const nDone = DJ_ORDER.filter(k => bjStatus(k) === "done").length;
+    const rows = DJ_ORDER.map(k => {
+      const c = DASH_JOURNEYS.find(x => x.key === k), ok = bjStatus(k) === "done", r = state[k + "Result"], n = attN(k), N = DJ_BAB[k].length;
+      const sub = ok ? (r && r.passed ? `Lulus · ${esc(r.band)} ${Number(r.score_pct) || 0}%` : "Lulus")
+        : r ? `Post-test ${Number(r.score_pct) || 0}% · belum lulus` : n ? `Sedang ikut · hadir ${n}/${N} ${unitOf(k)}` : "Belum diikuti";
+      return `<button type="button" class="djh-row${ok ? " ok" : ""}" data-goto="${djPgOf(k)}" data-tabnav="1">
+        <span class="djh-ic">${ok ? DJ_CHECK : c.classIdx + 1}</span><span class="djh-t"><b>${esc(c.title)}</b><small>${sub}</small></span>${bjStarsHTML(bjStars(k))}</button>`;
+    }).join("");
+    el("capaianBody").innerHTML = pjSecHTML("Kelas", `${nDone}/5 lulus`) + `<div class="card djh">${rows}</div>`
+      + pjSecHTML("Asesmen pribadi") + `<button type="button" class="card djh-asm" data-goto="hasil"><span class="djh-t"><b>Hasil asesmen</b><small>DISC · SSD · Karunia Rohani · Leadership Wheel</small></span>${DJ_CHEV}</button>`;
+  };
 
   RENDER.login = function () {
     el("loginBody").innerHTML = `
@@ -1555,19 +1745,19 @@
   // Link: #p=<page> (diingat lewat sessionStorage kalau harus login dulu).
   // Tanda "sudah kirim" cuma di perangkat (localStorage) — supaya anonim.
   const FB_CLASSES = {
-    rs1:  { title:"Rock Solid 1", badge:"🪨 Rock Solid 1", color:"#5B6B77", until:"selesai", page:"fbrs1", sentKey:"dj_fb_sent_rs1",
+    rs1:  { title:"Rock Solid 1", badge:"🪨 Rock Solid 1", color:"var(--dj-rs)", until:"selesai", page:"fbrs1", sentKey:"dj_fb_sent_rs1",
             eligible:() => state.rs1AccessStatus === "approved" || attN("rs1") > 0, lockGoto:"rs1", lockBtn:"Ke tab Rock Solid 1",
             lockText:"Form ini terbuka setelah kamu tercatat hadir minimal 1 sesi Rock Solid 1 (scan barcode di kelas)." },
-    rs2:  { title:"Rock Solid 2", badge:"🌱 Rock Solid 2", color:"#5B6B77", until:"selesai", page:"fbrs2", sentKey:"dj_fb_sent_rs2",
+    rs2:  { title:"Rock Solid 2", badge:"🌱 Rock Solid 2", color:"var(--dj-rs)", until:"selesai", page:"fbrs2", sentKey:"dj_fb_sent_rs2",
             eligible:() => state.rs2AccessStatus === "approved" || attN("rs2") > 0, lockGoto:"rs2", lockBtn:"Ke tab Rock Solid 2",
             lockText:"Form ini terbuka setelah kamu tercatat hadir minimal 1 sesi Rock Solid 2 (scan barcode di kelas)." },
-    rs3:  { title:"Rock Solid 3", badge:"📘 Rock Solid 3 · Firm Local Church", color:"#5B6B77", until:"lulus", page:"rs3feedback", sentKey:"dj_rs3fb_sent",
+    rs3:  { title:"Rock Solid 3", badge:"📘 Rock Solid 3 · Firm Local Church", color:"var(--dj-rs)", until:"lulus", page:"rs3feedback", sentKey:"dj_rs3fb_sent",
             eligible:() => state.rs3AccessStatus === "approved" || attN("rs3") > 0, lockGoto:"rs3", lockBtn:"Ke tab Rock Solid 3",
             lockText:"Form ini terbuka setelah kamu tercatat hadir minimal 1 sesi Rock Solid 3 (scan barcode di kelas)." },
-    lts1: { title:"Lead To Serve 1", badge:"🧭 Lead To Serve 1 · Serve Road Map", color:"#B5623B", until:"selesai", page:"fblts1", sentKey:"dj_fb_sent_lts1",
+    lts1: { title:"Lead To Serve 1", badge:"🧭 Lead To Serve 1 · Serve Road Map", color:"var(--dj-lts)", until:"selesai", page:"fblts1", sentKey:"dj_fb_sent_lts1",
             eligible:() => state.accessStatus === "approved" || attN("lts1") > 0, lockGoto:"home", lockBtn:"Ke tab Lead To Serve 1",
             lockText:"Form ini terbuka setelah kamu tercatat hadir minimal 1 bab Lead To Serve 1 (scan barcode di kelas)." },
-    lts2: { title:"Lead To Serve 2", badge:"🤝 Lead To Serve 2 · Servant Leadership", color:"#B5623B", until:"lulus", page:"fblts2", sentKey:"dj_fb_sent_lts2",
+    lts2: { title:"Lead To Serve 2", badge:"🤝 Lead To Serve 2 · Servant Leadership", color:"var(--dj-lts)", until:"lulus", page:"fblts2", sentKey:"dj_fb_sent_lts2",
             eligible:() => state.lts2AccessStatus === "approved" || attN("lts2") > 0, lockGoto:"lts2", lockBtn:"Ke tab Lead To Serve 2",
             lockText:"Form ini terbuka setelah kamu tercatat hadir minimal 1 bab Lead To Serve 2 (scan barcode di kelas)." },
   };
@@ -1760,7 +1950,7 @@
     const fin = bjStatus(k) === "done", fbB = fbHomeCardsHTML(k), lts = k === "lts1" || k === "lts2";
     const fb = fbB ? pjFold(k, "fb", "💌", "Feedback kelas", fbSent(k) ? "✓ sudah terkirim" : fin ? "kelas selesai — isi yuk" : "anonim", fbB, fin && !fbSent(k)) : "";
     const work = body ? pjFold(k, "work", "✍️", (result ? "Coba lagi " : "") + (lts ? "post-test & asesmen" : "post-test"), result ? "boleh diulang" : "", body, !fin) : "";
-    return hero + pjBookHTML(k) + attCardHTML(k) + fb + result + pjAssessHTML(k) + work; };
+    return (state.persona === "ADMIN" ? "" : djChipsHTML(k)) + hero + pjBookHTML(k) + attCardHTML(k) + fb + result + pjAssessHTML(k) + work; };
   // 2026-11-21 Buku Peserta: kartu di tab kelas (di bawah kartu DJ) → buku layar penuh (bookOpen edisi peserta)
   // 2026-11-21 (user: "buku hanya bisa dibuka oleh peserta yg sdh daftar dan lulus"): Buku Peserta kelas k terbuka bila
   // sudah terdaftar di kelas itu (hadir/scan ≥1 sesi) ATAU sudah lulus kelas itu; Admin/SP/Content selalu. Dijaga juga di
@@ -2089,14 +2279,14 @@
       const done = ph.keys.every(k => bjStatus(k) === "done"), isCur = ph === curPh;
       // 2026-10-17: Grow & Plant (RS1–3) = slate, sama dgn warna kelas RS; Serve & Lead tetap terracotta.
       const rs = ph.key === "grow" || ph.key === "plant";
-      const col = rs ? (done ? "#3F4B55" : isCur ? "#5B6B77" : "#8E9CA6") : (done ? "#7A3F22" : isCur ? "#B5623B" : "#C98F72");
+      const col = rs ? (done ? "var(--dj-rs-d)" : isCur ? "var(--dj-rs)" : "var(--dj-rs-l)") : (done ? "var(--dj-lts-d)" : isCur ? "var(--dj-lts)" : "var(--dj-lts-l)");   // 2026-11-21 palet aplikasi
       const c = ph.ang, d1 = c - 38, d2 = c + 30, rev = ph.key === "grow";
       const head = `M ${pt(R - W / 2 - 6, d2)} L ${pt(R + W / 2 + 6, d2)} L ${pt(R, d2 + 13)} Z`;
       return `<g data-stage="${ph.keys[0]}" class="${isCur ? "cur" : ""}">
         <defs><path id="bjw${i}" d="${arc(rev ? 130 : 113, c - 50, c + 50, rev)}"/><path id="bjl${i}" d="${arc(rev ? 105 : 98, c - 50, c + 50, rev)}"/><path id="bjr${i}" d="${arc(rev ? 157 : 149, c - 55, c + 55, rev)}"/></defs>
-        ${isCur ? `<path class="glow" d="${arc(R, d1, d2)}" stroke="${col}" stroke-width="${W + 14}" fill="none"/>` : ""}
-        <path d="${arc(R, d1, d2)}" stroke="${col}" stroke-width="${W}" fill="none"/>
-        <path d="${head}" fill="${col}"/>
+        ${isCur ? `<path class="glow" d="${arc(R, d1, d2)}" style="stroke:${col}" stroke-width="${W + 14}" fill="none"/>` : ""}
+        <path d="${arc(R, d1, d2)}" style="stroke:${col}" stroke-width="${W}" fill="none"/>
+        <path d="${head}" style="fill:${col}"/>
         <text class="w"><textPath href="#bjw${i}" startOffset="50%">${ph.word}${done ? " ✓" : ""}</textPath></text>
         <text class="l"><textPath href="#bjl${i}" startOffset="50%">${esc(ph.cls.toUpperCase())}</textPath></text>
         <text class="r${isCur ? " rc" : ""}"${isCur ? ` style="fill:${col}"` : ""}><textPath href="#bjr${i}" startOffset="50%">${esc(ph.role)}</textPath></text>
@@ -2104,7 +2294,7 @@
     }).join("");
     const doneN = order.filter(k => bjStatus(k) === "done").length;
     const centre = curPh
-      ? `<text class="c1" x="${C}" y="${C - 30}">KAMU DI TAHAP</text><text class="c2" x="${C}" y="${C + 4}"${curPh.key === "grow" || curPh.key === "plant" ? ' style="fill:#5B6B77"' : ""}>${curPh.word}</text><text class="c3" x="${C}" y="${C + 28}">${esc(curPh.role)}</text><text class="c4" x="${C}" y="${C + 48}">${doneN}/5 kelas · ★ ${order.reduce((a, k) => a + bjStars(k), 0)} bintang</text>`
+      ? `<text class="c1" x="${C}" y="${C - 30}">KAMU DI TAHAP</text><text class="c2" x="${C}" y="${C + 4}"${curPh.key === "grow" || curPh.key === "plant" ? ' style="fill:var(--dj-rs)"' : ""}>${curPh.word}</text><text class="c3" x="${C}" y="${C + 28}">${esc(curPh.role)}</text><text class="c4" x="${C}" y="${C + 48}">${doneN}/5 kelas · ★ ${order.reduce((a, k) => a + bjStars(k), 0)} bintang</text>`
       : `<text class="c1" x="${C}" y="${C - 22}">SIKLUS LENGKAP</text><text class="c2" x="${C}" y="${C + 10}">🎉</text><text class="c3" x="${C}" y="${C + 36}">Kini muridkan orang lain</text>`;
     return `<svg viewBox="0 0 340 340" role="img" aria-label="Siklus Discipleship Journey: Grow (Rock Solid 1–2), Plant (Rock Solid 3), Serve (Lead To Serve 1), Lead (Lead To Serve 2)">
       <circle cx="${C}" cy="${C}" r="168" class="disc"/><circle cx="${C}" cy="${C}" r="88" class="core"/>
@@ -2145,21 +2335,32 @@
     };
     // LTS1 tak punya post-test → buang fakta "Lulus" utk LTS1
     const fixLts1 = h => h.replace(/(data-bj="lts1"[\s\S]*?)<span>Lulus: nilai Good \(≥50%\)<\/span>/, "$1<span>Selesai saat S-E-R-V-E lengkap</span>");
+    // 2026-11-21 (tampilan sederhana): Beranda = garis Perjalananku + kartu Kelas sekarang + Perlu dikerjakan.
+    // Siklus, lima tahap & panduan dilipat di "Tentang" (dulu tampil semua → info dobel).
+    const strip = order.map(k => { const c = DASH_JOURNEYS.find(x => x.key === k), st = bjStatus(k) === "done" ? "done" : k === cur ? "now" : "todo", N = DJ_BAB[k].length, n = attN(k), s = bjStars(k);
+      return `<button type="button" class="djj-n djj-n--${st}" data-goto="${djPgOf(k)}" data-tabnav="1" aria-label="${esc(c.title)}: ${st === "done" ? "selesai" : st === "now" ? "sedang diikuti" : "belum"}">
+        <span class="djj-dot">${st === "done" ? DJ_CHECK : st === "now" ? `${n}/${N}` : ""}</span><b>${esc(c.tab)}</b><small>${st === "done" ? (s ? "★".repeat(s) : "selesai") : st === "now" ? "sekarang" : "&nbsp;"}</small></button>`; }).join("");
+    let nowCard;
+    if (cur) {
+      const N = DJ_BAB[cur].length, n = attN(cur), r = state[cur + "Result"], mine = state.myAtt[cur] || [];
+      const hint = !n ? "Belum mulai — scan barcode di pertemuan pertama lewat tombol Scan di JB3 HOME"
+        : !attDone(cur) ? `Hadir ${n} dari ${N} ${unitOf(cur)} · ${N - n} lagi, post-test terbuka`
+        : r && !r.passed ? "Hadir lengkap · post-test belum lulus, boleh coba lagi"
+        : cur === "lts1" ? "Hadir lengkap · lengkapi asesmen &amp; post-test" : "Hadir lengkap · post-test siap dikerjakan";
+      nowCard = `<div class="djj-now"><small>KELAS SEKARANG</small><b>${esc(curC.title)}</b><span>${hint}</span>
+        <div class="djj-seg" style="grid-template-columns:repeat(${N},minmax(0,1fr));">${DJ_BAB[cur].map((_, i) => `<i class="${mine.includes(i + 1) ? "on" : ""}"></i>`).join("")}</div>
+        <div class="djj-act"><button type="button" class="djj-b1" data-goto="${djPgOf(cur)}" data-tabnav="1">Buka kelas</button>${bkpOK(cur) ? `<button type="button" class="djj-b2" data-bkpes="${cur}">Baca buku</button>` : ""}</div></div>`;
+    } else nowCard = `<div class="djj-now"><small>LUAR BIASA</small><b>Semua tahap selesai 🎉</b><span>Kini saatnya memuridkan orang lain.</span><div class="djj-act"><button type="button" class="djj-b1" data-goto="capaian" data-tabnav="1">Lihat hasil</button></div></div>`;
+    const todo = [];
+    if (cur && ptOpen(cur) && !(state[cur + "Result"] || {}).passed) todo.push({ go:djPgOf(cur), tone:"a", t:`Post-test ${esc(curC.title)}`, s:"siap dikerjakan" });
+    order.forEach(k => { const fb = FB_CLASSES[k]; if (fb && bjStatus(k) === "done" && !fbSent(k)) todo.push({ go:fb.page, tone:"w", t:`Feedback ${esc(clsTitle(k))}`, s:"1 menit · anonim" }); });
     el("journeyBody").innerHTML = `
-      <div class="bj-hero">
-        <svg class="bj-hero-deco" viewBox="0 0 100 100" aria-hidden="true"><path d="M10 90 C 30 60, 60 80, 70 50 S 85 20, 92 8" fill="none" stroke="#fff" stroke-width="3" stroke-dasharray="4 6"/><circle cx="92" cy="8" r="6" fill="#fff"/></svg>
-        <small>Discipleship Journey · JB3</small>
-        <h2>Halo, ${esc(first)} 👋</h2>
-        <p>Lima kelas, satu arah: menjadi murid Kristus yang berakar di gereja lokal dan melayani dengan visi.</p>
-        <span class="bj-hero-stars">★ ${stars} dari 15 bintang terkumpul</span>
-        <div class="bj-hero-row">
-          <span class="bj-ring" style="--p:${done * 20};"><b>${done}/5<span>tahap</span></b></span>
-          <span class="bj-next">${cur
-            ? `<span>${done ? "Langkah berikutnya" : "Mulai dari sini"}</span><b>${curC.icon} ${esc(curC.title)}</b><button type="button" data-goto="${BJ_STAGES[cur].page}" data-tabnav="1">Lanjutkan →</button>`
-            : `<span>Luar biasa!</span><b>🎉 Semua tahap selesai</b><button type="button" data-goto="lts2" data-tabnav="1">Lihat hasil →</button>`}</span>
-        </div>
-      </div>
-
+      <div class="djj-hi"><small>Discipleship Journey</small><b>Halo, ${esc(first)}</b></div>
+      <div class="card djj-strip"><div class="djj-h"><b>Perjalananku</b><small>${done} dari 5 selesai · ★ ${stars}</small></div>
+        <div class="djj-line" style="--p:${Math.min(done, 4) * 25}%;">${strip}</div></div>
+      ${nowCard}
+      ${todo.length ? pjSecHTML("Perlu dikerjakan") + `<div class="djj-todo">${todo.slice(0, 3).map(x => `<button type="button" class="djj-t djj-t--${x.tone}" data-goto="${x.go}"><span class="djj-ti" aria-hidden="true">${x.tone === "w" ? '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg>' : '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>'}</span><span class="djj-tt"><b>${x.t}</b><small>${x.s}</small></span>${DJ_CHEV}</button>`).join("")}</div>` : ""}
+      <details class="card djj-about"><summary><span><b>Tentang Discipleship Journey</b><small>Siklus pemuridan, lima tahap &amp; cara kerja</small></span>${DJ_CHEV}</summary><div class="djj-about-b">
       ${pjSecHTML("Siklus pemuridan JB3", "ketuk tahap")}
       <div class="card bj-map">${bjMapSVG(order, cur)}</div>
 
@@ -2181,6 +2382,7 @@
         <div class="bj-rung bj-rung--key"><i>🔥</i><span><b>Home Leader</b><small>Sudah mengikuti <b>Rock Solid 1–3</b> — memimpin orang lain mengenal & melakukan Firman.</small></span></div>
       </div></div></details>
 
+      </div></details>
       <p class="bj-verse">“Jikalau kamu tetap dalam firman-Ku, kamu benar-benar adalah murid-Ku.”<small>Yohanes 8:31</small></p>`;
   };
   // 2026-10-15 ("buat Post test untuk Rock Solid 1 dan 2 di Discipleship
@@ -2654,11 +2856,11 @@
   // JB3 HOME Tracker). RS3/LTS1/LTS2: permintaan akses + kelas selesai.
   // Semua data-attribute tombol Setujui/Tolak/Hapus TETAP SAMA spt dulu.
   const DASH_JOURNEYS = [
-    { key:"rs1", tab:"RS1", ph:"img/dj-rs1.webp", ic:"rs1", title:"Rock Solid 1", sub:"Post-test Firm Foundation · 20 soal", icon:"🪨", color:"#5B6B77", classIdx:0, stateKey:"rs1AccessRequests", attr:"pt" },
-    { key:"rs2", tab:"RS2", ph:"img/dj-rs2.webp", ic:"rs2", title:"Rock Solid 2", sub:"Post-test Firm Faith, True Knowledge · 40 soal", icon:"🌱", color:"#5B6B77", classIdx:1, stateKey:"rs2AccessRequests", attr:"pt" },
-    { key:"rs3", tab:"RS3", ph:"img/dj-rs3.webp", ic:"rs3", title:"Rock Solid 3", sub:"Post-test Firm Local Church · 40 soal", icon:"📘", color:"#5B6B77", classIdx:2, stateKey:"rs3AccessRequests", attr:"rs3" },
-    { key:"lts1", tab:"LTS1", ph:"img/dj-lts1.webp", ic:"lts1", title:"Lead To Serve 1", sub:"Serve Road Map · DISC · SSD · Karunia Rohani", icon:"🧭", color:"#B5623B", classIdx:3, stateKey:"accessRequests", attr:"" },
-    { key:"lts2", tab:"LTS2", ph:"img/dj-lts2.webp", ic:"lts2", title:"Lead To Serve 2", sub:"Post-test Servant Leadership · 25 soal", icon:"🤝", color:"#B5623B", classIdx:4, stateKey:"lts2AccessRequests", attr:"lts2" },
+    { key:"rs1", tab:"RS1", ph:"img/dj-rs1.webp", ic:"rs1", title:"Rock Solid 1", sub:"Post-test Firm Foundation · 20 soal", icon:"🪨", color:"var(--dj-rs)", classIdx:0, stateKey:"rs1AccessRequests", attr:"pt" },
+    { key:"rs2", tab:"RS2", ph:"img/dj-rs2.webp", ic:"rs2", title:"Rock Solid 2", sub:"Post-test Firm Faith, True Knowledge · 40 soal", icon:"🌱", color:"var(--dj-rs)", classIdx:1, stateKey:"rs2AccessRequests", attr:"pt" },
+    { key:"rs3", tab:"RS3", ph:"img/dj-rs3.webp", ic:"rs3", title:"Rock Solid 3", sub:"Post-test Firm Local Church · 40 soal", icon:"📘", color:"var(--dj-rs)", classIdx:2, stateKey:"rs3AccessRequests", attr:"rs3" },
+    { key:"lts1", tab:"LTS1", ph:"img/dj-lts1.webp", ic:"lts1", title:"Lead To Serve 1", sub:"Serve Road Map · DISC · SSD · Karunia Rohani", icon:"🧭", color:"var(--dj-lts)", classIdx:3, stateKey:"accessRequests", attr:"" },
+    { key:"lts2", tab:"LTS2", ph:"img/dj-lts2.webp", ic:"lts2", title:"Lead To Serve 2", sub:"Post-test Servant Leadership · 25 soal", icon:"🤝", color:"var(--dj-lts)", classIdx:4, stateKey:"lts2AccessRequests", attr:"lts2" },
   ];
   // judul dokumen Bahan Ajar ("Rock Solid 1 — Firm Foundation") → judul & nama kelas di semua tempat yg terhubung
   var clsApply = function (m) {
@@ -2853,14 +3055,7 @@
       + fbAdminHTML(cfg.key)
       + `<p class="jd-note">🗓️ ${cfg.key === "lts1" ? "LTS1: Barcode 1 (Landasan – Modul 6) membuka semua asesmen, Barcode 2 membuka post-test & kelulusan" : `Post-test terbuka otomatis setelah hadir di semua ${DJ_BAB[cfg.key].length} ${unitOf(cfg.key)}`}. Catat kehadiran & tampilkan barcode lewat tombol <b>Absensi</b> di atas.</p>`;
     el("dashboardBody").innerHTML = `
-      <div class="jd-hero jd-hero--ph" style="--jc:${cfg.color};--ph:url(${cfg.ph});">
-        <svg class="jd-hero-deco" viewBox="0 0 120 120" aria-hidden="true"><circle cx="100" cy="18" r="46" fill="#fff" opacity=".08"/><circle cx="18" cy="112" r="34" fill="#fff" opacity=".06"/><path d="M8 92 C 34 70, 52 98, 78 72 S 112 58, 118 34" fill="none" stroke="#fff" stroke-width="1.6" stroke-dasharray="3 5" opacity=".35"/></svg>
-        <div class="jd-hero-top"><span class="jd-hero-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${NAV_IC[cfg.key]}</svg></span><div><small>Discipleship Journey · ${esc(cfg.tab)}</small><b>${esc(cfg.title)}</b></div></div>
-        <p class="jd-hero-sub">${esc(cfg.sub)}</p>
-        <div class="jd-hero-nums">${nums.map(([n, l, c]) => `<span class="${c}"><b>${n}</b>${l}</span>`).join("")}</div>
-        <div class="jd-prog" role="img" aria-label="${done.length} dari ${people.length} akun selesai kelas"><i style="width:${pctDone}%"></i></div>
-        <div class="jd-prog-l">${done.length} dari ${people.length} akun sudah menyelesaikan kelas ini · ${pctDone}%</div>
-      </div>
+      ${djKelasTopHTML(cfg.key)}
       <!-- 2026-10-26 (user): baris Aturan Kelas · Absensi · Bahan Ajar di bawah kartu kelas Admin DIHAPUS -->
       <div style="--jc:${cfg.color};">${secs}</div>
     `;
@@ -4100,24 +4295,10 @@ ${body}</body></html>`;
     }).join("");
     const chip = (key, label) => `<button type="button" class="btn btn--sm ${filter === key ? "btn--primary" : "btn--ghost"}" data-resultsfilter="${key}">${esc(label)}</button>`;
     el("resultsBody").innerHTML = `
-      <div class="jd-hero pd-hero" style="--jc:#3E4A5C;">
-        <svg class="jd-hero-deco" viewBox="0 0 120 120" aria-hidden="true"><circle cx="100" cy="18" r="46" fill="#fff" opacity=".08"/><circle cx="18" cy="112" r="34" fill="#fff" opacity=".06"/><path d="M8 92 C 34 70, 52 98, 78 72 S 112 58, 118 34" fill="none" stroke="#fff" stroke-width="1.6" stroke-dasharray="3 5" opacity=".35"/></svg>
-        <div class="jd-hero-top"><span class="jd-hero-ic">📊</span><div><small>Discipleship Journey</small><b>Dashboard Peserta</b></div></div>
-        <p class="jd-hero-sub">Gambaran seluruh perjalanan pemuridan — RS1 sampai LTS2.</p>
-        <div class="jd-hero-nums">
-          <span><b>${people.length}</b>total akun</span>
-          <span class="${pendTotal ? "hot" : ""}"><b>${pendTotal}</b>menunggu</span>
-          <span><b>${allDone}</b>lulus semua</span>
-        </div>
-      </div>
-      ${pend.length ? `<div class="pj-sec"><span>Perlu tindakan</span></div>
-        <div class="pd-act">${pend.map(({ c, n }) => `<button type="button" class="pd-act-b" style="--jc:${c.color};" data-dashtab="${c.key}"><span>${c.icon}</span><b>${esc(c.tab)}</b><small>${n} menunggu</small><i aria-hidden="true">→</i></button>`).join("")}</div>` : ""}
-      <div class="pj-sec"><span>Alur perjalanan</span><small>ketuk untuk buka kelas</small></div>
-      <div class="jd-card pf">${steps}</div>
       <div class="pj-sec"><span>Ringkasan asesmen</span></div>
       ${resultsAnalyticsHTML(rows) || `<p class="jd-empty" style="margin:0 2px 12px;">Belum ada data asesmen.</p>`}
       <div class="pj-sec"><span>Daftar peserta</span></div>
-      <details class="jd-card rs-all" data-rsall ${state.rsAllOpen ? "open" : ""} style="--tc:var(--accent);">
+      <details class="jd-card rs-all" data-rsall ${state.rsAllOpen === false ? "" : "open"} style="--tc:var(--accent);">
         <summary class="jd-head"><span class="jd-sic" aria-hidden="true">👥</span><span class="jd-tt"><b>Semua peserta</b><small class="rs-all-sub">A–Z · cari, filter & ketuk nama untuk hasilnya</small></span><span class="jd-count">${rows.length}</span>
         <svg class="jd-chev" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></summary>
         <div class="jd-body rs-all-b">
@@ -5318,7 +5499,7 @@ ${body}</body></html>`;
     if (T.closest("#pfLogout") || T.closest("#rolePill")) {
       await DB.logout().catch(() => {});
       snapClear();   // 2026-10-17: data tersimpan (buka instan) ikut dihapus saat Keluar
-      Object.assign(state, { lts1Batch:null, batch:{}, page:"login", stack:[], persona:null, meId:null, myProfile:null, accessStatus:null, accessRequests:[], myDisc:null, myRoadmap:null, mySsd:null, myGifts:null, rs3AccessStatus:null, rs3AccessRequests:[], rs3Result:null, lts2AccessStatus:null, lts2AccessRequests:[], lts2Result:null, rs1AccessStatus:null, rs1AccessRequests:[], rs1Result:null, lts1Result:null, rs2AccessStatus:null, rs2AccessRequests:[], rs2Result:null, materi:null, materiKey:"rs1", myAtt:{ rs1:[], rs2:[], rs3:[], lts1:[], lts2:[] }, absKey:"lts1", absRoster:null, absQuery:"", participantResults:null, participantResultsP:null, viewProfileId:null, resultsFilter:"all", dashKey:null, dashOpen:{}, classProgress:null, rs3Feedback:null, rs3FbBatches:null, fbDraft:{}, fbAgain:false, lwHist:[], lwLast:null, lwEdit:false, draft:{ discPicks:[], roadmapData:{}, ssdAnswers:{}, giftsAnswers:{}, rs3Answers:{}, lts2Answers:{}, rs1Answers:{}, rs2Answers:{}, lwAnswers:{}, lwMinistry:null } });
+      Object.assign(state, { lts1Batch:null, batch:{}, page:"login", stack:[], persona:null, meId:null, myProfile:null, accessStatus:null, accessRequests:[], myDisc:null, myRoadmap:null, mySsd:null, myGifts:null, rs3AccessStatus:null, rs3AccessRequests:[], rs3Result:null, lts2AccessStatus:null, lts2AccessRequests:[], lts2Result:null, rs1AccessStatus:null, rs1AccessRequests:[], rs1Result:null, lts1Result:null, rs2AccessStatus:null, rs2AccessRequests:[], rs2Result:null, materi:null, materiKey:"rs1", myAtt:{ rs1:[], rs2:[], rs3:[], lts1:[], lts2:[] }, absKey:"lts1", absRoster:null, rosterAll:null, absQuery:"", participantResults:null, participantResultsP:null, viewProfileId:null, resultsFilter:"all", dashKey:null, dashOpen:{}, classProgress:null, rs3Feedback:null, rs3FbBatches:null, fbDraft:{}, fbAgain:false, lwHist:[], lwLast:null, lwEdit:false, draft:{ discPicks:[], roadmapData:{}, ssdAnswers:{}, giftsAnswers:{}, rs3Answers:{}, lts2Answers:{}, rs1Answers:{}, rs2Answers:{}, lwAnswers:{}, lwMinistry:null } });
       show("login", { replace:true });
       return;
     }
@@ -5582,6 +5763,8 @@ ${body}</body></html>`;
       const cur = state.dashOpen[k] != null ? state.dashOpen[k] : dashTog.dataset.def === "1";
       state.dashOpen[k] = !cur; RENDER.dashboard(); return;
     }
+    const kelasGo = T.closest("[data-kelasgo]");
+    if (kelasGo) { const [pg, k] = kelasGo.dataset.kelasgo.split(":"); if (pg === "materi") state.materiKey = k; else state.absKey = k; show(pg); return; }
     const dashTab = T.closest("[data-dashtab]");
     if (dashTab) {
       state.dashKey = dashTab.dataset.dashtab;
@@ -5612,6 +5795,7 @@ ${body}</body></html>`;
       const on = !r.babs.includes(n);
       r.babs = on ? r.babs.concat(n).sort((a, b) => a - b) : r.babs.filter(x => x !== n);
       const l = el("absList"); if (l) l.innerHTML = absListHTML();
+      if (state.rosterAll) delete state.rosterAll[k];
       try { await DB.setAttendance(pid, k, n, on); if (pid === state.meId) state.myAtt[k] = r.babs.slice(); }
       catch (err) { r.babs = on ? r.babs.filter(x => x !== n) : r.babs.concat(n).sort((a, b) => a - b); const l2 = el("absList"); if (l2) l2.innerHTML = absListHTML(); toast("Gagal simpan absensi: " + (err.message || err)); }
       return;
