@@ -836,6 +836,33 @@
   .mtb-soon { cursor:default; }
   .mtb-soon .mtb-cv { filter:grayscale(.9); opacity:.55; }
   .mtb-lk { position:absolute; top:30px; left:13px; padding:2px 7px; border-radius:999px; background:rgba(0,0,0,.55); color:#fff; font-style:normal; font-size:9.5px; font-weight:800; letter-spacing:.04em; }
+  .mtr-note { margin:4px 2px 0; }
+  .tc { z-index:10000 !important; } .mte { z-index:10001; }
+  /* 2026-11-21 — buku utuh layar penuh (bookOpen) */
+  .bkb-cover { position:relative; height:100%; break-after:column; -webkit-column-break-after:always; border-radius:4px 14px 14px 4px; overflow:hidden; color:#fff;
+    background:linear-gradient(180deg, rgba(0,0,0,.05) 25%, color-mix(in srgb, var(--jc) 78%, #000) 72%), var(--ph) center 30% / cover no-repeat, var(--jc);
+    box-shadow:inset 12px 0 0 rgba(0,0,0,.28), inset 14px 0 0 rgba(255,255,255,.16), 0 8px 22px rgba(0,0,0,.18); }
+  .bkb-cover .mtb-tag { top:18px; left:30px; font-size:13px; padding:4px 12px; }
+  .bkb-cv-t { position:absolute; left:30px; right:20px; bottom:58px; }
+  .bkb-cv-t small { display:block; font-size:.72em; font-weight:800; letter-spacing:.06em; text-transform:uppercase; opacity:.85; margin-bottom:.4em; }
+  .bkb-cv-t b { display:block; font-family:var(--font-display); font-size:1.75em; font-weight:700; line-height:1.15; text-shadow:0 2px 6px rgba(0,0,0,.35); }
+  .bkb-cv-f { position:absolute; left:30px; right:20px; bottom:22px; font-size:.75em; font-weight:700; opacity:.9; }
+  .bkb-sect { break-before:column; -webkit-column-break-before:always; }
+  .bkb-anc { display:block; height:0; }
+  .bkb-kick { margin:0 0 .2em; font-size:.75em; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); }
+  .bkb-acts { display:flex; flex-wrap:wrap; gap:6px; margin:0 0 1em; padding-bottom:.9em; border-bottom:1px solid var(--line); }
+  .bkb-toc { list-style:none; margin:0; padding:0; }
+  .bkb-toc li { break-inside:avoid; }
+  .bkb-toc button { width:100%; display:flex; align-items:flex-end; gap:8px; padding:.55em 0; border:0; border-bottom:1px dashed var(--line); background:none; color:var(--ink); font:inherit; font-size:.95em; text-align:left; cursor:pointer; }
+  .bkb-toc span { min-width:0; font-weight:700; line-height:1.3; }
+  .bkb-toc small { display:block; font-size:.72em; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--accent); }
+  .bkb-toc i { flex:1; min-width:16px; border-bottom:2px dotted var(--line-strong, rgba(0,0,0,.2)); margin-bottom:.35em; }
+  .bkb-toc em { flex:none; font-style:normal; font-weight:800; color:var(--accent-ink, var(--accent)); min-width:1.6em; text-align:right; }
+  .bkb-dl { display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin-top:1.2em; break-inside:avoid; }
+  .bkb-dl span { flex:1; min-width:120px; font-size:.8em; font-weight:700; color:var(--ink-soft); }
+  .bkb-end { text-align:center; padding-top:30%; }
+  .bkb-end p { color:var(--ink-faint); font-weight:700; letter-spacing:.1em; } .bkb-end b { display:block; font-family:var(--font-display); font-size:1.2em; margin:.4em 0 1.2em; }
+  .bkb .mr-pg { padding-top:14px; }
   .mt-open { display:flex; flex-direction:column; gap:1px; margin:10px 0 10px; padding:8px 12px; border-left:4px solid var(--jc); border-radius:4px 12px 12px 4px; background:color-mix(in srgb, var(--jc) 9%, var(--surface)); scroll-margin-top:12px; }
   .mt-open span { font-size:11px; font-weight:800; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-faint); }
   .mt-open b { font-family:var(--font-display); font-size:16px; font-weight:700; color:var(--ink); }
@@ -872,7 +899,7 @@
   /* 2026-11-21 — Mode Buku: isi pelajaran per halaman, dibalik ke samping */
   .bk { position:relative; }
   .bk-vp { position:relative; overflow:hidden; touch-action:pan-y; }
-  .bk .bk-flow { height:100%; max-height:none; overflow:visible; padding:0; border:0; column-fill:auto; will-change:transform; }
+  .bk .bk-flow { height:100%; max-height:none; overflow:visible; padding:0; border:0; column-fill:auto; }
   .bk-flow > :first-child { margin-top:0; }
   .bk-flow .mt-q, .bk-flow .mt-note, .bk-flow .mt-memo, .bk-flow li, .bk-flow .mt-top { break-inside:avoid; }
   .bk-flow .mt-h3, .bk-flow .mt-h4, .bk-flow .mr-h1 { break-after:avoid; break-inside:avoid; }
@@ -2917,20 +2944,28 @@
   const BK = new WeakMap();
   const BK_NAV = `<div class="bk-nav"><button type="button" data-bk="-1" aria-label="Halaman sebelumnya">‹</button><div class="bk-meta"><span class="bk-pg"></span><i class="bk-bar"><b></b></i></div><button type="button" data-bk="1" aria-label="Halaman berikutnya">›</button></div>`;
   const bkWrap = (inner, cls) => `<div class="bk ${cls || ""}"><div class="bk-vp"><div class="bk-flow mt-body${cls === "bk-full" ? " mr-body" : ""}">${inner}<span class="bk-end"></span></div></div>${BK_NAV}</div>`;
-  function bkLay(bk, keep) {
+  function bkLay(bk, keep, onResize) {
     const vp = bk && bk.querySelector(".bk-vp"), fl = vp && vp.querySelector(".bk-flow"); if (!fl) return;
-    const full = bk.classList.contains("bk-full");
+    const full = bk.classList.contains("bk-full"), old = BK.get(bk);
+    // ukuran halaman tak berubah (mis. bilah alamat HP muncul/hilang tanpa beda tinggi) → biarkan, jangan geser halaman
+    if (onResize && old && old.W === vp.clientWidth && old.H === vp.clientHeight) return;
+    // posisi baca dipertahankan lewat elemen pertama di halaman yg sedang terbuka (bukan perkiraan persen)
+    let mark = null;
+    if (keep && old && old.n > 0) { const x0 = fl.getBoundingClientRect().left, c0 = old.n * old.per;
+      mark = [...fl.querySelectorAll("p,li,h1,h3,h4,blockquote,.mt-note,.bkb-anc")].find(e => Math.floor((e.getBoundingClientRect().left - x0 + 2) / (old.cw + old.G)) >= c0); }
     bk.classList.remove("bk-one");
     const W = vp.clientWidth; if (!W || !vp.clientHeight) return;
-    const old = BK.get(bk), frac = keep && old && old.cols > 1 ? (old.n * old.per) / old.cols : 0;
+    const frac = keep && old && old.cols > 1 ? (old.n * old.per) / old.cols : 0;
     const per = full && W >= 860 ? 2 : 1, G = per > 1 ? 64 : 36, cw = Math.floor((W - G * (per - 1)) / per);
     bk.classList.toggle("bk-two", per > 1);
     fl.style.transition = "none"; fl.style.transform = "none";
     fl.style.columnWidth = cw + "px"; fl.style.columnGap = G + "px";
     const x0 = fl.getBoundingClientRect().left, end = fl.querySelector(".bk-end");
     const cols = Math.max(1, Math.floor((end.getBoundingClientRect().left - x0 + 2) / (cw + G)) + 1);
-    const st = { per, G, cw, cols, step: (cw + G) * per, pages: Math.ceil(cols / per), n: 0 };
+    const st = { per, G, cw, cols, step: (cw + G) * per, pages: Math.ceil(cols / per), n: 0, W, H: vp.clientHeight };
     st.n = Math.min(st.pages - 1, Math.floor(frac * cols / per + 0.01));
+    if (mark) st.n = Math.min(st.pages - 1, Math.floor(Math.max(0, Math.floor((mark.getBoundingClientRect().left - x0 + 2) / (cw + G))) / per));
+    if (!keep && bk.dataset.pos) { try { const c0 = +localStorage.getItem(bk.dataset.pos) || 0; st.n = Math.min(st.pages - 1, Math.floor(c0 / per)); } catch (_) {} }
     BK.set(bk, st);
     if (!full && cols === 1) bk.classList.add("bk-one");   // pelajaran pendek: 1 halaman, tinggi menyesuaikan isi
     bkGo(bk, st.n, false);
@@ -2938,6 +2973,7 @@
   function bkGo(bk, n, anim) {
     const st = BK.get(bk); if (!st) return;
     st.n = Math.max(0, Math.min(st.pages - 1, n));
+    if (bk.dataset.pos) { try { localStorage.setItem(bk.dataset.pos, st.n * st.per); } catch (_) {} }   // halaman terakhir dibaca
     const fl = bk.querySelector(".bk-flow"), vp = bk.querySelector(".bk-vp");
     fl.style.transition = anim ? "transform .38s cubic-bezier(.2,.7,.2,1)" : "none";
     fl.style.transform = st.n ? `translateX(${-st.n * st.step}px)` : "none";
@@ -2948,11 +2984,13 @@
     bk.querySelector("[data-bk='-1']").disabled = st.n === 0;
     bk.querySelector("[data-bk='1']").disabled = st.n >= st.pages - 1;
   }
+  function bkColOf(bk, target) {   // halaman (kolom, mulai 0) tempat elemen berada
+    const st = BK.get(bk), fl = bk.querySelector(".bk-flow");
+    return Math.max(0, Math.floor((target.getBoundingClientRect().left - fl.getBoundingClientRect().left + 2) / (st.cw + st.G)));
+  }
   function bkJump(bk, target) {   // lompat ke halaman tempat elemen (subjudul) berada
     const st = BK.get(bk); if (!st || !target) return;
-    const fl = bk.querySelector(".bk-flow");
-    const col = Math.floor((target.getBoundingClientRect().left - fl.getBoundingClientRect().left + 2) / (st.cw + st.G));
-    bkGo(bk, Math.floor(Math.max(0, col) / st.per), true);
+    bkGo(bk, Math.floor(bkColOf(bk, target) / st.per), true);
   }
   const bkFlip = (bk, k) => { const st = BK.get(bk); if (st) bkGo(bk, st.n + k, true); };
   document.addEventListener("click", e => {
@@ -2976,9 +3014,9 @@
     const dx = e.changedTouches[0].clientX - T0.x, st = BK.get(T0.bk); if (!st) return;
     bkGo(T0.bk, st.n + (dx < -50 ? 1 : dx > 50 ? -1 : 0), true); }, { passive: true });
   let BK_RZ = 0;
-  const bkAll = () => document.querySelectorAll(".bk").forEach(b => bkLay(b, true));
-  window.addEventListener("resize", () => { clearTimeout(BK_RZ); BK_RZ = setTimeout(bkAll, 150); });
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(bkAll).catch(() => {});
+  const bkAll = rz => { document.querySelectorAll(".bk").forEach(b => bkLay(b, true, rz)); if (typeof bookPageNums === "function") bookPageNums(); };
+  window.addEventListener("resize", () => { clearTimeout(BK_RZ); BK_RZ = setTimeout(() => bkAll(true), 150); });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => bkAll(false)).catch(() => {});
 
   function mdDoc(md) {
     const parts = String(md || "").split(/\n(?=# )/);
@@ -3041,6 +3079,82 @@
   document.addEventListener("click", e => {
     const t = e.target.closest && e.target.closest("[data-mtread]"); if (!t) return;
     e.preventDefault(); readOpen(t.dataset.mtread);
+  });
+
+  // ---------------------------------------------------------------- Buku utuh (Bahan Ajar DJ)
+  // 2026-11-21 (user: "ubah menjadi benar-benar buku tidak ada lagi seperti itu" + "ada daftar isi, hal, dll"): ketuk buku
+  // di Rak Bahan Pengajar → buku layar penuh: sampul → Daftar Isi (nomor halaman, ketuk = lompat) → Pengantar → tiap
+  // pelajaran mulai di halaman baru (label bab + judul + ✎ Ubah / ▶ Mode Mengajar / ⬇ PDF / Word). Dibalik per halaman
+  // (mesin bkLay/bkGo), 2 halaman berdampingan di layar lebar. Halaman terakhir dibaca diingat per buku (dj_bk_pos:<kelas>).
+  const BOOK = { el: null, key: null, hist: false };
+  const bkSplitHead = h => { const m = String(h).match(/^((?:Pelajaran|Bagian|Sesi|Bab)\s+\d+)\s*[—–·:\-]\s*(.+)$/i); return m ? [m[1], m[2]] : ["", h]; };
+  function bookHTML(key) {
+    const c = MT_SETS.dj.tabs.find(x => x.key === key) || {}, row = (state.materi || []).find(r => r.key === key);
+    if (!row) return "";
+    const parts = String(row.body || "").split(/\n(?=# )/), intro = parts[0].split("\n");
+    const les = parts.slice(1).map(p => { const L = p.split("\n"); return { head: L[0].replace(/^# /, ""), lines: L.slice(1) }; });
+    const noId = s => s.replace(/ id="mt\d+"/g, "");
+    const upd = row.updated_at ? new Date(row.updated_at).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" }) : "";
+    const tocRow = (id, kick, t) => `<li><button type="button" data-bkto="${id}"><span>${kick ? `<small>${esc(kick)}</small>` : ""}${mdInline(t)}</span><i aria-hidden="true"></i><em data-bkpg="${id}"></em></button></li>`;
+    let h = `<div class="bkb-cover" style="--jc:${c.color};--ph:url('${c.ph}');"><i class="mtb-tag">${esc(c.tab || "")}</i>
+      <div class="bkb-cv-t"><small>Bahan Ajar Pengajar · Discipleship Journey JB3</small><b>${mdInline(intro[0].replace(/^# /, ""))}</b></div>
+      <span class="bkb-cv-f">${les.length} pelajaran${upd ? " · diperbarui " + esc(upd) : ""}</span></div>`;
+    h += `<div class="bkb-sect"><span class="bkb-anc" id="bkbtoc"></span><h1 class="mr-h1">Daftar Isi</h1><ol class="bkb-toc">${tocRow("bkb0", "", "Pengantar")}${les.map((L, i) => { const [k, t] = bkSplitHead(L.head); return tocRow("bkb" + (i + 1), k, t); }).join("")}</ol>
+      <div class="bkb-dl"><span>Unduh seluruh buku</span><button type="button" class="mt-dlb" data-mtdl="pdf:all">⬇ PDF</button><button type="button" class="mt-dlb" data-mtdl="doc:all">⬇ Word</button></div></div>`;
+    h += `<div class="bkb-sect"><span class="bkb-anc" id="bkb0"></span><p class="bkb-kick">Pengantar</p>${MT_CUR.edit ? `<div class="bkb-acts"><button type="button" class="mt-teach mt-edb" data-mtedit="0">✎ Ubah</button></div>` : ""}${noId(mdBlocks(intro.slice(1)))}</div>`;
+    les.forEach((L, i) => { const [k, t] = bkSplitHead(L.head), n = i + 1;
+      h += `<div class="bkb-sect"><span class="bkb-anc" id="bkb${n}"></span>${k ? `<p class="bkb-kick">${esc(k)}</p>` : ""}<h1 class="mr-h1">${mdInline(t)}</h1>
+        <div class="bkb-acts">${MT_CUR.edit ? `<button type="button" class="mt-teach mt-edb" data-mtedit="${n}">✎ Ubah</button>` : ""}<button type="button" class="mt-teach" data-mtteach="${n}">▶ Mode Mengajar</button><button type="button" class="mt-dlb" data-mtdl="pdf:${n}">⬇ PDF</button><button type="button" class="mt-dlb" data-mtdl="doc:${n}">⬇ Word</button></div>
+        ${noId(mdBlocks(L.lines))}</div>`; });
+    h += `<div class="bkb-sect bkb-end"><p>— Selesai —</p><b>${mdInline(intro[0].replace(/^# /, ""))}</b><button type="button" class="mt-teach" data-bkto="bkbtoc">☰ Kembali ke Daftar Isi</button></div>`;
+    return h;
+  }
+  function bookPageNums() {   // nomor halaman di Daftar Isi
+    const bk = BOOK.el && BOOK.el.querySelector(".bk"), st = bk && BK.get(bk); if (!st) return;
+    bk.querySelectorAll("[data-bkpg]").forEach(e => { const a = bk.querySelector("#" + e.dataset.bkpg); e.textContent = a ? bkColOf(bk, a) + 1 : ""; });
+  }
+  function bookOpen(key) {
+    const c = MT_SETS.dj.tabs.find(x => x.key === key); if (!c) return;
+    if (!(state.materi || []).some(r => r.key === key)) { toast("Buku ini belum ada isinya."); return; }
+    if (state.materiKey !== key || MT_CUR.key !== key) { state.materiKey = key; if (RENDER.materi) RENDER.materi(); }
+    if (!BOOK.el) {
+      const d = document.createElement("div"); d.className = "mr bkb"; d.setAttribute("role", "dialog"); d.setAttribute("aria-label", "Buku bahan ajar");
+      d.innerHTML = `<div class="mr-top"><button type="button" data-bkx="1" aria-label="Tutup buku">✕</button><b></b><button type="button" data-bkto="bkbtoc" aria-label="Daftar isi" title="Daftar isi">☰</button><button type="button" data-bkfs="-" aria-label="Huruf lebih kecil">A−</button><button type="button" data-bkfs="+" aria-label="Huruf lebih besar">A+</button></div><div class="mr-pg"></div>`;
+      const w = document.createElement("div"); w.className = "djx"; w.appendChild(d); document.body.appendChild(w);
+      d.addEventListener("click", e => {
+        const t = e.target.closest("[data-bkx],[data-bkto],[data-bkfs]"); if (!t) return;
+        const bk = d.querySelector(".bk");
+        if (t.dataset.bkx) bookClose();
+        else if (t.dataset.bkto) bkJump(bk, d.querySelector("#" + t.dataset.bkto));
+        else { const f = Math.min(26, Math.max(14, mrFs() + (t.dataset.bkfs === "+" ? 1 : -1)));
+          try { localStorage.setItem("dj_mr_fs", f); } catch (_) {} d.style.setProperty("--mrfs", f + "px"); bkLay(bk, true); bookPageNums(); }
+      });
+      BOOK.el = d;
+    }
+    const d = BOOK.el;
+    d.querySelector(".mr-top b").textContent = c.title;
+    d.querySelector(".mr-pg").innerHTML = bkWrap(bookHTML(key), "bk-full");
+    const bk = d.querySelector(".bk"); bk.dataset.pos = "dj_bk_pos:" + key;
+    d.style.setProperty("--mrfs", mrFs() + "px");
+    d.hidden = false; document.body.classList.add("tc-on"); BOOK.key = key;
+    bkLay(bk); bookPageNums();
+    if (!BOOK.hist) { try { history.pushState({ djbk: 1 }, ""); BOOK.hist = true; } catch (_) {} }
+  }
+  function bookClose(fromPop) {
+    if (!BOOK.el || BOOK.el.hidden) return;
+    BOOK.el.hidden = true; BOOK.key = null; document.body.classList.remove("tc-on");
+    if (!fromPop && BOOK.hist) { try { if (history.state && history.state.djbk) history.back(); } catch (_) {} }
+    BOOK.hist = false;
+  }
+  window.addEventListener("popstate", () => { if (!(history.state && history.state.djbk)) bookClose(true); });   // kembali dari editor = tetap di buku
+  document.addEventListener("keydown", e => { if (!BOOK.key || MR.i !== null || TEACH.i !== null || (MTE.el && !MTE.el.hidden)) return;
+    const bk = BOOK.el.querySelector(".bk");
+    if (e.key === "Escape") bookClose();
+    else if (e.key === "ArrowRight" || e.key === "PageDown" || e.key === " ") { e.preventDefault(); bkFlip(bk, 1); }
+    else if (e.key === "ArrowLeft" || e.key === "PageUp") { e.preventDefault(); bkFlip(bk, -1); } });
+  document.addEventListener("click", e => {
+    const t = e.target.closest && e.target.closest("[data-mtbook]"); if (!t) return;
+    e.preventDefault(); bookOpen(t.dataset.mtbook);
   });
 
   // ---------------------------------------------------------------- Ubah Bahan Ajar (editor)
@@ -3206,6 +3320,7 @@
       const openI = MTE_LAST_I = MTE.i;
       if (RENDER[state.page]) RENDER[state.page]();
       const sec = document.querySelectorAll(".mt-sec")[openI - 1]; if (sec) sec.open = true;
+      if (BOOK.key) bookOpen(BOOK.key);   // 2026-11-21: buku yg sedang dibaca ikut diperbarui, halaman tetap
     } catch (err) {
       if (String(err && err.message) === "STALE") { MTE.force = true; mteStat("Ada versi lebih baru");
         toast("Bahan ini baru saja diubah orang lain. Tekan Simpan sekali lagi untuk tetap menyimpan versimu."); }
@@ -3408,15 +3523,20 @@ ${body}</body></html>`;
     // nanti diisi materi untuk peserta. Family & Gap Kids tetap pakai tombol tab.
     const nLes = r => Math.max(0, String(r.body || "").split(/\n(?=# )/).length - 1);
     const mtBook = c => { const r = rows.find(x => x.key === c.key), on = !!cur && cur.key === c.key;
-      return `<button type="button" class="mtb${on ? " on" : ""}" style="--jc:${c.color};--ph:url('${c.ph}');" data-materitab="${c.key}" aria-pressed="${on}" aria-label="Buku ${esc(c.title)}${on ? " (sedang dibuka)" : ""}">${on ? `<i class="mtb-rib" aria-hidden="true"></i>` : ""}<span class="mtb-cv"><i class="mtb-tag">${esc(c.tab)}</i><b class="mtb-t">${esc(c.title)}</b><small class="mtb-s">${r ? nLes(r) + " pelajaran" : "Belum ada isi"}</small></span></button>`; };
+      return `<button type="button" class="mtb${on ? " on" : ""}" style="--jc:${c.color};--ph:url('${c.ph}');" data-mtbook="${c.key}" aria-label="Buka buku ${esc(c.title)}${on ? " (terakhir dibaca)" : ""}">${on ? `<i class="mtb-rib" aria-hidden="true"></i>` : ""}<span class="mtb-cv"><i class="mtb-tag">${esc(c.tab)}</i><b class="mtb-t">${esc(c.title)}</b><small class="mtb-s">${r ? nLes(r) + " pelajaran" : "Belum ada isi"}</small></span></button>`; };
     const mtSoon = c => `<div class="mtb mtb-soon" style="--jc:${c.color};--ph:url('${c.ph}');" role="img" aria-label="Buku peserta ${esc(c.title)} — isi menyusul"><span class="mtb-cv"><i class="mtb-tag">${esc(c.tab)}</i><i class="mtb-lk">Segera</i><b class="mtb-t">${esc(c.title)}</b><small class="mtb-s">Untuk peserta</small></span></div>`;
-    const shelves = set === "dj" ? `<div class="mtr-h"><b>📚 Rak Bahan Pengajar</b><small>${S.tabs.length} buku · ketuk untuk membuka</small></div>
+    const shelves = set === "dj" ? `<div class="mtr-h"><b>📚 Rak Bahan Pengajar</b><small>${S.tabs.length} buku · ketuk untuk membaca</small></div>
       <div class="mtr"><div class="mtr-shelf">${S.tabs.map(mtBook).join("")}</div></div>
       <div class="mtr-h"><b>🎒 Rak Peserta</b><small>isi menyusul</small></div>
       <div class="mtr mtr-ps"><div class="mtr-shelf">${S.tabs.map(mtSoon).join("")}</div></div>
-      ${cur ? `<div class="mt-open" id="mtOpen" style="--jc:${(S.tabs.find(x => x.key === cur.key) || {}).color || "var(--accent)"};"><span>📖 Sedang dibuka</span><b>${esc(MT_CUR.title)}</b></div>` : ""}` : "";
+      <p class="jd-note mtr-note">Ketuk sebuah buku untuk membacanya seperti buku: sampul, daftar isi, lalu balik halaman (geser / ‹ ›). Halaman terakhir dibaca diingat.</p>` : "";
+    if (shelves) {   // DJ: hanya rak; isi dibaca di buku layar penuh (bookOpen). mdDoc tetap dipanggil utk MT_LESSONS (Mode Mengajar).
+      if (cur) mdDoc(cur.body);
+      box.innerHTML = `<div class="mt-lock">${S.lock}</div>${shelves}`;
+      return;
+    }
     box.innerHTML = `<div class="mt-lock">${S.lock}</div>
-      ${shelves || `<div class="mt-tabs">${tabs}</div>`}
+      <div class="mt-tabs">${tabs}</div>
       ${cur ? `<div class="mt-dlall"><span>Unduh semua bahan ${esc(MT_CUR.title)}</span><button type="button" class="mt-dlb" data-mtdl="pdf:all">⬇ PDF</button><button type="button" class="mt-dlb" data-mtdl="doc:all">⬇ Word</button></div>` : ""}
       ${cur ? mdDoc(cur.body) + `<p class="jd-note">Diperbarui ${esc(new Date(cur.updated_at).toLocaleDateString("id-ID", { day:"numeric", month:"long", year:"numeric" }))}</p>`
         : `<div class="card pad"><p class="sub">Belum ada bahan untuk kelas ini.</p></div>`}`;
