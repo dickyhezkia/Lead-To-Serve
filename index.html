@@ -883,6 +883,23 @@
   .bkb-tp-d { margin:0; font-weight:800; }
   .bkb-tp-e { margin:.25em 0 0; font-size:.9em; color:var(--ink-soft); }
   .bkb-tp-p { margin:2.6em 0 0; font-size:.85em; font-weight:800; letter-spacing:.16em; text-transform:uppercase; color:var(--ink); }
+  .bkp-rf { break-before:column; }
+  .bkp-rf-h { font-family:var(--font-display); font-size:1.35em; margin:.1em 0 .2em; }
+  .bkp-rf-s { font-size:.8em; color:var(--ink-soft); margin:0 0 1em; }
+  .bkp-f { display:block; break-inside:avoid; margin:0 0 1em; }
+  .bkp-f > span { display:block; font-size:.88em; font-weight:700; margin:0 0 .35em; line-height:1.35; }
+  .bkp-f textarea { display:block; width:100%; box-sizing:border-box; resize:none; padding:.5em .7em; border:1px solid var(--line-strong); border-radius:8px;
+    font:inherit; font-size:.95em; line-height:1.6; color:var(--ink); background:var(--paper) repeating-linear-gradient(transparent 0 calc(1.6em - 1px), var(--line) calc(1.6em - 1px) 1.6em); background-attachment:local; background-position:0 .5em; }
+  .bkp-f textarea:focus { outline:2px solid var(--accent); outline-offset:1px; }
+  .bkp .mr-top .bkp-st { flex:none; font-size:11.5px; color:var(--ink-faint); max-width:120px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .mr-top .bkp-st:empty { display:none; }
+  .pj-book { display:flex; align-items:center; gap:12px; width:100%; margin:0 0 10px; padding:10px 12px; border:1px solid var(--line); border-radius:14px; background:var(--surface); color:var(--ink); font:inherit; text-align:left; cursor:pointer; }
+  .pj-book-cv { flex:none; width:38px; aspect-ratio:5/8; border-radius:2px 6px 6px 2px; background:var(--jc) var(--ph) center/cover; box-shadow:inset 4px 0 0 rgba(0,0,0,.18), 0 2px 5px rgba(0,0,0,.2); display:flex; align-items:center; justify-content:center; }
+  .pj-book-cv img { width:28px; filter:brightness(0) invert(1); opacity:.95; }
+  .pj-book-t { flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; }
+  .pj-book-t b { font-size:15px; }
+  .pj-book-t small { font-size:12.5px; color:var(--ink-soft); line-height:1.35; }
+  .pj-book svg { flex:none; color:var(--jc); }
   .bkb-cp { height:100%; display:flex; flex-direction:column; justify-content:flex-end; }
   .bkb-cp-in { font-size:.78em; line-height:1.6; color:var(--ink-soft); }
   .bkb-cp-in p { margin:0 0 1em; }
@@ -1738,7 +1755,10 @@
     const fin = bjStatus(k) === "done", fbB = fbHomeCardsHTML(k), lts = k === "lts1" || k === "lts2";
     const fb = fbB ? pjFold(k, "fb", "💌", "Feedback kelas", fbSent(k) ? "✓ sudah terkirim" : fin ? "kelas selesai — isi yuk" : "anonim", fbB, fin && !fbSent(k)) : "";
     const work = body ? pjFold(k, "work", "✍️", (result ? "Coba lagi " : "") + (lts ? "post-test & asesmen" : "post-test"), result ? "boleh diulang" : "", body, !fin) : "";
-    return hero + attCardHTML(k) + fb + result + pjAssessHTML(k) + work; };
+    return hero + pjBookHTML(k) + attCardHTML(k) + fb + result + pjAssessHTML(k) + work; };
+  // 2026-11-21 Buku Peserta: kartu di tab kelas (di bawah kartu DJ) → buku layar penuh (bookOpen edisi peserta)
+  const pjBookHTML = k => { if (!BKP_KEYS.includes(k)) return ""; const c = DASH_JOURNEYS.find(x => x.key === k) || {};
+    return `<button type="button" class="pj-book" data-bkpes="${k}" style="--jc:${c.color};--ph:url('${c.ph}');"><span class="pj-book-cv" aria-hidden="true"><img src="./logo.png?v=1" alt=""></span><span class="pj-book-t"><b>📖 Buku Peserta</b><small>Baca materi ${esc(c.title || "")} seperti buku &amp; tulis catatan refleksimu di setiap pelajaran</small></span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button>`; };
 
   function pjStatusPill(st, res) {
     if (res && res.passed) return `✓ Lulus · ${esc(res.band)}`;
@@ -3068,7 +3088,7 @@
   document.addEventListener("click", e => {
     const t = e.target.closest && e.target.closest("[data-bk]");
     if (t) { e.preventDefault(); bkFlip(t.closest(".bk"), +t.dataset.bk); return; }
-    const vp = e.target.closest && e.target.closest(".bk-vp"); if (!vp || e.target.closest("button,a,input,summary")) return;
+    const vp = e.target.closest && e.target.closest(".bk-vp"); if (!vp || e.target.closest("button,a,input,textarea,label,summary")) return;
     if (String(window.getSelection && window.getSelection() || "").trim()) return;   // sedang menyeleksi teks
     const r = vp.getBoundingClientRect(), x = (e.clientX - r.left) / r.width;
     if (x < 0.22) bkFlip(vp.closest(".bk"), -1); else if (x > 0.78) bkFlip(vp.closest(".bk"), 1);
@@ -3076,7 +3096,7 @@
   document.addEventListener("input", e => { const sl = e.target.closest && e.target.closest(".bk-sl"); if (!sl) return;
     const bk = sl.closest(".bk"), st = BK.get(bk); if (st && +sl.value !== st.n) bkGo(bk, +sl.value, false); });
   let BK_T = null;   // geser jari: halaman ikut jari, lepas > 50px = balik
-  document.addEventListener("touchstart", e => { const vp = e.target.closest && e.target.closest(".bk-vp"); if (!vp || e.touches.length > 1) { BK_T = null; return; }
+  document.addEventListener("touchstart", e => { const vp = e.target.closest && e.target.closest(".bk-vp"); if (!vp || e.touches.length > 1 || e.target.closest("textarea")) { BK_T = null; return; }
     BK_T = { bk: vp.closest(".bk"), x: e.touches[0].clientX, y: e.touches[0].clientY, h: null }; }, { passive: true });
   document.addEventListener("touchmove", e => { if (!BK_T) return; const st = BK.get(BK_T.bk); if (!st) return;
     const dx = e.touches[0].clientX - BK_T.x, dy = e.touches[0].clientY - BK_T.y;
@@ -3167,12 +3187,44 @@
   // halaman di bawah (tidak di sampul/halaman kosong/halaman judul; halaman pembuka bab tanpa judul berjalan). Paragraf
   // rata kiri-kanan + pemenggalan kata. ✎ Ubah / ▶ Mode Mengajar / ⬇ Unduh pindah ke menu ⋯ (berlaku utk bab yg dibuka).
   // ⚠️ penanda bab pakai data-bkid (BUKAN id): build-journey.py memberi awalan dj_ pada semua id → di HOME #bkb3 tak ketemu.
-  const BOOK = { el: null, key: null, hist: false, types: {}, chs: [], title: "", cur: null };
+  const BOOK = { el: null, key: null, hist: false, types: {}, chs: [], title: "", cur: null, ed: null, pes: {}, isi: {} };
+  // 2026-11-21 (user: "membuat buku bacaan untuk pesertanya" → "dari buku pengajar · ada kolom isian · mulai 1 dulu"):
+  // Buku Peserta = buku utuh yg sama, isi dari dj_buku_peserta() (server membuang catatan "! " & bagian khusus pengajar,
+  // v_dj_buku_peserta.sql) + halaman "Catatan & Refleksi" di akhir tiap pelajaran (kolom isian, tersimpan otomatis per orang
+  // di dj_buku_isian). Dibuka dari tab kelas (kartu "Buku Peserta") & Rak Peserta di Bahan Ajar. Kelas lain menyusul:
+  // tambahkan key di BKP_KEYS + v_keys di SQL.
+  const BKP_KEYS = ["rs1"];
+  const BKP_Q = [["inti", "Hal terpenting yang saya pelajari dari pelajaran ini", 4], ["laku", "Yang akan saya lakukan minggu ini", 3],
+    ["tanya", "Pertanyaan yang ingin saya tanyakan di kelas", 3], ["catat", "Catatan bebas", 5]];
+  function bkpRefl(n, L) {
+    const memo = L.lines.map(l => l.replace(/^#+\s*/, "").match(/^AYAT(?:-AYAT)?\s+HAFALAN\s*:?\s*(.+)$/i)).find(Boolean);
+    const f = (id, q, rows) => `<label class="bkp-f"><span>${q}</span><textarea data-bkpf="p${n}_${id}" rows="${rows}" placeholder="Tulis di sini…"></textarea></label>`;   // tanpa id: build HOME memberi awalan dj_
+    return `<div class="bkp-rf"><span class="bkb-anc" data-bkid="bkrf${n}"></span><p class="bkb-kick">Pelajaran ${n}</p><h3 class="bkp-rf-h">✍️ Catatan &amp; Refleksi</h3>
+      <p class="bkp-rf-s">Tulisanmu tersimpan otomatis di akunmu — hanya kamu yang bisa melihatnya.</p>
+      ${memo ? f("ayat", `Ayat hafalan: <b>${esc(memo[1].replace(/\*+/g, ""))}</b> — tuliskan ayatnya sambil menghafal`, 3) : ""}
+      ${BKP_Q.map(q => f(q[0], q[1], q[2])).join("")}</div>`;
+  }
+  const bkpLocal = key => { try { return JSON.parse(localStorage.getItem("dj_bkp_isi:" + key) || "null"); } catch (_) { return null; } };
+  const bkpSetLocal = (key, data, dirty) => { try { localStorage.setItem("dj_bkp_isi:" + key, JSON.stringify({ data, dirty })); } catch (_) {} };
+  const BKP_SV = { t: 0, busy: false, again: false };
+  function bkpStatus(t) { const e = BOOK.el && BOOK.el.querySelector(".bkp-st"); if (e) e.textContent = t; }
+  function bkpSave(now) {
+    const key = BOOK.ed && BOOK.key; if (!key) return;
+    clearTimeout(BKP_SV.t);
+    if (!now) { BKP_SV.t = setTimeout(() => bkpSave(true), 900); return; }
+    if (BKP_SV.busy) { BKP_SV.again = true; return; }
+    BKP_SV.busy = true; bkpStatus("Menyimpan…");
+    const data = Object.assign({}, BOOK.isi[key] || {});
+    DB.saveIsian(key, data).then(() => { bkpSetLocal(key, data, false); bkpStatus("Tersimpan ✓"); })
+      .catch(() => { bkpStatus("Belum tersimpan · dicoba lagi"); BKP_SV.t = setTimeout(() => bkpSave(true), 8000); })
+      .finally(() => { BKP_SV.busy = false; if (BKP_SV.again) { BKP_SV.again = false; bkpSave(true); } });
+  }
   const BK_EDISI = "Edisi Revisi 2026";
   const bkSplitHead = h => { const m = String(h).match(/^((?:Pelajaran|Bagian|Sesi|Bab)\s+\d+)\s*[—–·:\-]\s*(.+)$/i); return m ? [m[1], m[2]] : ["", h]; };
   const bkTitleParts = t => { const m = String(t).match(/^(.+?)\s[—–-]\s(.+)$/); return m ? [m[1].trim(), m[2].trim()] : [String(t).trim(), ""]; };
-  function bookHTML(key) {
-    const c = MT_SETS.dj.tabs.find(x => x.key === key) || {}, row = (state.materi || []).find(r => r.key === key);
+  function bookHTML(key, ed) {
+    const c = MT_SETS.dj.tabs.find(x => x.key === key) || {}, row = ed ? BOOK.pes[key] : (state.materi || []).find(r => r.key === key);
+    const LBL = ed ? "Buku Peserta" : "Bahan Ajar Pengajar";
     if (!row) return "";
     const parts = String(row.body || "").split(/\n(?=# )/), intro = parts[0].split("\n");
     const les = parts.slice(1).map(p => { const L = p.split("\n"); return { head: L[0].replace(/^# /, ""), lines: L.slice(1) }; });
@@ -3185,25 +3237,25 @@
     // sampul depan (mode 2 halaman: didahului halaman kosong di kiri = buku tertutup)
     let h = `<div class="bkb-lead" data-bkpt="blank"></div>
       <div class="bkb-cover" data-bkpt="cover" style="--jc:${c.color};--ph:url('${c.ph}');"><i class="mtb-tag">${esc(c.tab || "")}</i><img class="bkb-logo" src="./logo.png?v=1" alt="JB3 Home for All">
-      <div class="bkb-cv-t"><small>Bahan Ajar Pengajar · Discipleship Journey</small><b>${esc(tt)}</b>${tn ? `<em>${esc(tn)}</em>` : ""}</div>
+      <div class="bkb-cv-t"><small>${LBL} · Discipleship Journey</small><b>${esc(tt)}</b>${tn ? `<em>${esc(tn)}</em>` : ""}</div>
       <span class="bkb-cv-f">Gereja JB3 · ${BK_EDISI}</span></div>`;
     // halaman judul (kanan) + keterangan terbitan (kiri, di baliknya)
     h += `<div class="bkb-sect bkb-tp">${anc("bkbtp", 'data-recto="1" data-bkpt="title"')}
-      <img class="bkb-tp-logo" src="./logo.png?v=1" alt="JB3 Home for All"><p class="bkb-tp-k">Bahan Ajar Pengajar</p>
+      <img class="bkb-tp-logo" src="./logo.png?v=1" alt="JB3 Home for All"><p class="bkb-tp-k">${LBL}</p>
       <h1 class="bkb-tp-t">${esc(tt)}</h1>${tn ? `<p class="bkb-tp-s">${esc(tn)}</p>` : ""}<i class="bkb-tp-r" aria-hidden="true"></i>
       <p class="bkb-tp-d">Discipleship Journey</p><p class="bkb-tp-e">${BK_EDISI}</p><p class="bkb-tp-p">Gereja JB3</p></div>`;
     h += `<div class="bkb-sect bkb-cp">${anc("bkbcp", 'data-bkpt="copy"')}<div class="bkb-cp-in">
-      <p><b>${esc(full)}</b><br>Bahan Ajar Pengajar · Discipleship Journey</p>
+      <p><b>${esc(full)}</b><br>${LBL} · Discipleship Journey</p>
       <p>${BK_EDISI}${upd ? `<br>Terakhir diperbarui ${esc(upd)}` : ""}<br>${les.length} pelajaran</p>
-      <p>Gereja JB3<br>Untuk kalangan sendiri — dipakai oleh pengajar kelas Discipleship Journey. Tidak untuk diperjualbelikan.</p></div></div>`;
+      <p>Gereja JB3<br>Untuk kalangan sendiri — dipakai oleh ${ed ? "peserta" : "pengajar"} kelas Discipleship Journey. Tidak untuk diperjualbelikan.</p></div></div>`;
     // Daftar Isi
     h += `<div class="bkb-sect">${anc("bkbtoc", 'data-recto="1" data-bkpt="open" data-bkch="toc" data-bkt="Daftar Isi"')}<h1 class="mr-h1 bkb-toc-h">Daftar Isi</h1><p class="bkb-hint">Ketuk judul untuk langsung ke bab itu · ☰ di atas kembali ke sini</p>
       <ol class="bkb-toc">${tocRow("bkb0", "", "Pengantar")}${les.map((L, i) => { const [k, t] = bkSplitHead(L.head); return tocRow("bkb" + (i + 1), k, t); }).join("")}</ol></div>`;
     // Pengantar + bab
-    h += `<div class="bkb-sect bkb-ch">${anc("bkb0", 'data-recto="1" data-bkpt="open" data-bkch="0" data-bkt="Pengantar"')}<p class="bkb-kick">Pengantar</p><h1 class="mr-h1">${esc(tt)}</h1><i class="bkb-rule" aria-hidden="true"></i>${noId(mdBlocks(intro.slice(1)))}</div>`;
+    h += `<div class="bkb-sect bkb-ch">${anc("bkb0", 'data-recto="1" data-bkpt="open" data-bkch="0" data-bkt="Pengantar"')}<p class="bkb-kick">Pengantar</p><h1 class="mr-h1">${esc(tt)}</h1><i class="bkb-rule" aria-hidden="true"></i>${ed ? `<h3 class="mt-h3">Cara memakai buku ini</h3><ul class="mt-ul"><li>Baca satu pelajaran sebelum atau sesudah kelas — balik halaman dengan geser atau ‹ ›.</li><li>Di akhir setiap pelajaran ada halaman <b>Catatan &amp; Refleksi</b>. Tulisanmu tersimpan otomatis dan hanya bisa kamu lihat.</li><li>Ketuk ☰ di atas untuk kembali ke Daftar Isi kapan saja.</li></ul>` : ""}${noId(mdBlocks(intro.slice(1)))}</div>`;
     les.forEach((L, i) => { const [k, t] = bkSplitHead(L.head), n = i + 1, tPlain = t.replace(/\*+/g, "");
       h += `<div class="bkb-sect bkb-ch">${anc("bkb" + n, `data-recto="1" data-bkpt="open" data-bkch="${n}" data-bkt="${esc(k ? k + " · " + tPlain : tPlain)}"`)}${k ? `<p class="bkb-kick">${esc(k)}</p>` : ""}<h1 class="mr-h1">${mdInline(t)}</h1><i class="bkb-rule" aria-hidden="true"></i>
-        ${noId(mdBlocks(L.lines))}</div>`; });
+        ${noId(mdBlocks(L.lines))}${ed ? bkpRefl(n, L) : ""}</div>`; });
     h += `<div class="bkb-sect bkb-end">${anc("bkbend", 'data-recto="1" data-bkpt="open" data-bkch="end" data-bkt="Selesai"')}<img class="bkb-end-logo" src="./logo.png?v=1" alt="JB3 Home for All"><p>— Selesai —</p><b>${esc(full)}</b><small>${BK_EDISI} · Gereja JB3</small><button type="button" class="mt-teach" data-bkto="bkbtoc">☰ Kembali ke Daftar Isi</button></div>`;
     // sampul belakang (mode 2 halaman: di halaman kiri)
     h += `<div class="bkb-sect bkb-back" data-verso="1" data-bkpt="cover" style="--jc:${c.color};"><img src="./logo.png?v=1" alt="JB3 Home for All"><b>Discipleship Journey</b><span>${esc(tt)}${tn ? " · " + esc(tn) : ""}</span><small>Gereja JB3 · ${BK_EDISI}</small></div>`;
@@ -3249,13 +3301,29 @@
       + `<button type="button" data-mtdl="pdf:all">⬇ Unduh seluruh buku · PDF</button><button type="button" data-mtdl="doc:all">⬇ Unduh seluruh buku · Word</button>`;
     m.hidden = false;
   }
-  function bookOpen(key) {
+  function bookOpen(key, ed) {
     const c = MT_SETS.dj.tabs.find(x => x.key === key); if (!c) return;
-    if (!(state.materi || []).some(r => r.key === key)) { toast("Buku ini belum ada isinya."); return; }
-    if (state.materiKey !== key || MT_CUR.key !== key) { state.materiKey = key; if (RENDER.materi) RENDER.materi(); }
+    ed = ed || null;
+    if (ed) {
+      if (!BKP_KEYS.includes(key)) { toast("Buku peserta kelas ini menyusul."); return; }
+      if (!BOOK.pes[key]) {
+        if (BOOK.loading) return; BOOK.loading = true; toast("Membuka buku…");
+        Promise.all([DB.bukuPeserta(key), DB.getIsian(key).catch(() => null)]).then(([row, isi]) => {
+          if (!row) { toast("Buku peserta belum tersedia."); return; }
+          const loc = bkpLocal(key);   // isian yg belum sempat terkirim (sinyal putus) menang atas versi server
+          BOOK.pes[key] = row; BOOK.isi[key] = loc && loc.dirty ? Object.assign({}, isi || {}, loc.data) : (isi || (loc && loc.data) || {});
+          bookOpen(key, ed);
+          if (loc && loc.dirty) bkpSave(true);
+        }).catch(err => toast("Buku belum bisa dibuka: " + (err.message || err))).finally(() => { BOOK.loading = false; });
+        return;
+      }
+    } else {
+      if (!(state.materi || []).some(r => r.key === key)) { toast("Buku ini belum ada isinya."); return; }
+      if (state.materiKey !== key || MT_CUR.key !== key) { state.materiKey = key; if (RENDER.materi) RENDER.materi(); }
+    }
     if (!BOOK.el) {
       const d = document.createElement("div"); d.className = "mr bkb"; d.setAttribute("role", "dialog"); d.setAttribute("aria-label", "Buku bahan ajar");
-      d.innerHTML = `<div class="mr-top"><button type="button" data-bkx="1" aria-label="Tutup buku">✕</button><b></b><button type="button" data-bkto="bkbtoc" aria-label="Daftar isi" title="Daftar isi">☰</button><button type="button" data-bkfs="-" aria-label="Huruf lebih kecil">A−</button><button type="button" data-bkfs="+" aria-label="Huruf lebih besar">A+</button><button type="button" data-bkmenu="1" aria-label="Menu: ubah, mengajar, unduh" title="Ubah · Mengajar · Unduh">⋯</button></div>
+      d.innerHTML = `<div class="mr-top"><button type="button" data-bkx="1" aria-label="Tutup buku">✕</button><b></b><button type="button" data-bkto="bkbtoc" aria-label="Daftar isi" title="Daftar isi">☰</button><button type="button" data-bkfs="-" aria-label="Huruf lebih kecil">A−</button><button type="button" data-bkfs="+" aria-label="Huruf lebih besar">A+</button><button type="button" data-bkmenu="1" aria-label="Menu: ubah, mengajar, unduh" title="Ubah · Mengajar · Unduh">⋯</button><small class="bkp-st" aria-live="polite"></small></div>
         <div class="bkb-menu" hidden></div><div class="mr-pg"></div>`;
       const w = document.createElement("div"); w.className = "djx"; w.appendChild(d); document.body.appendChild(w);
       d.addEventListener("click", e => {
@@ -3269,13 +3337,24 @@
         else { const f = Math.min(26, Math.max(14, mrFs() + (t.dataset.bkfs === "+" ? 1 : -1)));
           try { localStorage.setItem("dj_mr_fs", f); } catch (_) {} d.style.setProperty("--mrfs", f + "px"); bkLay(bk, true); bookPageNums(); }
       });
+      d.addEventListener("input", e => { const t = e.target.closest && e.target.closest("textarea[data-bkpf]"); if (!t || !BOOK.ed) return;
+        const m = BOOK.isi[BOOK.key] || (BOOK.isi[BOOK.key] = {});
+        if (t.value.trim()) m[t.dataset.bkpf] = t.value; else delete m[t.dataset.bkpf];
+        bkpSetLocal(BOOK.key, m, true); bkpStatus("…"); bkpSave(); });
+      d.addEventListener("focusout", e => { if (e.target.matches && e.target.matches("textarea[data-bkpf]") && BKP_SV.t) bkpSave(true); });
+      d.addEventListener("focusin", e => { const vp = e.target.closest && e.target.closest(".bk-vp"); if (vp) requestAnimationFrame(() => { vp.scrollLeft = 0; vp.scrollTop = 0; }); });
       BOOK.el = d;
     }
     const d = BOOK.el;
     bookMenu(false);
-    d.querySelector(".mr-top b").textContent = c.title;
-    d.querySelector(".mr-pg").innerHTML = bkWrap(bookHTML(key), "bk-full");
-    const bk = d.querySelector(".bk"); bk.dataset.pos = "dj_bk_pos:" + key;
+    BOOK.ed = ed;
+    d.classList.toggle("bkp", !!ed);
+    d.querySelector("[data-bkmenu]").hidden = !!ed;
+    bkpStatus("");
+    d.querySelector(".mr-top b").textContent = ed ? "Buku Peserta · " + c.title : c.title;
+    d.querySelector(".mr-pg").innerHTML = bkWrap(bookHTML(key, ed), "bk-full");
+    const bk = d.querySelector(".bk"); bk.dataset.pos = (ed ? "dj_bkp_pos:" : "dj_bk_pos:") + key;
+    if (ed) { const m = BOOK.isi[key] || {}; bk.querySelectorAll("textarea[data-bkpf]").forEach(t => { t.value = m[t.dataset.bkpf] || ""; }); }
     bk.querySelector(".bk-flow").setAttribute("lang", "id");   // pemenggalan kata bahasa Indonesia
     bk.insertAdjacentHTML("afterbegin", `<div class="bk-hd" aria-hidden="true"></div>`);
     bk.querySelector(".bk-vp").insertAdjacentHTML("afterend", `<div class="bk-ft" aria-hidden="true"></div>`);
@@ -3290,6 +3369,7 @@
   }
   function bookClose(fromPop) {
     if (!BOOK.el || BOOK.el.hidden) return;
+    if (BOOK.ed && BKP_SV.t) bkpSave(true);
     BOOK.el.hidden = true; BOOK.key = null; document.body.classList.remove("tc-on");
     if (!fromPop && BOOK.hist) { try { if (history.state && history.state.djbk) history.back(); } catch (_) {} }
     BOOK.hist = false;
@@ -3301,8 +3381,8 @@
     else if (e.key === "ArrowRight" || e.key === "PageDown" || e.key === " ") { e.preventDefault(); bkFlip(bk, 1); }
     else if (e.key === "ArrowLeft" || e.key === "PageUp") { e.preventDefault(); bkFlip(bk, -1); } });
   document.addEventListener("click", e => {
-    const t = e.target.closest && e.target.closest("[data-mtbook]"); if (!t) return;
-    e.preventDefault(); bookOpen(t.dataset.mtbook);
+    const t = e.target.closest && e.target.closest("[data-mtbook],[data-bkpes]"); if (!t) return;
+    e.preventDefault(); if (t.dataset.bkpes) bookOpen(t.dataset.bkpes, "peserta"); else bookOpen(t.dataset.mtbook);
   });
 
   // ---------------------------------------------------------------- Ubah Bahan Ajar (editor)
@@ -3468,7 +3548,7 @@
       const openI = MTE_LAST_I = MTE.i;
       if (RENDER[state.page]) RENDER[state.page]();
       const sec = document.querySelectorAll(".mt-sec")[openI - 1]; if (sec) sec.open = true;
-      if (BOOK.key) bookOpen(BOOK.key);   // 2026-11-21: buku yg sedang dibaca ikut diperbarui, halaman tetap
+      if (BOOK.key) bookOpen(BOOK.key, BOOK.ed);   // 2026-11-21: buku yg sedang dibaca ikut diperbarui, halaman tetap
     } catch (err) {
       if (String(err && err.message) === "STALE") { MTE.force = true; mteStat("Ada versi lebih baru");
         toast("Bahan ini baru saja diubah orang lain. Tekan Simpan sekali lagi untuk tetap menyimpan versimu."); }
@@ -3646,7 +3726,7 @@ ${body}</body></html>`;
             { key:"kids_ocean", color:"#6C5CE7", icon:"🐋", tab:"Ocean", title:"Gap Kids Ocean — Okt–Des 2026" }] },
   };
   // 2026-11-21 (user: "rak peserta sementara disembunyikan"): ubah ke true untuk menampilkan lagi Rak Peserta.
-  const MT_RAK_PESERTA = false;
+  const MT_RAK_PESERTA = true;   // 2026-11-21: tampil lagi — RS1 sudah ada edisi peserta (BKP_KEYS), lainnya "Segera"
   function renderMateri(set) {
     const S = MT_SETS[set];
     if (!S.can()) { show(state.persona === "ADMIN" ? "home" : "journey", { replace:true }); return; }
@@ -3679,10 +3759,11 @@ ${body}</body></html>`;
     const mtBook = c => { const r = rows.find(x => x.key === c.key), on = !!cur && cur.key === c.key;
       return `<button type="button" class="mtb${on ? " on" : ""}" style="--jc:${c.color};--ph:url('${c.ph}');" data-mtbook="${c.key}" aria-label="Buka buku ${esc(c.title)}${on ? " (terakhir dibaca)" : ""}">${on ? `<i class="mtb-rib" aria-hidden="true"></i>` : ""}<span class="mtb-cv"><i class="mtb-tag">${esc(c.tab)}</i><img class="mtb-logo" src="./logo.png?v=1" alt="JB3"><span class="mtb-txt"><b class="mtb-t">${esc(c.title)}</b>${mtName(c) ? `<em class="mtb-nm">${esc(mtName(c))}</em>` : ""}<small class="mtb-s">${r ? nLes(r) + " pelajaran · Edisi 2026" : "Belum ada isi"}</small></span></span></button>`; };
     const mtSoon = c => `<div class="mtb mtb-soon" style="--jc:${c.color};--ph:url('${c.ph}');" role="img" aria-label="Buku peserta ${esc(c.title)} — isi menyusul"><span class="mtb-cv"><i class="mtb-tag">${esc(c.tab)}</i><i class="mtb-lk">Segera</i><img class="mtb-logo" src="./logo.png?v=1" alt="JB3"><span class="mtb-txt"><b class="mtb-t">${esc(c.title)}</b>${mtName(c) ? `<em class="mtb-nm">${esc(mtName(c))}</em>` : ""}<small class="mtb-s">Untuk peserta</small></span></span></div>`;
+    const mtPes = c => `<button type="button" class="mtb" style="--jc:${c.color};--ph:url('${c.ph}');" data-bkpes="${c.key}" aria-label="Buka buku peserta ${esc(c.title)}"><span class="mtb-cv"><i class="mtb-tag">${esc(c.tab)}</i><img class="mtb-logo" src="./logo.png?v=1" alt="JB3"><span class="mtb-txt"><b class="mtb-t">${esc(c.title)}</b>${mtName(c) ? `<em class="mtb-nm">${esc(mtName(c))}</em>` : ""}<small class="mtb-s">Buku Peserta</small></span></span></button>`;
     const shelves = set === "dj" ? `<div class="mtr-h"><b>📚 Rak Bahan Pengajar</b><small>${S.tabs.length} buku · ketuk untuk membaca</small></div>
       <div class="mtr"><div class="mtr-shelf">${S.tabs.map(mtBook).join("")}</div></div>
-      ${MT_RAK_PESERTA ? `<div class="mtr-h"><b>🎒 Rak Peserta</b><small>isi menyusul</small></div>
-      <div class="mtr mtr-ps"><div class="mtr-shelf">${S.tabs.map(mtSoon).join("")}</div></div>` : ""}
+      ${MT_RAK_PESERTA ? `<div class="mtr-h"><b>🎒 Rak Peserta</b><small>${BKP_KEYS.length} buku · yang lain menyusul</small></div>
+      <div class="mtr mtr-ps"><div class="mtr-shelf">${S.tabs.map(c => BKP_KEYS.includes(c.key) ? mtPes(c) : mtSoon(c)).join("")}</div></div>` : ""}
       <p class="jd-note mtr-note">Ketuk sebuah buku untuk membacanya seperti buku: sampul, daftar isi, lalu balik halaman (geser / ‹ ›). Halaman terakhir dibaca diingat.</p>` : "";
     if (shelves) {   // DJ: hanya rak; isi dibaca di buku layar penuh (bookOpen). mdDoc tetap dipanggil utk MT_LESSONS (Mode Mengajar).
       if (cur) mdDoc(cur.body);

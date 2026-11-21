@@ -517,6 +517,23 @@ window.makeDB = function makeDB(sb) {
       if (!data || !data.length) throw new Error("Kamu belum punya izin mengubah bahan ajar ini.");
       return data[0];
     },
+    // 2026-11-21 Buku Peserta DJ: edisi peserta disaring di server (v_dj_buku_peserta.sql: tanpa catatan "! " & bagian
+    // khusus pengajar) + kolom isian/refleksi milik sendiri (dj_buku_isian, RLS pemilik saja).
+    async bukuPeserta(key) {
+      const { data, error } = await sb.rpc("dj_buku_peserta", { p_key:key });
+      if (error) throw error;
+      return (data || [])[0] || null;
+    },
+    async getIsian(book) {
+      const s = await this.session(); if (!s) return {};
+      const { data, error } = await sb.from("dj_buku_isian").select("data").eq("profile_id", s.user.id).eq("book", book).maybeSingle();
+      if (error) throw error;
+      return (data && data.data) || {};
+    },
+    async saveIsian(book, obj) {
+      const s = await this.session(); if (!s) throw new Error("Belum login");
+      wrap(await sb.from("dj_buku_isian").upsert({ profile_id:s.user.id, book, data:obj, updated_at:new Date().toISOString() }, { onConflict:"profile_id,book" }));
+    },
 
     // 2026-09-23 (permintaan user - ide "auto-tandai kelas Lead To Serve 1
     // di JB3 begitu 5 bagian S-E-R-V-E lengkap", diusulkan Claude & dipilih
