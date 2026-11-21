@@ -833,9 +833,13 @@
   .mtb-t { position:absolute; left:13px; right:6px; bottom:22px; font-family:var(--font-display); font-size:13px; font-weight:700; line-height:1.15; text-shadow:0 1px 3px rgba(0,0,0,.45); }
   .mtb-s { position:absolute; left:13px; right:6px; bottom:7px; font-size:10px; font-weight:700; opacity:.88; }
   .mtb-rib { position:absolute; top:-8px; right:12px; z-index:2; width:14px; height:28px; background:#F7C948; clip-path:polygon(0 0, 100% 0, 100% 100%, 50% 74%, 0 100%); filter:drop-shadow(0 1px 1px rgba(0,0,0,.25)); }
+  /* 2026-11-21 (user: "tambahkan logo jb3 di setiap buku ajar"): logo JB3 putih di sampul (rak & buku), berwarna di halaman penutup */
+  .mtb-logo { position:absolute; top:34px; left:13px; width:66px; height:auto; filter:brightness(0) invert(1) drop-shadow(0 1px 2px rgba(0,0,0,.5)); opacity:.95; pointer-events:none; }
+  .bkb-logo { position:absolute; top:16px; right:20px; width:150px; max-width:40%; height:auto; filter:brightness(0) invert(1) drop-shadow(0 1px 3px rgba(0,0,0,.5)); }
+  .bkb-end-logo { display:block; width:150px; max-width:60%; height:auto; margin:0 auto 1.4em; opacity:.8; }
   .mtb-soon { cursor:default; }
   .mtb-soon .mtb-cv { filter:grayscale(.9); opacity:.55; }
-  .mtb-lk { position:absolute; top:30px; left:13px; padding:2px 7px; border-radius:999px; background:rgba(0,0,0,.55); color:#fff; font-style:normal; font-size:9.5px; font-weight:800; letter-spacing:.04em; }
+  .mtb-lk { position:absolute; top:60px; left:13px; padding:2px 7px; border-radius:999px; background:rgba(0,0,0,.55); color:#fff; font-style:normal; font-size:9.5px; font-weight:800; letter-spacing:.04em; }
   .mtr-note { margin:4px 2px 0; }
   .tc { z-index:10000 !important; } .mte { z-index:10001; }
   /* 2026-11-21 — buku utuh layar penuh (bookOpen) */
@@ -3097,6 +3101,7 @@
   // di Rak Bahan Pengajar → buku layar penuh: sampul → Daftar Isi (nomor halaman, ketuk = lompat) → Pengantar → tiap
   // pelajaran mulai di halaman baru (label bab + judul + ✎ Ubah / ▶ Mode Mengajar / ⬇ PDF / Word). Dibalik per halaman
   // (mesin bkLay/bkGo), 2 halaman berdampingan di layar lebar. Halaman terakhir dibaca diingat per buku (dj_bk_pos:<kelas>).
+  // ⚠️ penanda bab pakai data-bkid (BUKAN id): build-journey.py memberi awalan dj_ pada semua id → di HOME #bkb3 tak ketemu.
   const BOOK = { el: null, key: null, hist: false };
   const bkSplitHead = h => { const m = String(h).match(/^((?:Pelajaran|Bagian|Sesi|Bab)\s+\d+)\s*[—–·:\-]\s*(.+)$/i); return m ? [m[1], m[2]] : ["", h]; };
   function bookHTML(key) {
@@ -3104,25 +3109,25 @@
     if (!row) return "";
     const parts = String(row.body || "").split(/\n(?=# )/), intro = parts[0].split("\n");
     const les = parts.slice(1).map(p => { const L = p.split("\n"); return { head: L[0].replace(/^# /, ""), lines: L.slice(1) }; });
-    const noId = s => s.replace(/ id="mt\d+"/g, "");
+    const noId = s => s.replace(/ id="(?:dj_)?mt\d+"/g, "");   // HOME: build memberi awalan dj_ pada id
     const upd = row.updated_at ? new Date(row.updated_at).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" }) : "";
     const tocRow = (id, kick, t) => `<li><button type="button" data-bkto="${id}"><span>${kick ? `<small>${esc(kick)}</small>` : ""}${mdInline(t)}</span><i aria-hidden="true"></i><em data-bkpg="${id}"></em></button></li>`;
-    let h = `<div class="bkb-cover" style="--jc:${c.color};--ph:url('${c.ph}');"><i class="mtb-tag">${esc(c.tab || "")}</i>
+    let h = `<div class="bkb-cover" style="--jc:${c.color};--ph:url('${c.ph}');"><i class="mtb-tag">${esc(c.tab || "")}</i><img class="bkb-logo" src="./logo.png?v=1" alt="JB3 Home for All">
       <div class="bkb-cv-t"><small>Bahan Ajar Pengajar · Discipleship Journey JB3</small><b>${mdInline(intro[0].replace(/^# /, ""))}</b></div>
       <span class="bkb-cv-f">${les.length} pelajaran${upd ? " · diperbarui " + esc(upd) : ""}</span></div>`;
-    h += `<div class="bkb-sect"><span class="bkb-anc" id="bkbtoc"></span><h1 class="mr-h1">Daftar Isi</h1><p class="bkb-hint">Ketuk judul untuk langsung ke bab itu · ☰ di atas kembali ke sini</p><ol class="bkb-toc">${tocRow("bkb0", "", "Pengantar")}${les.map((L, i) => { const [k, t] = bkSplitHead(L.head); return tocRow("bkb" + (i + 1), k, t); }).join("")}</ol>
+    h += `<div class="bkb-sect"><span class="bkb-anc" data-bkid="bkbtoc"></span><h1 class="mr-h1">Daftar Isi</h1><p class="bkb-hint">Ketuk judul untuk langsung ke bab itu · ☰ di atas kembali ke sini</p><ol class="bkb-toc">${tocRow("bkb0", "", "Pengantar")}${les.map((L, i) => { const [k, t] = bkSplitHead(L.head); return tocRow("bkb" + (i + 1), k, t); }).join("")}</ol>
       <div class="bkb-dl"><span>Unduh seluruh buku</span><button type="button" class="mt-dlb" data-mtdl="pdf:all">⬇ PDF</button><button type="button" class="mt-dlb" data-mtdl="doc:all">⬇ Word</button></div></div>`;
-    h += `<div class="bkb-sect"><span class="bkb-anc" id="bkb0"></span><p class="bkb-kick">Pengantar</p>${MT_CUR.edit ? `<div class="bkb-acts"><button type="button" class="mt-teach mt-edb" data-mtedit="0">✎ Ubah</button></div>` : ""}${noId(mdBlocks(intro.slice(1)))}</div>`;
+    h += `<div class="bkb-sect"><span class="bkb-anc" data-bkid="bkb0"></span><p class="bkb-kick">Pengantar</p>${MT_CUR.edit ? `<div class="bkb-acts"><button type="button" class="mt-teach mt-edb" data-mtedit="0">✎ Ubah</button></div>` : ""}${noId(mdBlocks(intro.slice(1)))}</div>`;
     les.forEach((L, i) => { const [k, t] = bkSplitHead(L.head), n = i + 1;
-      h += `<div class="bkb-sect"><span class="bkb-anc" id="bkb${n}"></span>${k ? `<p class="bkb-kick">${esc(k)}</p>` : ""}<h1 class="mr-h1">${mdInline(t)}</h1>
+      h += `<div class="bkb-sect"><span class="bkb-anc" data-bkid="bkb${n}"></span>${k ? `<p class="bkb-kick">${esc(k)}</p>` : ""}<h1 class="mr-h1">${mdInline(t)}</h1>
         <div class="bkb-acts">${MT_CUR.edit ? `<button type="button" class="mt-teach mt-edb" data-mtedit="${n}">✎ Ubah</button>` : ""}<button type="button" class="mt-teach" data-mtteach="${n}">▶ Mode Mengajar</button><button type="button" class="mt-dlb" data-mtdl="pdf:${n}">⬇ PDF</button><button type="button" class="mt-dlb" data-mtdl="doc:${n}">⬇ Word</button></div>
         ${noId(mdBlocks(L.lines))}</div>`; });
-    h += `<div class="bkb-sect bkb-end"><p>— Selesai —</p><b>${mdInline(intro[0].replace(/^# /, ""))}</b><button type="button" class="mt-teach" data-bkto="bkbtoc">☰ Kembali ke Daftar Isi</button></div>`;
+    h += `<div class="bkb-sect bkb-end"><img class="bkb-end-logo" src="./logo.png?v=1" alt="JB3 Home for All"><p>— Selesai —</p><b>${mdInline(intro[0].replace(/^# /, ""))}</b><button type="button" class="mt-teach" data-bkto="bkbtoc">☰ Kembali ke Daftar Isi</button></div>`;
     return h;
   }
   function bookPageNums() {   // nomor halaman di Daftar Isi
     const bk = BOOK.el && BOOK.el.querySelector(".bk"), st = bk && BK.get(bk); if (!st) return;
-    bk.querySelectorAll("[data-bkpg]").forEach(e => { const a = bk.querySelector("#" + e.dataset.bkpg); e.textContent = a ? bkColOf(bk, a) + 1 : ""; });
+    bk.querySelectorAll("[data-bkpg]").forEach(e => { const a = bk.querySelector(`[data-bkid="${e.dataset.bkpg}"]`); e.textContent = a ? bkColOf(bk, a) + 1 : ""; });
   }
   function bookOpen(key) {
     const c = MT_SETS.dj.tabs.find(x => x.key === key); if (!c) return;
@@ -3136,7 +3141,7 @@
         const t = e.target.closest("[data-bkx],[data-bkto],[data-bkfs]"); if (!t) return;
         const bk = d.querySelector(".bk");
         if (t.dataset.bkx) bookClose();
-        else if (t.dataset.bkto) bkJump(bk, d.querySelector("#" + t.dataset.bkto));
+        else if (t.dataset.bkto) bkJump(bk, d.querySelector(`[data-bkid="${t.dataset.bkto}"]`));
         else { const f = Math.min(26, Math.max(14, mrFs() + (t.dataset.bkfs === "+" ? 1 : -1)));
           try { localStorage.setItem("dj_mr_fs", f); } catch (_) {} d.style.setProperty("--mrfs", f + "px"); bkLay(bk, true); bookPageNums(); }
       });
@@ -3508,6 +3513,8 @@ ${body}</body></html>`;
             { key:"kids_light", color:"#D9A21B", icon:"🗼", tab:"Light House", title:"Gap Kids Light House — Okt–Des 2026" },
             { key:"kids_ocean", color:"#6C5CE7", icon:"🐋", tab:"Ocean", title:"Gap Kids Ocean — Okt–Des 2026" }] },
   };
+  // 2026-11-21 (user: "rak peserta sementara disembunyikan"): ubah ke true untuk menampilkan lagi Rak Peserta.
+  const MT_RAK_PESERTA = false;
   function renderMateri(set) {
     const S = MT_SETS[set];
     if (!S.can()) { show(state.persona === "ADMIN" ? "home" : "journey", { replace:true }); return; }
@@ -3534,12 +3541,12 @@ ${body}</body></html>`;
     // nanti diisi materi untuk peserta. Family & Gap Kids tetap pakai tombol tab.
     const nLes = r => Math.max(0, String(r.body || "").split(/\n(?=# )/).length - 1);
     const mtBook = c => { const r = rows.find(x => x.key === c.key), on = !!cur && cur.key === c.key;
-      return `<button type="button" class="mtb${on ? " on" : ""}" style="--jc:${c.color};--ph:url('${c.ph}');" data-mtbook="${c.key}" aria-label="Buka buku ${esc(c.title)}${on ? " (terakhir dibaca)" : ""}">${on ? `<i class="mtb-rib" aria-hidden="true"></i>` : ""}<span class="mtb-cv"><i class="mtb-tag">${esc(c.tab)}</i><b class="mtb-t">${esc(c.title)}</b><small class="mtb-s">${r ? nLes(r) + " pelajaran" : "Belum ada isi"}</small></span></button>`; };
-    const mtSoon = c => `<div class="mtb mtb-soon" style="--jc:${c.color};--ph:url('${c.ph}');" role="img" aria-label="Buku peserta ${esc(c.title)} — isi menyusul"><span class="mtb-cv"><i class="mtb-tag">${esc(c.tab)}</i><i class="mtb-lk">Segera</i><b class="mtb-t">${esc(c.title)}</b><small class="mtb-s">Untuk peserta</small></span></div>`;
+      return `<button type="button" class="mtb${on ? " on" : ""}" style="--jc:${c.color};--ph:url('${c.ph}');" data-mtbook="${c.key}" aria-label="Buka buku ${esc(c.title)}${on ? " (terakhir dibaca)" : ""}">${on ? `<i class="mtb-rib" aria-hidden="true"></i>` : ""}<span class="mtb-cv"><i class="mtb-tag">${esc(c.tab)}</i><img class="mtb-logo" src="./logo.png?v=1" alt="JB3"><b class="mtb-t">${esc(c.title)}</b><small class="mtb-s">${r ? nLes(r) + " pelajaran" : "Belum ada isi"}</small></span></button>`; };
+    const mtSoon = c => `<div class="mtb mtb-soon" style="--jc:${c.color};--ph:url('${c.ph}');" role="img" aria-label="Buku peserta ${esc(c.title)} — isi menyusul"><span class="mtb-cv"><i class="mtb-tag">${esc(c.tab)}</i><i class="mtb-lk">Segera</i><img class="mtb-logo" src="./logo.png?v=1" alt="JB3"><b class="mtb-t">${esc(c.title)}</b><small class="mtb-s">Untuk peserta</small></span></div>`;
     const shelves = set === "dj" ? `<div class="mtr-h"><b>📚 Rak Bahan Pengajar</b><small>${S.tabs.length} buku · ketuk untuk membaca</small></div>
       <div class="mtr"><div class="mtr-shelf">${S.tabs.map(mtBook).join("")}</div></div>
-      <div class="mtr-h"><b>🎒 Rak Peserta</b><small>isi menyusul</small></div>
-      <div class="mtr mtr-ps"><div class="mtr-shelf">${S.tabs.map(mtSoon).join("")}</div></div>
+      ${MT_RAK_PESERTA ? `<div class="mtr-h"><b>🎒 Rak Peserta</b><small>isi menyusul</small></div>
+      <div class="mtr mtr-ps"><div class="mtr-shelf">${S.tabs.map(mtSoon).join("")}</div></div>` : ""}
       <p class="jd-note mtr-note">Ketuk sebuah buku untuk membacanya seperti buku: sampul, daftar isi, lalu balik halaman (geser / ‹ ›). Halaman terakhir dibaca diingat.</p>` : "";
     if (shelves) {   // DJ: hanya rak; isi dibaca di buku layar penuh (bookOpen). mdDoc tetap dipanggil utk MT_LESSONS (Mode Mengajar).
       if (cur) mdDoc(cur.body);
