@@ -3074,10 +3074,32 @@
     if (!full && cols === 1) bk.classList.add("bk-one");   // pelajaran pendek: 1 halaman, tinggi menyesuaikan isi
     bkGo(bk, st.n, false);
   }
+  // 2026-11-21 (user: "di hp saya ringan tp di hp pengguna lain masih berat"): buku utuh di HP (< 860px) dibagi per BAGIAN
+  // (depan · Pengantar · tiap bab · penutup). Hanya bagian yg sedang dibaca yg ditampilkan (lainnya display:none = tidak
+  // disusun) → HP lemah tak perlu menyusun ±270 halaman sekaligus. ‹ › / geser di ujung bagian = pindah ke bagian berikut.
+  function bkSegInit(bk) {
+    let n = 0; [...bk.querySelector(".bk-flow").children].forEach(e => { if (e.classList.contains("bk-end")) return;
+      if (e.classList.contains("bkb-ch") || e.classList.contains("bkb-end")) n++; e.dataset.seg = n; });
+    bk._segN = n;
+  }
+  function bkSegShow(bk, s) {
+    bk._seg = Math.max(0, Math.min(bk._segN, s | 0));
+    bk.querySelectorAll(".bk-flow > [data-seg]").forEach(e => { e.style.display = +e.dataset.seg === bk._seg ? "" : "none"; });
+  }
+  function bkSegGo(bk, s, last) {   // tampilkan bagian s lalu buka halaman pertamanya (atau terakhir)
+    bkSegShow(bk, s);
+    const pos = bk.dataset.pos; delete bk.dataset.pos; bkLay(bk); if (pos) bk.dataset.pos = pos;
+    if (typeof bookPageNums === "function") bookPageNums();
+    const st = BK.get(bk); if (st) bkGo(bk, last ? st.pages - 1 : 0, false);
+  }
   function bkGo(bk, n, anim) {
     const st = BK.get(bk); if (!st) return;
+    if (bk._segN != null && (n < 0 || n > st.pages - 1)) {
+      const ns = bk._seg + (n < 0 ? -1 : 1);
+      if (ns >= 0 && ns <= bk._segN) { bkSegGo(bk, ns, n < 0); return; }
+    }
     st.n = Math.max(0, Math.min(st.pages - 1, n));
-    if (bk.dataset.pos) { try { localStorage.setItem(bk.dataset.pos, st.n * st.per); } catch (_) {} }   // halaman terakhir dibaca
+    if (bk.dataset.pos) { try { localStorage.setItem(bk.dataset.pos, st.n * st.per); if (bk._segN != null) localStorage.setItem(bk.dataset.pos + ":seg", bk._seg); } catch (_) {} }   // halaman terakhir dibaca
     const fl = bk.querySelector(".bk-flow"), vp = bk.querySelector(".bk-vp");
     fl.style.transition = anim ? "transform .38s cubic-bezier(.2,.7,.2,1)" : "none";
     fl.style.transform = st.n ? `translateX(${-st.n * st.step}px)` : "none";
@@ -3087,8 +3109,9 @@
     const sl = bk.querySelector(".bk-sl");   // 2026-11-21 (user: "bagian ini bisa geser"): garis kemajuan = penggeser halaman
     sl.max = Math.max(0, st.pages - 1); if (+sl.value !== st.n) sl.value = st.n; sl.disabled = st.pages < 2;
     sl.style.setProperty("--p", (st.pages > 1 ? (st.n / (st.pages - 1)) * 100 : 100) + "%");
-    bk.querySelector("[data-bk='-1']").disabled = st.n === 0;
-    bk.querySelector("[data-bk='1']").disabled = st.n >= st.pages - 1;
+    const sg = bk._segN != null;
+    bk.querySelector("[data-bk='-1']").disabled = st.n === 0 && !(sg && bk._seg > 0);
+    bk.querySelector("[data-bk='1']").disabled = st.n >= st.pages - 1 && !(sg && bk._seg < bk._segN);
     if (bk._onGo) bk._onGo(st);   // judul berjalan & nomor halaman (buku utuh)
   }
   function bkColOf(bk, target) {   // halaman (kolom, mulai 0) tempat elemen berada
@@ -3097,6 +3120,8 @@
   }
   function bkJump(bk, target) {   // lompat ke halaman tempat elemen (subjudul) berada
     const st = BK.get(bk); if (!st || !target) return;
+    const sgE = bk._segN != null && target.closest("[data-seg]");
+    if (sgE && +sgE.dataset.seg !== bk._seg) { bkSegGo(bk, +sgE.dataset.seg, false); const s2 = BK.get(bk); bkGo(bk, Math.floor(bkColOf(bk, target) / s2.per), false); return; }
     bkGo(bk, Math.floor(bkColOf(bk, target) / st.per), true);
   }
   const bkFlip = (bk, k) => { const st = BK.get(bk); if (st) bkGo(bk, st.n + k, true); };
@@ -3287,9 +3312,9 @@
   function bookPageNums() {   // nomor halaman Daftar Isi + peta jenis halaman & bab (judul berjalan)
     const bk = BOOK.el && !BOOK.el.hidden && BOOK.el.querySelector(".bk"), st = bk && BK.get(bk); if (!st) return;
     const pno = col => col - st.off + 1;
-    bk.querySelectorAll("[data-bkpg]").forEach(e => { const a = bk.querySelector(`[data-bkid="${e.dataset.bkpg}"]`); e.textContent = a ? pno(bkColOf(bk, a)) : ""; });
+    bk.querySelectorAll("[data-bkpg]").forEach(e => { const a = bk.querySelector(`[data-bkid="${e.dataset.bkpg}"]`); e.textContent = a && bkVisible(a) && bk._segN == null ? pno(bkColOf(bk, a)) : ""; });
     BOOK.types = {}; bk.querySelectorAll("[data-bkpt]").forEach(e => { if (bkVisible(e)) BOOK.types[bkColOf(bk, e)] = e.dataset.bkpt; });
-    BOOK.chs = [...bk.querySelectorAll("[data-bkch]")].map(e => ({ col: bkColOf(bk, e), ch: e.dataset.bkch, t: e.dataset.bkt || "" }));
+    BOOK.chs = [...bk.querySelectorAll("[data-bkch]")].filter(bkVisible).map(e => ({ col: bkColOf(bk, e), ch: e.dataset.bkch, t: e.dataset.bkt || "" }));
     // pemenggalan kata / gambar yg selesai dimuat belakangan bisa menggeser isi → bab jatuh di halaman kiri: hitung ulang sekali
     if (st.per > 1 && !BOOK.fixing && [...bk.querySelectorAll("[data-recto]")].some(a => bkColOf(bk, a) % 2 === 0)) {
       BOOK.fixing = true; try { bkLay(bk, true); } finally { BOOK.fixing = false; } return bookPageNums(); }
@@ -3392,6 +3417,10 @@
     d.querySelector(".mr-top b").textContent = ed ? "Buku Peserta · " + c.title : c.title;
     d.querySelector(".mr-pg").innerHTML = bkWrap(bookHTML(key, ed), "bk-full");
     const bk = d.querySelector(".bk"); bk.dataset.pos = (ed ? "dj_bkp_pos:" : "dj_bk_pos:") + key;
+    if (window.innerWidth < 860) {   // HP: per bagian (lihat bkSegInit)
+      bkSegInit(bk); let s0 = null; try { s0 = localStorage.getItem(bk.dataset.pos + ":seg"); if (s0 == null) localStorage.removeItem(bk.dataset.pos); } catch (_) {}
+      bkSegShow(bk, +s0 || 0);
+    }
     if (ed) { const m = BOOK.isi[key] || {}; bk.querySelectorAll("textarea[data-bkpf]").forEach(t => { t.value = m[t.dataset.bkpf] || ""; }); }
     bk.querySelector(".bk-flow").setAttribute("lang", "id");   // pemenggalan kata bahasa Indonesia
     bk.insertAdjacentHTML("afterbegin", `<div class="bk-hd" aria-hidden="true"></div>`);
