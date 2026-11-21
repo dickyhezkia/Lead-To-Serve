@@ -1056,6 +1056,60 @@
   /* 2026-10-16 (user: "buat beranda yang menjelaskan perjalanan dan definisi setiap tahapnya" + "buat menarik, realistik"):
      halaman Beranda (page "journey") = tab pertama peserta. Definisi tahap diambil dari materi RS3
      ("Rangkaian kelas pemuridan") & visi JB3 — bukan karangan. Kelas CSS berawalan .bj- */
+  /* 2026-11-21 tampilan DJ baru — Beranda peserta (bh-) & Kelas Berjalan pengajar (kb-) */
+  .bh-hi { margin:2px 2px 10px; font-size:15px; color:var(--ink-soft); }
+  .bh-hi b { color:var(--ink); }
+  .bh-hero { border-radius:22px; padding:18px; margin-bottom:6px; color:#fff; background:var(--jc); box-shadow:0 10px 26px rgba(0,0,0,.16); display:flex; flex-direction:column; gap:16px; }
+  .bh-top { display:flex; align-items:center; gap:16px; }
+  .bh-ring { flex:none; width:78px; height:78px; border-radius:50%; display:grid; place-items:center; background:conic-gradient(#F7C948 calc(var(--p) * 1%), rgba(255,255,255,.2) 0); }
+  .bh-ring b { width:62px; height:62px; border-radius:50%; background:var(--jc); display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:19px; font-weight:800; line-height:1; }
+  .bh-ring small { font-size:12px; font-weight:600; opacity:.9; margin-top:3px; }
+  .bh-t { min-width:0; display:flex; flex-direction:column; gap:3px; }
+  .bh-t small { font-size:12px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; opacity:.88; }
+  .bh-t b { font-size:21px; font-weight:800; line-height:1.15; }
+  .bh-t em { font-style:normal; font-size:13.5px; line-height:1.35; opacity:.95; }
+  .bh-acts { display:grid; grid-template-columns:repeat(auto-fit, minmax(0, 1fr)); gap:10px; }
+  .bh-acts button { min-height:46px; border-radius:14px; font:inherit; font-size:15px; font-weight:800; cursor:pointer; }
+  .bh-b1 { border:0; background:#fff; color:var(--jc); }
+  .bh-b2 { border:1.5px solid rgba(255,255,255,.55); background:transparent; color:#fff; }
+  .bh-path { position:relative; display:flex; justify-content:space-between; padding:16px 14px 12px; }
+  .bh-path::before { content:""; position:absolute; left:34px; right:34px; top:33px; height:3px; border-radius:3px; background:var(--line); }
+  .bh-st { position:relative; flex:0 0 54px; display:flex; flex-direction:column; align-items:center; gap:6px; border:0; background:none; padding:0; font:inherit; cursor:pointer; }
+  .bh-st i { width:36px; height:36px; border-radius:50%; display:grid; place-items:center; font-style:normal; font-size:13px; font-weight:800; background:var(--surface-2); color:var(--ink-faint); border:2px solid var(--line); box-sizing:border-box; }
+  .bh-st span { font-size:12px; font-weight:700; color:var(--ink-faint); }
+  .bh-st--done i { background:var(--jc); border-color:var(--jc); color:#fff; }
+  .bh-st--now i { background:var(--jc); border-color:var(--jc); color:#fff; font-size:11.5px; box-shadow:0 0 0 5px color-mix(in srgb, var(--jc) 22%, transparent); }
+  .bh-st--done span, .bh-st--now span { color:var(--ink); font-weight:800; }
+  .bh-todos { display:flex; flex-direction:column; gap:10px; margin-bottom:6px; }
+  .bh-todo { display:flex; align-items:center; gap:12px; width:100%; padding:13px 14px; border:1px solid var(--line); border-radius:16px; background:var(--surface); color:var(--ink); font:inherit; text-align:left; cursor:pointer; }
+  .bh-todo > i { flex:none; width:40px; height:40px; border-radius:12px; display:grid; place-items:center; font-style:normal; font-size:19px; background:var(--surface-2); }
+  .bh-todo > span { flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; }
+  .bh-todo b { font-size:15px; } .bh-todo small { font-size:13px; color:var(--ink-soft); }
+  .bh-todo > svg { flex:none; color:var(--ink-faint); }
+  .kb-sum { display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:8px; margin-bottom:12px; }
+  .kb-sum > div { border-radius:16px; padding:12px; background:var(--accent); color:#fff; display:flex; flex-direction:column; gap:2px; }
+  .kb-sum b { font-size:24px; font-weight:800; line-height:1.1; } .kb-sum span { font-size:12.5px; opacity:.92; }
+  .kb-alert { display:flex; align-items:center; justify-content:space-between; gap:8px; width:100%; margin:0 0 10px; padding:11px 14px; border:0; border-radius:14px; background:color-mix(in srgb, var(--warn) 16%, var(--surface)); color:var(--ink); font:inherit; font-size:14px; text-align:left; }
+  .kb-alert--go { cursor:pointer; }
+  .kb-alert--txt { display:block; }
+  .kb-card { margin:0 0 12px; padding:16px; border-radius:18px; background:var(--surface); border:1px solid var(--line); display:flex; flex-direction:column; gap:12px; }
+  .kb-top { display:flex; align-items:center; gap:10px; }
+  .kb-tag { flex:none; padding:4px 8px; border-radius:8px; background:var(--jc); color:#fff; font-size:12px; font-weight:800; letter-spacing:.03em; }
+  .kb-top b { flex:1; min-width:0; font-size:16px; } .kb-top small { font-size:13px; color:var(--ink-soft); font-weight:700; white-space:nowrap; }
+  .kb-bar { height:8px; border-radius:4px; background:var(--surface-2); overflow:hidden; }
+  .kb-bar i { display:block; height:100%; border-radius:4px; background:var(--jc); }
+  .kb-st { display:flex; flex-wrap:wrap; gap:6px 16px; font-size:13.5px; color:var(--ink-soft); }
+  .kb-st b { color:var(--ink); }
+  .kb-warn { margin:0; font-size:13.5px; font-weight:700; color:var(--warn); }
+  .kb-acts { display:grid; grid-template-columns:1.4fr 1fr; gap:10px; }
+  .kb-acts button { min-height:46px; border-radius:13px; font:inherit; font-size:15px; font-weight:800; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; }
+  .kb-go { border:0; background:var(--jc); color:#fff; }
+  .kb-more { border:1.5px solid var(--line-strong); background:transparent; color:var(--ink); }
+  .kb-idle { padding:4px 0; }
+  .kb-idle button { display:flex; align-items:center; gap:10px; width:100%; min-height:48px; padding:8px 14px; border:0; border-top:1px solid var(--line); background:none; color:var(--ink); font:inherit; font-size:15px; text-align:left; cursor:pointer; }
+  .kb-idle button:first-child { border-top:0; }
+  .kb-idle b { flex:1; } .kb-idle svg { color:var(--ink-faint); }
+  .kb-note { margin:8px 2px 16px; font-size:12.5px; color:var(--ink-faint); }
   .bj-hero { position: relative; overflow: hidden; border-radius: var(--r-lg); padding: 20px 18px 18px; margin-bottom: 14px; color: #fff; background: radial-gradient(120% 90% at 100% 0%, #D9875E 0%, transparent 55%), linear-gradient(150deg, #B5623B 0%, #7A3F22 100%); box-shadow: 0 12px 30px rgba(122,63,34,.32); }
   .bj-hero small { display: block; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; opacity: .82; font-weight: 700; }
   .bj-hero h2 { font-family: var(--font-display); font-weight: 600; font-size: 26px; line-height: 1.15; margin: 6px 0 6px; }
@@ -1197,6 +1251,7 @@
         <div class="scroll has-tabbar">
           <section class="page" data-page="login"><div id="loginBody"></div></section>
           <section class="page" data-page="journey"><div id="journeyBody"></div></section>
+          <section class="page" data-page="kelas"><div id="kelasBody"></div></section>
           <section class="page" data-page="home"><div id="homeBody"></div></section>
           <section class="page" data-page="strength"><div id="strengthBody"></div></section>
           <section class="page" data-page="experience"><div id="experienceBody"></div></section>
@@ -1333,6 +1388,7 @@
   ];
   const META = {
     journey: { h:"Discipleship Journey", tab:"journey" },
+    kelas: { h:"Kelas Berjalan", tab:"kelas" },   // 2026-11-21 tampilan DJ baru: beranda Admin/pengajar
     home: { h:"Lead To Serve 1", tab:"home" },
     rs1: { h:"Rock Solid 1", tab:"rs1" },
     rs2: { h:"Rock Solid 2", tab:"rs2" },
@@ -1374,13 +1430,8 @@
     if (FB_PAGE[page]) { state.fbKey = FB_PAGE[page]; page = "feedback"; }
     // 2026-10-04: tab "Peserta" (halaman results) = dashboard lintas kelas;
     // landing Admin: kelas yg py permintaan Menunggu, kalau tak ada → Peserta.
-    if (state.persona === "ADMIN" && (page === "home" || page === "dashboard")) {
-      if (!state.dashKey) {
-        const k = adminLandingKey();
-        state.dashKey = k || DASH_JOURNEYS[0].key;
-        page = k ? "dashboard" : "results";
-      } else page = "dashboard";
-    }
+    // 2026-11-21 (tampilan DJ baru): beranda Admin = halaman Kelas Berjalan; dashboard kelas dibuka dari kartunya.
+    if (state.persona === "ADMIN" && (page === "home" || page === "dashboard")) page = page === "dashboard" && state.dashKey ? "dashboard" : "kelas";
     const prev = state.page;
     if (!opts.replace && prev !== page && !NOCHROME.includes(prev) && !NOCHROME.includes(page)) state.stack.push(prev);
     state.page = page;
@@ -1411,9 +1462,7 @@
       <span class="ib-main"><span class="ib-name">${esc((state.myProfile || {}).name || "")}</span>
       <span class="identity-badge">${state.persona === "ADMIN" ? "Admin" : "Peserta"}</span></span>`;
     if (isAdm) {
-      el("tabbar").innerHTML = `<button class="tab jtab" style="--jc:var(--accent);" data-goto="results" data-tabnav="1" ${state.page === "results" ? 'aria-current="page"' : ""} aria-label="Dashboard Peserta">
-        ${tabIcoHTML("results")}<span class="lbl">Peserta</span></button>` + DASH_JOURNEYS.map(c => `<button class="tab jtab" style="--jc:${c.color};" data-dashtab="${c.key}" ${state.page === "dashboard" && dashCfg().key === c.key ? 'aria-current="page"' : ""} aria-label="${esc(c.title)}">
-        ${tabIcoHTML(c.key, c.classIdx + 1)}<span class="lbl">${c.tab}</span></button>`).join("");
+      el("tabbar").innerHTML = adminTabsHTML();
       return;
     }
     el("tabbar").innerHTML = TABS.PESERTA.map(t => { const c = t.k === "journey" ? { color:"var(--accent)", title:"Beranda", icon:"🏠", tab:"Beranda" } : DASH_JOURNEYS.find(x => x.key === t.k);
@@ -1431,6 +1480,15 @@
     lts1:'<circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/>',
     lts2:'<circle cx="9" cy="7" r="3"/><path d="M3 21v-1a6 6 0 0 1 12 0v1"/><path d="M16 4.5a3 3 0 0 1 0 5"/><path d="M18 14a5 5 0 0 1 3 4.6V21"/>',
   };
+  // 2026-11-21 (user: "deploy tampilan dj baru", mockup Kelas Berjalan): tab Admin = Kelas · Peserta · Bahan Ajar.
+  // Dulu: Peserta + 5 tab kelas — dashboard tiap kelas kini dibuka dari kartu kelas di halaman Kelas (data-dashtab).
+  NAV_IC.kelas = '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 14h4"/>';
+  NAV_IC.materi = '<path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2z"/><path d="M22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z"/>';
+  function adminTabsHTML() {
+    const cur = state.page === "dashboard" ? "kelas" : state.page;
+    const t = (p, lbl) => `<button class="tab jtab" style="--jc:var(--accent);" data-goto="${p}" data-tabnav="1" ${cur === p ? 'aria-current="page"' : ""} aria-label="${lbl}">${tabIcoHTML(p)}<span class="lbl">${lbl}</span></button>`;
+    return t("kelas", "Kelas") + t("results", "Peserta") + t("materi", "Bahan Ajar");
+  }
   const tabIcoHTML = (k, n) => `<span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${NAV_IC[k] || NAV_IC.journey}</svg>${n ? `<i class="tab-n">${n}</i>` : ""}</span>`;
 
   /* ---------------- RENDER ---------------- */
@@ -2103,6 +2161,80 @@
       <circle cx="${C}" cy="${C}" r="168" class="disc"/><circle cx="${C}" cy="${C}" r="88" class="core"/>
       ${segs}${centre}</svg>`;
   }
+  // 2026-11-21 (user: "deploy tampilan dj baru" — mockup Kelas Berjalan): beranda Admin/pengajar.
+  // Batch berjalan per kelas = hadir ≥1 sesi/bab tapi belum lulus kelas (sama dgn kartu "Batch berjalan" di dashboard).
+  // Sesi terakhir = nomor sesi tertinggi yg sudah ada hadirnya. Kehadiran = sesi dihadiri ÷ (peserta × sesi berjalan).
+  // Tertinggal = melewatkan ≥2 sesi yg sudah berjalan. Feedback = rata-rata batch feedback AKTIF kelas itu (3 nilai, skala 5).
+  function fbStat(k) {
+    const b = (state.rs3FbBatches || []).find(x => (x.class_key || "rs3") === k && x.is_active); if (!b) return null;
+    const rows = (state.rs3Feedback || []).filter(r => r.batch_id === b.id); if (!rows.length) return null;
+    const avg = rows.reduce((a, r) => a + ((Number(r.rating_materi) || 0) + (Number(r.rating_durasi) || 0) + (Number(r.rating_pengajar) || 0)) / 3, 0) / rows.length;
+    return { n:rows.length, avg };
+  }
+  const kbNum = x => String(Math.round(x * 10) / 10).replace(".", ",");
+  RENDER.kelas = function () {
+    const box = el("kelasBody"); if (!box) return;
+    const keys = Object.keys(DJ_BAB);
+    state.absRoster = state.absRoster || {};
+    const miss = keys.filter(k => !state.absRoster[k]);
+    if (miss.length) {
+      if (!state.kelasP) {
+        box.innerHTML = `<div class="card pad"><p class="sub" style="margin:0;">Memuat kelas berjalan…</p></div>`;
+        state.kelasP = Promise.all(miss.map(k => DB.attRoster(k).then(r => { state.absRoster = state.absRoster || {}; state.absRoster[k] = r; })))
+          .then(() => { state.kelasP = null; if (state.page === "kelas") RENDER.kelas(); })
+          .catch(err => { state.kelasP = null; box.innerHTML = `<div class="card pad"><b>Kelas berjalan belum bisa dimuat.</b><p class="sub">${esc(err.message || String(err))}</p></div>`; });
+      }
+      return;
+    }
+    const ptb = state.postTestBest || {};
+    const info = keys.map(k => {
+      const c = DASH_JOURNEYS.find(j => j.key === k), all = DJ_BAB[k].length;
+      const hb = p => p.babs.filter(b => b >= 1 && b <= all);
+      const ppl = state.absRoster[k].filter(p => !p.done && p.babs.length);
+      const cur = ppl.reduce((m, p) => Math.max(m, ...hb(p)), 0);
+      return { k, c, all, ppl, cur,
+        last: ppl.filter(p => p.babs.includes(cur)).length,
+        att: ppl.reduce((a, p) => a + hb(p).length, 0),
+        behind: ppl.filter(p => cur - hb(p).length >= 2).length,
+        ptWait: ppl.filter(p => hb(p).length === all && !((ptb[k] || {})[p.id] || {}).passed).length,
+        fb: fbStat(k),
+        pend: c.stateKey ? (state[c.stateKey] || []).filter(r => r.status === "pending").length : 0 };
+    });
+    const act = info.filter(i => i.ppl.length), idle = info.filter(i => !i.ppl.length);
+    const nP = act.reduce((a, i) => a + i.ppl.length, 0), slot = act.reduce((a, i) => a + i.ppl.length * i.cur, 0);
+    const pct = slot ? Math.round(act.reduce((a, i) => a + i.att, 0) / slot * 100) : null;
+    const behind = act.reduce((a, i) => a + i.behind, 0), pend = info.filter(i => i.pend);
+    const chev = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>`;
+    const alerts = (behind ? `<div class="kb-alert kb-alert--txt"><span><b>${behind} peserta</b> melewatkan ≥2 ${act.length === 1 ? unitOf(act[0].k) : "sesi"} — lihat di kartu kelas</span></div>` : "")
+      + pend.map(i => `<button type="button" class="kb-alert kb-alert--go" data-dashtab="${i.k}"><span><b>${i.pend} permintaan akses</b> menunggu · ${esc(i.c.tab)}</span>${chev}</button>`).join("");
+    const card = i => { const u = unitOf(i.k), U = u[0].toUpperCase() + u.slice(1), nx = Math.min(i.cur + 1, i.all);
+      return `<section class="kb-card" style="--jc:${i.c.color};">
+        <div class="kb-top"><span class="kb-tag">${esc(i.c.tab)}</span><b>${esc(i.c.title)}</b><small>${U} ${i.cur}/${i.all}</small></div>
+        <div class="kb-bar"><i style="width:${Math.round(i.cur / i.all * 100)}%"></i></div>
+        <div class="kb-st">
+          <span><b>${i.ppl.length}</b> peserta</span>
+          <span><b>${i.last}/${i.ppl.length}</b> hadir ${u} ${i.cur}</span>
+          <span>${i.fb ? `<b>${kbNum(i.fb.avg)}</b> ★ feedback (${i.fb.n})` : `feedback belum ada`}</span>
+          ${i.ptWait ? `<span><b>${i.ptWait}</b> belum lulus post-test</span>` : ""}
+        </div>
+        ${i.behind ? `<p class="kb-warn">⚠ ${i.behind} peserta melewatkan ≥2 ${u}</p>` : ""}
+        <div class="kb-acts">
+          <button type="button" class="kb-go" data-absgo="${i.k}"><svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"/></svg>${i.cur < i.all ? `Mulai ${U} ${nx}` : "Absensi"}</button>
+          <button type="button" class="kb-more" data-dashtab="${i.k}">Detail kelas</button>
+        </div>
+      </section>`; };
+    box.innerHTML = `
+      <div class="kb-sum">
+        <div><b>${act.length}</b><span>kelas berjalan</span></div>
+        <div><b>${nP}</b><span>peserta</span></div>
+        <div><b>${pct == null ? "–" : pct + "%"}</b><span>kehadiran</span></div>
+      </div>
+      ${alerts}
+      ${act.length ? act.map(card).join("") : `<div class="card pad"><b>Belum ada kelas berjalan</b><p class="sub" style="margin:4px 0 0;">Kelas muncul di sini begitu peserta scan absensi sesi pertama.</p></div>`}
+      ${idle.length ? pjSecHTML("Kelas lain", "tidak ada batch berjalan") + `<div class="card kb-idle">${idle.map(i => `<button type="button" data-dashtab="${i.k}" style="--jc:${i.c.color};"><span class="kb-tag">${esc(i.c.tab)}</span><b>${esc(i.c.title)}</b>${chev}</button>`).join("")}</div>` : ""}
+      <p class="kb-note">Batch berjalan = peserta yang sudah hadir minimal 1 ${act.length === 1 ? unitOf(act[0].k) : "sesi"} tetapi belum lulus kelas.</p>`;
+  };
+
   RENDER.journey = function () {
     attRefresh();
     const order = ["rs1", "rs2", "rs3", "lts1", "lts2"];
@@ -2138,25 +2270,50 @@
     };
     // LTS1 tak punya post-test → buang fakta "Lulus" utk LTS1
     const fixLts1 = h => h.replace(/(data-bj="lts1"[\s\S]*?)<span>Lulus: nilai Good \(≥50%\)<\/span>/, "$1<span>Selesai saat S-E-R-V-E lengkap</span>");
-    el("journeyBody").innerHTML = `
-      <div class="bj-hero">
-        <svg class="bj-hero-deco" viewBox="0 0 100 100" aria-hidden="true"><path d="M10 90 C 30 60, 60 80, 70 50 S 85 20, 92 8" fill="none" stroke="#fff" stroke-width="3" stroke-dasharray="4 6"/><circle cx="92" cy="8" r="6" fill="#fff"/></svg>
-        <small>Discipleship Journey · JB3</small>
-        <h2>Halo, ${esc(first)} 👋</h2>
-        <p>Lima kelas, satu arah: menjadi murid Kristus yang berakar di gereja lokal dan melayani dengan visi.</p>
-        <span class="bj-hero-stars">★ ${stars} dari 15 bintang terkumpul</span>
-        <div class="bj-hero-row">
-          <span class="bj-ring" style="--p:${done * 20};"><b>${done}/5<span>tahap</span></b></span>
-          <span class="bj-next">${cur
-            ? `<span>${done ? "Langkah berikutnya" : "Mulai dari sini"}</span><b>${curC.icon} ${esc(curC.title)}</b><button type="button" data-goto="${BJ_STAGES[cur].page}" data-tabnav="1">Lanjutkan →</button>`
-            : `<span>Luar biasa!</span><b>🎉 Semua tahap selesai</b><button type="button" data-goto="lts2" data-tabnav="1">Lihat hasil →</button>`}</span>
+    // 2026-11-21 (user: tampilan DJ baru — "lebih simpel, menarik dan informatif"): hero + peta siklus diganti
+    // kartu "Kelas saya" (progres absensi, langkah berikutnya, Buka kelas & Buku Peserta) + Perjalananku + Untuk dikerjakan.
+    const chev = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>`;
+    let heroH;
+    if (cur) {
+      const all = DJ_BAB[cur].length, had = attN(cur), u = unitOf(cur), mine = state.myAtt[cur] || [];
+      const nx = DJ_BAB[cur].findIndex((_, i) => !mine.includes(i + 1));
+      const r = state[cur + "Result"];
+      const next = nx >= 0 ? `${had ? "Berikutnya" : "Mulai"}: ${esc(DJ_BAB[cur][nx])}`
+        : cur === "lts1" ? "Semua bab hadir — lengkapi asesmen &amp; post-test"
+        : r && !r.passed ? "Post-test belum lulus — boleh coba lagi" : "Semua sesi hadir — post-test siap dikerjakan";
+      heroH = `<div class="bh-hero" style="--jc:${curC.color};">
+        <div class="bh-top">
+          <span class="bh-ring" style="--p:${Math.round(had / all * 100)};"><b>${had}/${all}<small>${u}</small></b></span>
+          <span class="bh-t"><small>Kelas saya</small><b>${esc(curC.title)}</b><em>${next}</em></span>
         </div>
-      </div>
+        <div class="bh-acts">
+          <button type="button" class="bh-b1" data-goto="${BJ_STAGES[cur].page}" data-tabnav="1">Buka kelas</button>
+          ${BKP_KEYS.includes(cur) ? `<button type="button" class="bh-b2" data-bkpes="${cur}">📖 Buku Peserta</button>` : ""}
+        </div>
+      </div>`;
+    } else heroH = `<div class="bh-hero" style="--jc:var(--accent);"><div class="bh-top"><span class="bh-t"><small>Discipleship Journey</small><b>🎉 Semua tahap selesai</b><em>★ ${stars} dari 15 bintang · kini muridkan orang lain</em></span></div>
+        <div class="bh-acts"><button type="button" class="bh-b1" data-goto="lts2" data-tabnav="1">Lihat hasil</button></div></div>`;
+    const pathH = `<div class="card bh-path">${order.map((k, i) => { const c = DASH_JOURNEYS.find(x => x.key === k), st = bjStatus(k) === "done" ? "done" : k === cur ? "now" : "todo";
+      return `<button type="button" class="bh-st bh-st--${st}" style="--jc:${c.color};" data-goto="${BJ_STAGES[k].page}" data-tabnav="1" aria-label="${esc(c.title)}"><i>${st === "done" ? "✓" : st === "now" ? attN(k) + "/" + DJ_BAB[k].length : i + 1}</i><span>${c.tab}</span></button>`; }).join("")}</div>`;
+    const todo = [];
+    if (cur) {
+      if (cur === "lts1" && state.lts1Loaded) { const m = [!state.myDisc && "DISC", !state.mySsd && "SSD", !state.myGifts && "Karunia Rohani"].filter(Boolean);
+        if (m.length) todo.push({ ic:"🧭", t:`Isi asesmen: ${m.join(", ")}`, s:"Syarat lulus Lead To Serve 1", go:"home" }); }
+      const r = state[cur + "Result"];
+      if (ptOpen(cur) && !(r && r.passed)) todo.push({ ic:"📝", t:`Kerjakan post-test ${curC.title}`, s:r ? "Belum lulus — boleh coba lagi" : "Sudah terbuka untukmu", go:BJ_STAGES[cur].page });
+    }
+    const fbK = order.filter(k => bjStatus(k) === "done" && FB_CLASSES[k]).reverse().find(k => { try { return !localStorage.getItem(FB_CLASSES[k].sentKey); } catch (e) { return false; } });
+    if (fbK) todo.push({ ic:"⭐", t:`Beri feedback ${clsTitle(fbK)}`, s:"Anonim · ±1 menit · membantu pengajar", go:FB_CLASSES[fbK].page });
+    if (cur && BKP_KEYS.includes(cur) && todo.length < 3) todo.push({ ic:"✍️", t:"Tulis catatan & refleksi", s:`Di Buku Peserta ${curC.title}`, bk:cur });
+    const todoH = todo.length ? `<div class="bh-todos">${todo.map(x => `<button type="button" class="bh-todo" ${x.bk ? `data-bkpes="${x.bk}"` : `data-goto="${x.go}" data-tabnav="1"`}><i aria-hidden="true">${x.ic}</i><span><b>${esc(x.t)}</b><small>${esc(x.s)}</small></span>${chev}</button>`).join("")}</div>` : "";
+    el("journeyBody").innerHTML = `
+      <p class="bh-hi">Halo, <b>${esc(first)}</b> 👋</p>
+      ${heroH}
+      ${pjSecHTML("Perjalananku", `★ ${stars}/15 · ${done}/5 selesai`)}
+      ${pathH}
+      ${todo.length ? pjSecHTML("Untuk dikerjakan") + todoH : ""}
 
-      ${pjSecHTML("Siklus pemuridan JB3", "ketuk tahap")}
-      <div class="card bj-map">${bjMapSVG(order, cur)}</div>
-
-      ${pjSecHTML("Lima tahap", `${done}/5 selesai`)}
+      ${pjSecHTML("Tentang lima kelas", "ketuk untuk detail")}
       <div class="card bj-rows">${fixLts1(order.map(card).join(""))}</div>
 
       ${pjSecHTML("Panduan")}
@@ -5102,7 +5259,7 @@ ${body}</body></html>`;
       state.participantResultsP.catch(() => {});
       // feedback kelas: hanya dipakai di halaman feedback dashboard → latar
       Promise.all([soft(DB.listRs3Feedback(), []), soft(DB.listRs3FbBatches(), [])]).then(([f, b]) => {
-        state.rs3Feedback = f; state.rs3FbBatches = b; if (state.page === "dashboard" && RENDER.dashboard) RENDER.dashboard(); });
+        state.rs3Feedback = f; state.rs3FbBatches = b; if (state.page === "dashboard" && RENDER.dashboard) RENDER.dashboard(); if (state.page === "kelas") RENDER.kelas(); });
     }
     if ((guess === "ADMIN") !== isAdm) pending = batch(isAdm);
     const [acc, rs3Acc, lts2Acc, rs3Res, lts2Res, disc, roadmap, ssd, gifts, classProgress, postTestBest, pt, rs1Res, rs2Res, att, lts1PtRes, lwHist] = await pending;
@@ -5520,6 +5677,8 @@ ${body}</body></html>`;
       const cur = state.dashOpen[k] != null ? state.dashOpen[k] : dashTog.dataset.def === "1";
       state.dashOpen[k] = !cur; RENDER.dashboard(); return;
     }
+    const absGo = T.closest("[data-absgo]");   // 2026-11-21 kartu Kelas Berjalan → Absensi kelas itu (barcode)
+    if (absGo) { state.absKey = absGo.dataset.absgo; show("absensi"); return; }
     const dashTab = T.closest("[data-dashtab]");
     if (dashTab) {
       state.dashKey = dashTab.dataset.dashtab;
